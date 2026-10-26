@@ -1006,3 +1006,6 @@ body.film-open { overflow: hidden; }
 @media (max-width: 600px) {
   .video-card__play { width: 66px; height: 66px; }
 }
+/* smaller film window */
+#video .video-card { max-width: 760px; margin-left: auto; margin-right: auto; }
+#video .section__head { text-align: center; margin-left: auto; margin-right: auto; }
