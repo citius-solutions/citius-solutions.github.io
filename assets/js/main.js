@@ -76,4 +76,16 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeFilm(); });
     if (location.hash === "#film") openFilm(); // deep link (may start muted/paused per browser policy)
   }
+
+  // Inline section video: loads only on click
+  document.querySelectorAll("[data-video]").forEach((card) => {
+    const v = card.querySelector("video");
+    const btn = card.querySelector(".video-card__play");
+    if (!v || !btn) return;
+    btn.addEventListener("click", () => {
+      card.classList.add("is-playing");
+      v.play().catch(() => {});
+    });
+    v.addEventListener("play", () => card.classList.add("is-playing"));
+  });
 })();
