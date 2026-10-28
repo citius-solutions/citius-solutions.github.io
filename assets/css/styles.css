@@ -25,35 +25,6 @@
   --font-phone: "Cormorant Garamond", "Playfair Display", Georgia, serif;
 }
 
-@font-face {
-  font-family: "Playfair Display";
-  src: url("../fonts/PlayfairDisplay-VariableFont_wght.woff2") format("woff2"), url("../fonts/PlayfairDisplay-VariableFont_wght.ttf") format("truetype");
-  font-weight: 400 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Playfair Display";
-  src: url("../fonts/PlayfairDisplay-Italic-VariableFont_wght.woff2") format("woff2"), url("../fonts/PlayfairDisplay-Italic-VariableFont_wght.ttf") format("truetype");
-  font-weight: 400 900;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Montserrat";
-  src: url("../fonts/Montserrat-VariableFont_wght.woff2") format("woff2"), url("../fonts/Montserrat-VariableFont_wght.ttf") format("truetype");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Cormorant Garamond";
-  src: url("../fonts/CormorantGaramond-VariableFont_wght.woff2") format("woff2"), url("../fonts/CormorantGaramond-VariableFont_wght.ttf") format("truetype");
-  font-weight: 300 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
