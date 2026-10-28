@@ -1012,3 +1012,20 @@ body.film-open { overflow: hidden; }
 }
 
 h1.hero__eyebrow { font-family: var(--font-sans); }
+
+/* Страницы направлений (napravleniya/) и статьи */
+.article__body h3 { font-size: clamp(1.1rem, 2vw, 1.25rem); line-height: 1.35; margin: 1.5rem 0 0.45rem; color: var(--dusk-deep); font-variant-numeric: lining-nums; font-feature-settings: "lnum"; }
+.article__body h2 + h3 { margin-top: 0.6rem; }
+.article__body a { color: var(--gold-deep); text-decoration: underline; text-underline-offset: 0.15em; }
+.article__body ul.diamonds a { font-weight: 600; text-decoration: none; }
+.article__body ul.diamonds a:hover { text-decoration: underline; }
+.article-cta__note { margin: 1.2rem 0 0; font-size: 0.82rem; letter-spacing: 0.06em; color: rgba(243, 239, 230, 0.7); }
+.card h3 a { color: inherit; text-decoration: none; }
+.card h3 a::after { content: ""; position: absolute; inset: 0; }
+.card:hover { border-color: rgba(201, 164, 106, 0.55); }
+.card .pub__more { display: inline-block; text-decoration: none; }
+/* Ссылки на направления в подвале */
+.footer-dirs { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; align-items: baseline; padding-top: 1.1rem; margin-top: 1.1rem; border-top: 1px solid rgba(201, 164, 106, 0.25); font-size: 0.85rem; }
+.footer-dirs__label { color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 600; }
+.footer-dirs a { color: inherit; opacity: 0.85; text-decoration: none; }
+.footer-dirs a:hover { color: var(--gold); opacity: 1; }
