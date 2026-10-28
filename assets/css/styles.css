@@ -1039,3 +1039,5 @@ body.film-open { overflow: hidden; }
 @media (min-width: 1240px) {
   .brand { flex-shrink: 0; }
 }
+
+h1.hero__eyebrow { font-family: var(--font-sans); }
