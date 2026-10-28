@@ -89,3 +89,19 @@
     v.addEventListener("play", () => card.classList.add("is-playing"));
   });
 })();
+
+// Yandex.Metrika goals (counter 113852512)
+(function () {
+  var ID = 113852512;
+  var goal = function (name) { try { if (typeof window.ym === "function") window.ym(ID, "reachGoal", name); } catch (e) {} };
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+    if (/^tel:/i.test(href)) { goal("phone"); return; }
+    if (/^https?:\/\/(www\.)?(t\.me|vk\.ru|vk\.com|max\.ru)\//i.test(href)) { goal("messenger"); return; }
+    if (/обсудить объект/i.test(a.textContent || "")) goal("obsudit");
+  }, true);
+  var form = document.getElementById("contact-form");
+  if (form) form.addEventListener("submit", function () { goal("obsudit"); }, true);
+})();
