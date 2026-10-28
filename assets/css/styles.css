@@ -1013,8 +1013,8 @@ body.film-open { overflow: hidden; }
 @media (min-width: 900px) { #video .section__head h2 { white-space: nowrap; } }
 #video .section__head p { max-width: 40rem; margin-left: auto; margin-right: auto; }
 
-/* Header fit with 8 nav items (added «Отзывы») at 1240–1479px */
-@media (min-width: 1240px) and (max-width: 1479px) {
+/* Header fit with 8 nav items at 1240–1679px */
+@media (min-width: 1240px) and (max-width: 1679px) {
   .variant-b .brand img { width: 52px; height: 52px; }
   .variant-b .brand__name { font-size: 1.35rem; }
   .variant-b .brand__sub { font-size: 0.62rem; letter-spacing: 0.22em; }
@@ -1033,6 +1033,9 @@ body.film-open { overflow: hidden; }
   .nav { gap: 0.7rem; }
   .nav a { font-size: 0.82rem; }
 }
-@media (min-width: 1240px) and (max-width: 1299px) {
+@media (min-width: 1240px) and (max-width: 1339px) {
   .header-social { display: none !important; }
+}
+@media (min-width: 1240px) {
+  .brand { flex-shrink: 0; }
 }
