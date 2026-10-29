@@ -1029,3 +1029,33 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
 .footer-dirs__label { color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 600; }
 .footer-dirs a { color: inherit; opacity: 0.85; text-decoration: none; }
 .footer-dirs a:hover { color: var(--gold); opacity: 1; }
+
+/* 2026-10-29: строка принципов в контактах — прямой гротеск, разрядка, золото (вместо курсива) */
+.contact-panel .cta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0;
+  margin-top: 1.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 1.8;
+  color: var(--gold-deep);
+}
+.contact-panel .cta-line span { white-space: nowrap; }
+.contact-panel .cta-line span + span::before { content: ""; display: inline-block; width: 4px; height: 4px; margin: 0 0.85rem; border-radius: 50%; background: var(--gold); vertical-align: middle; }
+@media (max-width: 559px) {
+  .contact-panel .cta-line { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+  .contact-panel .cta-line span + span::before { display: none; }
+}
+/* 2026-10-29: значение названия Citius в блоке «О компании» */
+.name-note { margin: 0 0 1.5rem; padding: 0.15rem 0 0.15rem 1.1rem; border-left: 2px solid var(--gold); }
+.intro-copy .name-note__title { margin: 0 0 0.45rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep); }
+.intro-copy .name-note__title span { font-family: var(--font-serif); font-size: 1.05rem; letter-spacing: 0.08em; text-transform: none; color: var(--dusk-deep); }
+.intro-copy .name-note p:last-child { margin: 0; color: var(--dusk); }
