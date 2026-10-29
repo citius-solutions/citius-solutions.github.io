@@ -1055,3 +1055,9 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
 .intro-copy .name-note__title { margin: 0 0 0.45rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep); }
 .intro-copy .name-note__title span { font-family: var(--font-serif); font-size: 1.05rem; letter-spacing: 0.08em; text-transform: none; color: var(--dusk-deep); }
 .intro-copy .name-note p:last-child { margin: 0; color: var(--dusk); }
+.intro-copy .speed-block { margin: 0 0 1.6rem; }
+.intro-copy .speed-block p { margin: 0 0 0.9rem; }
+.intro-copy .speed-block ul.diamonds { list-style: none; padding: 0; margin: 0; }
+.intro-copy .speed-block ul.diamonds li { position: relative; padding-left: 1.6rem; margin: 0 0 0.75rem; color: var(--muted); font-size: 1.02rem; line-height: 1.65; }
+.intro-copy .speed-block ul.diamonds li::before { content: ""; position: absolute; left: 0.2rem; top: 0.66em; width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
+.intro-copy .speed-block strong { color: var(--dusk-deep); font-weight: 600; }
