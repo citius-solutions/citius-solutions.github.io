@@ -1048,12 +1048,8 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
   line-height: 1.8;
   color: var(--gold-deep);
 }
+.contact-panel .cta-line { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
 .contact-panel .cta-line span { white-space: nowrap; }
-.contact-panel .cta-line span + span::before { content: ""; display: inline-block; width: 4px; height: 4px; margin: 0 0.85rem; border-radius: 50%; background: var(--gold); vertical-align: middle; }
-@media (max-width: 559px) {
-  .contact-panel .cta-line { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
-  .contact-panel .cta-line span + span::before { display: none; }
-}
 /* 2026-10-29: значение названия Citius в блоке «О компании» */
 .name-note { margin: 0 0 1.5rem; padding: 0.15rem 0 0.15rem 1.1rem; border-left: 2px solid var(--gold); }
 .intro-copy .name-note__title { margin: 0 0 0.45rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep); }
