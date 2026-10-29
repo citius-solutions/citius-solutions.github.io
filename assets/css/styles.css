@@ -1061,3 +1061,9 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
 .intro-copy .speed-block ul.diamonds li { position: relative; padding-left: 1.6rem; margin: 0 0 0.75rem; color: var(--muted); font-size: 1.02rem; line-height: 1.65; }
 .intro-copy .speed-block ul.diamonds li::before { content: ""; position: absolute; left: 0.2rem; top: 0.66em; width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
 .intro-copy .speed-block strong { color: var(--dusk-deep); font-weight: 600; }
+
+/* hero: two-line eyebrow under the slogan (2026-10-29) */
+.variant-b .hero__eyebrow.hero__eyebrow--under, .hero__eyebrow--under { margin: 0 0 1.6rem; line-height: 1.7; }
+.hero__eyebrow--under span { display: block; }
+@media (max-width: 520px) { .hero__eyebrow--under { font-size: 0.62rem; letter-spacing: 0.1em; } }
+@media (max-width: 380px) { .hero__eyebrow--under { font-size: 0.58rem; letter-spacing: 0.06em; } }
