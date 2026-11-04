@@ -1069,3 +1069,5 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
 @media (max-width: 380px) { .hero__eyebrow--under { font-size: 0.58rem; letter-spacing: 0.06em; } }
 .hero__eyebrow--under .hero-sep, .hero__eyebrow--under .hero-cities { display: inline; }
 @media (max-width: 600px) { .hero__eyebrow--under .hero-sep { display: none; } .hero__eyebrow--under .hero-cities { display: block; } }
+.article__figure { margin: 1.6rem 0; }
+.article__figure img { display: block; width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 14px 36px rgba(30, 47, 74, 0.12); }
