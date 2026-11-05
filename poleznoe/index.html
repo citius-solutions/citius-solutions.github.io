@@ -23,10 +23,11 @@
   <meta name="twitter:title" content="Полезное — Ситиус Недвижимость">
   <meta name="twitter:description" content="Полезное от Ситиус Недвижимость: разборы налогов, ипотеки и правовой практики в сфере недвижимости.">
   <meta name="twitter:image" content="https://www.citius-solution.ru/assets/img/og.jpg">
-  <link rel="stylesheet" href="../assets/css/styles.css?v=24">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=25">
   <script>requestAnimationFrame(function(){setTimeout(function(){var l=document.createElement("link");l.rel="stylesheet";l.href="../assets/css/fonts.css?v=1";document.head.appendChild(l)},0)});</script>
   <noscript><link rel="stylesheet" href="../assets/css/fonts.css?v=1"></noscript>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.citius-solution.ru/"}, {"@type": "ListItem", "position": 2, "name": "Полезное", "item": "https://www.citius-solution.ru/poleznoe/"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Полезное — Ситиус Недвижимость","description":"Полезное от Ситиус Недвижимость: разборы налогов, ипотеки и правовой практики в сфере недвижимости.","url":"https://www.citius-solution.ru/poleznoe/","isPartOf":{"@type":"WebSite","name":"Ситиус Недвижимость","url":"https://www.citius-solution.ru/"}}</script>
   <!-- Yandex.Metrika counter -->
   <script type="text/javascript">
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -143,8 +144,20 @@
       </div>
     </section>
     <section>
-      <div class="container post-list">
-        <a class="post-item" href="edinstvennoe-zhilyo-i-nedvizhimost-za-rubezhom.html">
+      <div class="container filter-bar">
+        <div class="filter-chips" role="group" aria-label="Фильтр материалов">
+          <button type="button" class="filter-chip is-active" data-filter="all" aria-pressed="true">Все</button>
+          <a class="filter-chip filter-chip--rubric" href="sluchai/">А вот ещё был случай!</a>
+          <button type="button" class="filter-chip" data-filter="nalogi" aria-pressed="false">Налоги</button>
+          <button type="button" class="filter-chip" data-filter="ipoteka" aria-pressed="false">Ипотека</button>
+          <button type="button" class="filter-chip" data-filter="prodazha" aria-pressed="false">Продажа</button>
+          <button type="button" class="filter-chip" data-filter="zemlya" aria-pressed="false">Земля</button>
+          <button type="button" class="filter-chip" data-filter="pravo" aria-pressed="false">Право</button>
+          <button type="button" class="filter-chip" data-filter="nasledstvo" aria-pressed="false">Наследство</button>
+        </div>
+      </div>
+      <div class="container post-list" id="post-list">
+        <a class="post-item" href="edinstvennoe-zhilyo-i-nedvizhimost-za-rubezhom.html" data-tags="sluchai nalogi prodazha">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/edinstvennoe-zhilyo-i-nedvizhimost-za-rubezhom.webp" type="image/webp">
@@ -160,7 +173,7 @@
             <span class="pub__more">Читать статью →</span>
           </div>
         </a>
-        <a class="post-item" href="vs-nalogovaya-obyazana-uchest-rashody.html">
+        <a class="post-item" href="vs-nalogovaya-obyazana-uchest-rashody.html" data-tags="nalogi prodazha">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/vs-nalogovaya-obyazana-uchest-rashody.webp" type="image/webp">
@@ -175,7 +188,7 @@
             <span class="pub__more">Читать статью →</span>
           </div>
         </a>
-        <a class="post-item" href="kak-prodat-kvartiru-bez-naloga.html">
+        <a class="post-item" href="kak-prodat-kvartiru-bez-naloga.html" data-tags="nalogi prodazha">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/kak-prodat-kvartiru-bez-naloga.webp" type="image/webp">
@@ -190,7 +203,7 @@
             <span class="pub__more">Читать статью →</span>
           </div>
         </a>
-        <a class="post-item" href="mozhno-li-prodat-kvartiru-v-ipoteke.html">
+        <a class="post-item" href="mozhno-li-prodat-kvartiru-v-ipoteke.html" data-tags="ipoteka prodazha">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/mozhno-li-prodat-kvartiru-v-ipoteke.webp" type="image/webp">
@@ -205,7 +218,7 @@
             <span class="pub__more">Читать статью →</span>
           </div>
         </a>
-        <a class="post-item" href="mozhno-li-prodat-dom-bez-mezhevaniya.html">
+        <a class="post-item" href="mozhno-li-prodat-dom-bez-mezhevaniya.html" data-tags="zemlya pravo">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/mozhno-li-prodat-dom-bez-mezhevaniya.webp" type="image/webp">
@@ -220,7 +233,7 @@
             <span class="pub__more">Читать статью →</span>
           </div>
         </a>
-        <a class="post-item" href="kak-prodat-unasledovannuyu-kvartiru.html">
+        <a class="post-item" href="kak-prodat-unasledovannuyu-kvartiru.html" data-tags="nasledstvo prodazha">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/kak-prodat-unasledovannuyu-kvartiru.webp" type="image/webp">
@@ -235,7 +248,7 @@
             <span class="pub__more">Читать статью →</span>
           </div>
         </a>
-        <a class="post-item" href="ipoteka-vychet.html">
+        <a class="post-item" href="ipoteka-vychet.html" data-tags="nalogi ipoteka">
           <div class="post-item__img">
             <picture>
               <source srcset="../assets/img/poleznoe/ipoteka-vychet.webp" type="image/webp">
@@ -294,6 +307,32 @@
       <span class="footer-dirs__label">Направления</span><a href="../napravleniya/kvartiry.html">Покупка и продажа квартир</a><a href="../napravleniya/yuridicheski-slozhnye.html">Юридически сложные объекты</a><a href="../napravleniya/nalogovaya-optimizaciya.html">Законная налоговая оптимизация</a><a href="../napravleniya/zagorodnye-doma.html">Загородные дома</a><a href="../napravleniya/investicii.html">Инвестиции в недвижимость</a><a href="../napravleniya/zemelnye-uchastki.html">Земельные участки</a><a href="../napravleniya/kommercheskaya-nedvizhimost.html">Коммерческая и индустриальная недвижимость</a>
     </nav>
   </footer>
+  <script>
+  (function(){
+    var bar = document.querySelector('.filter-chips');
+    if (!bar) return;
+    var list = document.getElementById('post-list') || document.querySelector('.post-list');
+    if (!list) return;
+    var items = Array.prototype.slice.call(list.querySelectorAll('.post-item'));
+    function setFilter(tag, btn){
+      bar.querySelectorAll('button.filter-chip').forEach(function(b){
+        var on = b === btn;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      items.forEach(function(item){
+        var tags = (item.getAttribute('data-tags') || '').split(/\s+/).filter(Boolean);
+        var show = tag === 'all' || tags.indexOf(tag) !== -1;
+        item.classList.toggle('is-hidden', !show);
+      });
+    }
+    bar.addEventListener('click', function(e){
+      var btn = e.target.closest('button.filter-chip[data-filter]');
+      if (!btn || !bar.contains(btn)) return;
+      setFilter(btn.getAttribute('data-filter'), btn);
+    });
+  })();
+  </script>
   <script src="../assets/js/main.js?v=8" defer></script>
 </body>
 </html>
