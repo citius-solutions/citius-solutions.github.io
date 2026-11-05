@@ -1078,3 +1078,5 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
 .article__subtitle{margin:.35rem 0 0;font-size:1.15rem;font-weight:600;line-height:1.45;color:var(--ink,#1a1a1a)}
 .article__delo{margin:1.1rem 0 .3rem;padding:.15rem 0 .15rem .9rem;border-left:3px solid var(--gold,#c9a46a);font-size:1.25rem;font-weight:700;line-height:1.4;color:var(--gold-deep,#a8844a)}
 .crumbs .crumbs__current{color:inherit}
+
+p.card__hook,.post-card p.card__hook,article p.card__hook{margin:.6rem 0 .6rem!important;padding-left:.7rem;border-left:3px solid var(--gold,#c9a46a);font-weight:700;color:var(--gold-deep,#a8844a)!important;line-height:1.4}
