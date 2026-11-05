@@ -1071,3 +1071,10 @@ h1.hero__eyebrow { font-family: var(--font-sans); }
 @media (max-width: 600px) { .hero__eyebrow--under .hero-sep { display: none; } .hero__eyebrow--under .hero-cities { display: block; } }
 .article__figure { margin: 1.6rem 0; }
 .article__figure img { display: block; width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 14px 36px rgba(30, 47, 74, 0.12); }
+
+.article__body blockquote{margin:1.4em 0;padding:.9em 1.2em;border-left:3px solid #b08d57;background:rgba(176,141,87,.07);font-style:italic}
+.article__body blockquote p{margin:0}
+.article__body blockquote cite{display:block;margin-top:.5em;font-style:normal;font-size:.9em;opacity:.75}
+.article__subtitle{margin:.35rem 0 0;font-size:1.15rem;font-weight:600;line-height:1.45;color:var(--ink,#1a1a1a)}
+.article__delo{margin:1.1rem 0 .3rem;padding:.15rem 0 .15rem .9rem;border-left:3px solid var(--gold,#c9a46a);font-size:1.25rem;font-weight:700;line-height:1.4;color:var(--gold-deep,#a8844a)}
+.crumbs .crumbs__current{color:inherit}
