@@ -1126,3 +1126,26 @@ p.card__hook,.post-card p.card__hook,article p.card__hook{margin:.6rem 0 .6rem!i
   box-shadow: 0 6px 18px rgba(201, 164, 106, 0.22);
 }
 .post-item.is-hidden { display: none; }
+
+/* Narrow vertical reel player and CTA kicker on Полезное article pages */
+.article__figure--reel {
+  display: flex;
+  justify-content: center;
+  margin: 1.6rem auto;
+  max-width: 20.5rem;
+}
+.article__reel {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius);
+  box-shadow: 0 14px 36px rgba(30, 47, 74, 0.12);
+  background: var(--dusk-deep);
+}
+.article-cta__kicker {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: var(--gold-soft);
+  font-size: 1.05rem;
+}
