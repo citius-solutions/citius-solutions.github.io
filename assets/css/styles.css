@@ -1149,3 +1149,10 @@ p.card__hook,.post-card p.card__hook,article p.card__hook{margin:.6rem 0 .6rem!i
   color: var(--gold-soft);
   font-size: 1.05rem;
 }
+
+.article__figure figcaption {
+  margin-top: 0.55em;
+  font-size: 0.9em;
+  opacity: 0.75;
+  line-height: 1.4;
+}
