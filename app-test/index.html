@@ -1094,7 +1094,7 @@ function boBlock(){if(!['buy','alt'].includes(A.goal))return '';const n=bN();let
   ${SPBLO(r)?`<div class="hint">Районы и города поиска — <a href="#" onclick="setBuyObj(${j},1);go('dist');return false">выбрать</a>${bDist(j).length?' · выбрано: '+bDist(j).length:''}</div>`:''}
   ${j&&!o.reg?`<div class="hint">Регион подставили из покупки 1${lt==='house'&&obl(bReg(0))!==bReg(0)?' — для дома, дачи или участка взяли область':''}. Можно изменить.</div>`:''}
   ${n>1?`<a href="#" class="s gld" style="font-size:12px" onclick="delBuy(${j});return false">Убрать покупку ${j+1}</a>`:''}</div>`}
- return h+`<button class="btn ghost" style="width:100%;padding:7px;margin:-2px 0 10px;font-size:12.5px" onclick="addBuy()">+ Добавить ещё объект покупки</button>${n>1?'<div class="hint" style="margin:-6px 0 10px">Бюджет общий. На этапе поиска переключайтесь между покупками.</div>':''}`}
+ return h+`<button class="btn ghost" style="width:100%;padding:7px;margin:-2px 0 10px;font-size:12.5px" onclick="addBuy()">+ Добавить ещё объект покупки</button>${n>1?'<div class="hint" style="margin:-6px 0 10px">У каждой покупки свой бюджет. На этапе поиска переключайтесь между покупками.</div>':''}`}
 function regBlock(){const g=A.goal;
  if(g==='alt'||g==='sell')return `<div class="f"><div class="lbl">Где ваше жильё${(A.so||[]).length?' · объект 1':''}</div>${rgSel(sReg(0),"sSetLoc(0,'reg',this.value,1)")}<div class="lbl" style="margin-top:6px">Населённый пункт</div><input placeholder="город или посёлок" value="${hq(A.city)}" oninput="A.city=this.value">${sUnits().length>1?'<div class="hint">Где остальные объекты — на следующем экране.</div>':''}</div>`;
  if(g==='buy')return '';
@@ -1306,10 +1306,10 @@ function boBlock(){if(!['buy','alt'].includes(A.goal))return '';const n=bN();let
   ${SPBLO(r)?`<div class="hint">Районы и города поиска — <a href="#" onclick="setBuyObj(${j},1);go('dist');return false">выбрать</a>${bDist(j).length?' · выбрано: '+bDist(j).length:''}</div>`:''}
   ${j&&!own?`<div class="hint">Регион подставили из покупки 1${lt==='house'&&obl(bReg(0))!==bReg(0)?' — для дома, дачи или участка взяли область':''}. Можно изменить.</div>`:''}
   ${bParams(j)}
-  ${n>1?`<div class="lbl" style="margin-top:6px">Бюджет на эту покупку, ₽ · если знаете</div>${bInp(j,'bbud','например, 6 000 000',1)}<div class="hint">Если не указать — ищем по общему бюджету.</div>`:''}
+  ${n>1?`<div class="lbl" style="margin-top:6px">Бюджет на эту покупку, ₽</div>${bInp(j,'bbud','например, 6 000 000',1)}<div class="hint">У каждой покупки свой бюджет — по нему ищем объявления.</div>`:''}
   ${n>1?`<a href="#" class="s gld" style="font-size:12px" onclick="delBuy(${j});return false">Убрать покупку ${j+1}</a>`:''}</div>`}
  return h+`<button class="btn ghost" style="width:100%;padding:7px;margin:-2px 0 10px;font-size:12.5px" onclick="addBuy()">+ Добавить ещё объект покупки</button>${n>1?'<div class="hint" style="margin:-6px 0 10px">На этапе поиска переключайтесь между покупками — у каждой свои фильтры.</div>':''}`}
-function pRange(){if(A.pman)return [n0(A.pmin),n0(A.pmax)];if(buys()){const bb=num(A.bbud);return buyRange(bb||n0(A.pcenter)||budget())}const c=pCenter();return c?[Math.max(0,c-PSPAN),c+PSPAN]:[0,0]}
+function pRange(){if(A.pman)return [n0(A.pmin),n0(A.pmax)];if(buys()){const bb=num(A.bbud);return buyRange(bb||n0(A.pcenter)||(bN()>1?0:budget()))}const c=pCenter();return c?[Math.max(0,c-PSPAN),c+PSPAN]:[0,0]}
 // ===== 16.11.2026 (4): расселение — подсказка при 5 и более объектах (продажа + покупка), без ограничений
 SVC.rass='Сопровождение расселения: цепочка связанных сделок';
 function objTotal(){return (sells()?sObjs().length:0)+(['buy','alt'].includes(A.goal)?bN():0)}
@@ -1338,7 +1338,7 @@ function adSpec(j){const lt=bLt(j),reg=bReg(j),h=bGet(j,'hobj')||'house';
  const ar=n0(bGet(j,'adesired'))||44;const R=(bGet(j,'lrooms')||[]).filter(Boolean);const rw=r=>r==='st'?'Студия':r==='4'?'4-комнатная квартира':r+'-комнатная квартира';
  return {typical:ppmOf('flat',reg)*ar,mk:k=>`${R.length?rw(R[k%R.length]):(lt==='new'?'Квартира в новостройке':'Квартира')}${lt==='new'&&R.length?' в новостройке':''}, ${Math.round(ar*[1,1.1,.92,1.2][k])} м²`}}
 function demoAds(){const j=bAct();const S=adSpec(j),W=adPlaces(j);const own=num(A.bbud);const bud=budget();let mid;
- if(A.pman){const [lo,hi]=pRange();mid=(lo+hi)/2}else mid=own||(bud?(bN()>1?Math.min(bud,S.typical):bud):S.typical);
+ if(A.pman){const [lo,hi]=pRange();mid=(lo+hi)/2}else mid=own||(bN()>1?S.typical:(bud||S.typical));
  const L=[[.9,'Циан'],[.97,'Авито'],[1.02,'Домклик'],[1.07,'Циан']].map(([f,src],k)=>({src,nm:S.mk(k),p:Math.round(mid*f/10000)*10000,w:W[k%W.length]}));
  const F=A.flist||[];return `<div class="f"><div class="lbl">Подходящие объявления · в приложении${bN()>1?' · покупка '+(j+1):''}</div>${T('t-warn','демо-данные прототипа ⚠')}
  ${L.map(o=>{const n=`${o.nm} · ${o.w} · ${fmt(o.p)}`;const inF=F.some(x=>x.n&&x.n.startsWith(n));return `<div class="sl"><span class="nm">${o.nm}<br><span class="hint">${o.w} · ${fmt(o.p)} · ${o.src}</span></span><button class="btn ghost" style="flex:0 0 auto;padding:5px 9px;font-size:11.5px" ${inF?'disabled':''} onclick="favAd('${n.replace(/'/g,'')}')">${inF?'В избранном':'В избранное'}</button></div>`}).join('')}
@@ -1804,6 +1804,47 @@ function saleStart(){if(!['sell','alt'].includes(A.goal))return '';const U=sUnit
   ${i&&!o.reg?`<div class="hint">Регион подставили из объекта 1. Можно изменить.</div>`:''}
   ${n>1?`<a href="#" class="s gld" style="font-size:12px" onclick="delObj(${i});return false">Убрать объект ${k+1}</a>`:''}</div>`});
  return h+`<button class="btn ghost" style="width:100%;padding:7px;margin:-2px 0 10px;font-size:12.5px" onclick="addObj()">+ Добавить ещё объект продажи</button><div class="hint" style="margin:-6px 0 10px">${n>1?`Объектов: ${n}. Площадь, адрес и документы каждого — на следующем экране. Оценим каждый и сложим сумму.`:'Продаёте несколько квартир, комнат, домов или участков, в том числе в разных городах? Добавьте каждый.'}</div>`}
+
+// ===== (27) 17.11: у каждой покупки свой бюджет; доли и новостройки — несколько объектов, у каждого свой тип и место
+function bBud(j){return num(bGet(j,'bbud'))}
+{const bf0=budgetFormula;budgetFormula=function(){if(buys()&&bN()>1){const j=bAct(),b=bBud(j);if(!b)return '';const [lo,hi]=buyRange(b);return 'бюджет покупки '+(j+1)+' — '+(b<BSMALL?fmt(b):mln(b))+' → ищем '+rngT(lo,hi)}return bf0()}}
+{const lv=SCR.live.b;SCR.live.b=()=>{const h=lv();return buys()&&bN()>1?h.replace('Сначала бюджет (этапы 0–1). ','Укажите бюджет этой покупки на первом экране. '):h}}
+function budMulti(){const n=bN(),bud=budget(),ready=vReady();let sum=0,miss=0;
+ const rows=Array.from({length:n},(_,j)=>{const b=bBud(j);sum+=b;if(!b)miss++;const [lo,hi]=buyRange(b);
+  return `<div class="sl"><span class="nm">Покупка ${j+1} · ${BLTN[bLt(j)]||bLt(j)} · ${hq(bCity(j)||rgShort(bReg(j)))}<br><span class="hint">${b?'Бюджет '+(b<BSMALL?fmt(b):mln(b))+' · ищем '+rngT(lo,hi):'Бюджет не указан — <a href="#" onclick="go(\'s0a\');return false">указать</a>'}</span></span><button class="btn ghost" style="padding:6px 9px;font-size:12px" ${b?'':'disabled'} onclick="setBuyObj(${j},1);A.pcenter='';A.pman=0;go('links')">Смотреть</button></div>`}).join('');
+ const over=bud&&sum>bud?`<div class="note risk" style="margin-top:6px">Бюджеты покупок вместе — ${mln(sum)}, а денег на покупки — ${mln(bud)}. Проверьте суммы.</div>`:'';
+ return `<div class="f"><div class="lbl">Деньги на покупки</div><div class="row mut" style="font-size:10.5px"><span>Свои деньги, ₽</span><span>Одобренная ипотека, ₽</span></div><div class="row">${inp('own','0')}${inp('mortsum','0')}</div>
+ <div class="big" style="margin-top:4px">${bud?(bud<BSMALL?fmt(bud):mln(bud)):'—'}</div><div class="hint">${A.goal==='alt'&&!ready?'Деньги от продажи посчитаем после оценки всех объектов продажи. ':''}${A.goal==='alt'?'От продажи (минус остаток долга), свои деньги и ипотека вместе.':'Свои деньги и ипотека вместе.'}</div></div>
+ <div class="f"><div class="lbl">У каждой покупки свой бюджет</div>${rows}${over}<div class="hint" style="margin-top:4px">${miss?'Бюджет покупки указывают на первом экране, в её карточке. ':''}Ищем от бюджета −1 млн до +10 % — запас на торг.</div></div>
+ `}
+{const sm=SCR.sum.b;SCR.sum.b=()=>{const h=sm();if(!(buys()&&bN()>1))return h;const i=h.indexOf('<div class="f"><div class="lbl">Бюджет на покупку</div>'),k=h.indexOf('<div class="f"><div class="lbl">Что впереди');return i>=0&&k>i?h.slice(0,i)+budMulti()+h.slice(k):h}}
+// доли и новостройки: объект 0 — в A.xt/A.reg/A.city, остальные — в A.xo
+const XT={share:[['sell','Продаю долю'],['buy','Покупаю долю']],new:[['st','Студия'],['1','1-комнатная'],['2','2-комнатная'],['3','3 и более комнат']]};
+function xN(){return 1+(A.xo||[]).length}
+function xO(i){return i?((A.xo||[])[i-1]||{}):{t:A.xt,reg:A.reg,city:A.city,bud:A.xbud}}
+function xReg(i){return xO(i).reg||(i?xReg(0):'Санкт-Петербург')}
+function xSet(i,k,v,re){if(!i){({t:()=>A.xt=v,reg:()=>A.reg=v,city:()=>A.city=v,bud:()=>A.xbud=v})[k]()}else{A.xo[i-1]=A.xo[i-1]||{};A.xo[i-1][k]=v}if(re)show(cur,true)}
+function xAdd(){A.xo=[...(A.xo||[]),{t:A.goal==='share'?'sell':''}];show(cur,true)}
+function xDel(i){if(xN()<2)return;if(!i){const f=A.xo[0];A.xt=f.t;A.reg=f.reg||xReg(0);A.city=f.city||'';A.xbud=f.bud||'';A.xo=A.xo.slice(1)}else A.xo=A.xo.filter((x,k)=>k!==i-1);show(cur,true)}
+function xBuys(i){return A.goal==='new'||xO(i).t==='buy'}
+function xBlock(){const g=A.goal,n=xN(),O=XT[g];let h='';
+ for(let i=0;i<n;i++){const o=xO(i),t=o.t||(g==='share'&&!i?'':o.t);
+  const nm=g==='share'?'Доля '+(i+1):'Новостройка '+(i+1);
+  h+=`<div class="f"><div class="lbl">${n>1?nm+' · '+(g==='share'?'что делаете':'что ищете'):(g==='share'?'Что делаете с долей':'Что ищете')}</div><div class="chips">${O.map(([v,tt])=>`<span class="${t===v?'on':''}" onclick="xSet(${i},'t','${v}',1)">${tt}</span>`).join('')}</div>
+  <div class="lbl" style="margin-top:6px">${xBuys(i)?'Где ищете':'Где квартира с долей'}</div>${rgSel(xReg(i),`xSet(${i},'reg',this.value,1)`,'Регион'+(n>1?' · '+nm.toLowerCase():''))}
+  <div class="lbl" style="margin-top:6px">Населённый пункт</div><input aria-label="Населённый пункт${n>1?' · '+nm.toLowerCase():''}" placeholder="город или посёлок" value="${hq(o.city||'')}" oninput="xSet(${i},'city',this.value)">
+  ${i&&!o.reg?'<div class="hint">Регион подставили из объекта 1. Можно изменить.</div>':''}
+  ${n>1&&xBuys(i)?`<div class="lbl" style="margin-top:6px">Бюджет на эту покупку, ₽</div><input inputmode="numeric" aria-label="Бюджет · ${nm.toLowerCase()}" placeholder="например, 6 000 000" value="${hq(o.bud||'')}" oninput="xSet(${i},'bud',this.value)"><div class="hint">У каждой покупки свой бюджет.</div>`:''}
+  ${n>1?`<a href="#" class="s gld" style="font-size:12px" onclick="xDel(${i});return false">Убрать: ${nm.toLowerCase()}</a>`:''}</div>`}
+ return h+`<button class="btn ghost" style="width:100%;padding:7px;margin:-2px 0 10px;font-size:12.5px" onclick="xAdd()">${g==='share'?'+ Добавить ещё долю':'+ Добавить ещё новостройку'}</button><div class="hint" style="margin:-6px 0 10px">${n>1?'У каждой — свой тип и место'+(g==='new'?' и свой бюджет':'')+'.':(g==='share'?'Продаёте или покупаете несколько долей, в том числе в разных городах? Добавьте каждую.':'Ищете в нескольких городах или регионах? Добавьте каждый вариант.')}</div>`}
+{const rb=regBlock;regBlock=function(){return ['share','new'].includes(A.goal)?xBlock():rb()}}
+// заявка: все объекты и их места
+{const os=ordSummary;ordSummary=function(){const r=os();
+ if(buys()&&bN()>1)r.forEach(e=>{const m=/^Покупка (\d+)$/.exec(e[0]);if(m){const b=bBud(+m[1]-1);e[1]+=' · '+(b?'бюджет '+(b<BSMALL?fmt(b):mln(b)):'бюджет не указан')}});
+ if(['share','new'].includes(A.goal)){const O=XT[A.goal],n=xN();const k=r.findIndex(e=>e[0]==='Город и район');const add=Array.from({length:n},(_,i)=>{const o=xO(i);const tt=(O.find(x=>x[0]===o.t)||['',''])[1];
+   return [n>1?(A.goal==='share'?'Доля ':'Новостройка ')+(i+1):(A.goal==='share'?'Доля':'Ищете'),(tt?tt+' · ':'')+locLine([xReg(i),o.city||''])+(n>1&&xBuys(i)?' · '+(num(o.bud)?'бюджет '+mln(num(o.bud)):'бюджет не указан'):'')]});
+  if(k>=0)r.splice(k,1,...add)}
+ return r}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
