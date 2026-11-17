@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /app-test/
 
 Sitemap: https://www.citius-solution.ru/sitemap.xml
