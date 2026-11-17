@@ -246,8 +246,7 @@ function inp(k,ph){return `<input placeholder="${ph||''}" value="${A[k]||''}" on
 // --- Этап 0
 SCR.s0a={st:0,t:'С чего начнём?',i:'Этап 0 · Старт · 1/4',b:()=>`
  <div class="f"><div class="lbl">Ваша цель *</div>${chips('goal',[['sell','Продать'],['buy','Купить'],['alt','Продать и купить другое'],['share','Продать / купить долю'],['new','Купить новостройку']])}${A.goal==='new'||nbMode()?'<div class="hint" style="margin-top:5px">Новостройка: сначала нам, потом застройщику — покупка с Ситиусом бесплатна, а застройщик закрепляет покупателя за тем, кто обратился первым.</div>':''}</div>
-${['sell','alt'].includes(A.goal)?`<div class="f"><div class="lbl">Что продаёте</div><div class="chips">${[['flat','Квартира или комната'],['house','Дом, дача, участок']].map(([v,t])=>`<span class="${kindNow()===v?'on':''}" onclick="setKind('${v}')">${t}</span>`).join('')}</div>${kindNow()==='house'?`<div class="hint">${A.goal==='buy'?'Покажем дома и дачи на площадках и что проверить: землю, границы, дом, коммуникации, подъезд.':'Дальше спросим про землю (ИЖС, садоводство, ЛПХ) и межевание.'}</div>`:''}</div>`:''}
- ${regBlock()}
+${saleStart()}${['sell','alt'].includes(A.goal)?'':regBlock()}
  ${boBlock()}
  <div class="f"><div class="lbl">Когда хотите переехать / получить деньги</div>${chips('when',[['3','До 3 мес.'],['6','3–6 мес.'],['12','Не спешу']])}</div>
  ${buys()?`<div class="f"><div class="lbl">Как будете платить за покупку</div>${chips('pay',[['own','Свои'],['sale','От продажи'],['mort','Ипотека'],['msk','Маткапитал'],['subs','Субсидия']],1)}${mortBtn()}</div>`:''}
@@ -377,8 +376,8 @@ SCR.btorg={st:6,t:'Торг с продавцом',get i(){return buyOnly()?'Э�
  <div class="card"><b>Договорились — зафиксируйте письменно.</b> Цену, что остаётся ${A.ltype==='room'?'в комнате':hBuy()?'на участке и в доме':'в квартире'}, срок сделки и дату выезда — в соглашении о задатке. Это следующий шаг.</div>
  ${agxT('Агент знает реальные цены сделок в районе, а не только цены объявлений, и видит, где у продавца есть запас. Сэкономленное на торге может окупить его работу. И это не только деньги, но и время вашей жизни, которое остаётся свободным.')}`,next:()=>{if(buyOnly())return 'b6z';done.add(6);return 'path'}};
 
-SCR.hb6={st:6,t:'Дом и участок: что проверить',get i(){return buyOnly()?'Этап 6 · покупка · дом, дача, участок':'Этап 6 · встречная покупка · дом, дача, участок'},b:()=>{A.hobj=A.hobj||'house';const L=hLand(),snt=['snt','dk',undefined].includes(A.hland);
- return `<div class="f"><div class="lbl">Что покупаете</div>${chips('hobj',HOBJ)}<div class="lbl" style="margin-top:6px">Земля</div>${chips('hland',HLAND)}<div class="hint">Видно в объявлении или в выписке ЕГРН.</div></div>
+SCR.hb6={st:6,t:'Дом и участок: что проверить',get i(){return buyOnly()?'Этап 6 · покупка · дом, дача, участок':'Этап 6 · встречная покупка · дом, дача, участок'},b:()=>{A.hobj=A.hobj||'house';const L=hLand(),snt=(()=>{const a=LA(A.hland);return !a.length||a.includes('snt')||a.includes('dk')})();
+ return `<div class="f"><div class="lbl">Что покупаете</div>${chips('hobj',HOBJ)}<div class="lbl" style="margin-top:6px">Земля</div>${chips('hland',HLAND,1)}<div class="hint">Можно отметить несколько.</div><div class="hint">Видно в объявлении или в выписке ЕГРН.</div></div>
  <div class="f"><div class="lbl">Земля и документы</div>
  ${ck('h1','Выписка ЕГРН на участок'+(L?'':' и на дом')+': категория земли и вид разрешённого использования — ИЖС, садоводство или ЛПХ',T('t-any','по кадастровому номеру · '+xa(OL.egrn,'Росреестр')))}
  ${ck('h2','Границы установлены (межевание): в выписке есть координаты, на '+xa(OL.nspd,'карте НСПД')+' у участка есть контур; забор стоит по границе',T('t-any','карта НСПД · сверьте на месте'))}
@@ -1123,7 +1122,7 @@ SCR.s0b={st:0,get t(){const U=sUnits();if(U.length>1)return 'Ваши объек
  return `${tabs}<div class="f"><div class="lbl">Что продаёте${mu?' · '+uNo(cu).toLowerCase():''}</div>${chipsO(i,'otype',[['flat','Квартира'],['room','Комната в коммуналке'],['house','Дом или дача с участком'],['shr','Доля']])}
  ${i&&o.otype==='room'&&A.otype==='room'?'<div class="hint">Это комната в другой квартире. Комнаты в той же квартире, что объект 1, укажите в объекте 1 — «Сколько комнат продаёте в этой квартире».</div>':''}
  ${RG?`<div class="lbl" style="margin-top:6px">Сколько комнат продаёте в этой квартире</div><div class="chips">${[1,2,3,4,5].map(n=>`<span class="${Math.min(kN(),5)===n?'on':''}" onclick="setKsell(${n})">${n===5?'5+':n}</span>`).join('')}</div>${kN()>=5?`<a href="#" class="s gld" style="font-size:12px" onclick="setKsell(kN()+1);return false">+ ещё комната</a>`:''}`:''}
- ${!i&&R?`<div class="lbl" style="margin-top:6px">Сколько всего комнат в квартире</div>${chips('ktot',[['2','из 2'],['3','из 3'],['4','из 4'],['5','из 5+']])}${o.otype==='room'?`<div class="hint">${kSellHint()}${kN()>1?' Ипотеку и зарегистрированных отметите по каждой комнате на следующем экране.':''}</div>`:''}`:''}${i&&R?`<div class="lbl" style="margin-top:6px">Сколько всего комнат в этой квартире</div>${chipsO(i,'ktot',[['2','из 2'],['3','из 3'],['4','из 4'],['5','из 5+']])}<div class="hint">${o.otype==='shr'?'Продаёте долю: других сособственников нужно известить о продаже; договор — у нотариуса.':'Соседей — собственников остальных комнат этой квартиры нужно известить о продаже.'}</div>`:''}${H?`<div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${chipsO(i,'land',[['izhs','ИЖС'],['snt','Садоводство (СНТ)'],['lph','ЛПХ'],['oth','Другое'],['dk','Не знаю']])}<div class="lbl" style="margin-top:5px">Границы участка</div>${chipsO(i,'mezh',[['y','Межевание есть'],['n','Нет'],['dk','Не знаю']])}<div class="lbl" style="margin-top:5px">Коммуникации</div>${chipsO(i,'comm',[['el','Свет'],['gas','Газ'],['water','Вода'],['sew','Канализация'],['road','Дорога круглый год']],1)}${okadO(i)}<div class="lbl" style="margin-top:5px">Дом в ЕГРН</div>${chipsO(i,'hreg',[['y','Зарегистрирован'],['n','Не зарегистрирован'],['dk','Не знаю']])}<div class="hint">Всё это видно в выписке ЕГРН — покажем, где посмотреть.</div>`:''}${!R&&!H?'<div class="lbl" style="margin-top:5px">Сколько комнат</div>'+chipsO(i,'rooms',[['0','Студия'],['1','1'],['2','2'],['3','3'],['4','4+']]):''}</div>
+ ${!i&&R?`<div class="lbl" style="margin-top:6px">Сколько всего комнат в квартире</div>${chips('ktot',[['2','из 2'],['3','из 3'],['4','из 4'],['5','из 5+']])}${o.otype==='room'?`<div class="hint">${kSellHint()}${kN()>1?' Ипотеку и зарегистрированных отметите по каждой комнате на следующем экране.':''}</div>`:''}`:''}${i&&R?`<div class="lbl" style="margin-top:6px">Сколько всего комнат в этой квартире</div>${chipsO(i,'ktot',[['2','из 2'],['3','из 3'],['4','из 4'],['5','из 5+']])}<div class="hint">${o.otype==='shr'?'Продаёте долю: других сособственников нужно известить о продаже; договор — у нотариуса.':'Соседей — собственников остальных комнат этой квартиры нужно известить о продаже.'}</div>`:''}${H?`<div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${chipsO(i,'land',[['izhs','ИЖС'],['snt','Садоводство (СНТ)'],['lph','ЛПХ'],['oth','Другое'],['dk','Не знаю']],1)}<div class="hint">Можно отметить несколько, если у участков разное назначение.</div>${''}<div class="lbl" style="margin-top:5px">Границы участка</div>${chipsO(i,'mezh',[['y','Межевание есть'],['n','Нет'],['dk','Не знаю']])}<div class="lbl" style="margin-top:5px">Коммуникации</div>${chipsO(i,'comm',[['el','Свет'],['gas','Газ'],['water','Вода'],['sew','Канализация'],['road','Дорога круглый год']],1)}${okadO(i)}<div class="lbl" style="margin-top:5px">Дом в ЕГРН</div>${chipsO(i,'hreg',[['y','Зарегистрирован'],['n','Не зарегистрирован'],['dk','Не знаю']])}<div class="hint">Всё это видно в выписке ЕГРН — покажем, где посмотреть.</div>`:''}${!R&&!H?'<div class="lbl" style="margin-top:5px">Сколько комнат</div>'+chipsO(i,'rooms',[['0','Студия'],['1','1'],['2','2'],['3','3'],['4','4+']]):''}</div>
  ${rooms}
  <div class="f"><div class="lbl">Адрес или кадастровый номер</div>${inpO(i,'addr','для оценки и выписки ЕГРН')}<div class="hint">Номер квартиры нигде не публикуется.</div></div>
  ${i||mu?sLocBlock(i):(sReg(0)==='Санкт-Петербург'?`<div class="f"><select aria-label="Район" onchange="sSetLoc(0,'sdist',this.value)"><option value="">Район — для похожих объявлений</option>${SPB.map(d=>`<option ${A.sdist===d[0]?'selected':''}>${d[0]}</option>`).join('')}</select></div>`:'')}
@@ -1228,11 +1227,11 @@ function oName(o,j){return vLab(j)}
 
 // ---------- документы и проверки — по типу каждого объекта
 function docsObj(j){const o=OB(j),r=sReg(j),D=docCity(r),c=(k,t,g)=>ck('d'+j+k,t,g);let h='';
- if(o.otype==='house'){h=c('egrn','Выписка ЕГРН на участок и на дом: ВРИ'+(o.land&&o.land!=='dk'?' ('+({izhs:'ИЖС',snt:'садоводство',lph:'ЛПХ'}[o.land])+')':'')+', границы',T('t-own','собственник · Госуслуги или сайт Росреестра'))
+ if(o.otype==='house'){h=c('egrn','Выписка ЕГРН на участок и на дом: ВРИ'+(lnTxt(o.land)?' ('+lnTxt(o.land)+')':'')+', границы',T('t-own','собственник · Госуслуги или сайт Росреестра'))
   +(o.mezh==='y'?'':c('mezh','Межевание: если границ участка нет в ЕГРН — кадастровый инженер',T('t-own','собственник · платно')))
   +(o.hreg==='y'?'':c('hreg','Дом не в ЕГРН — технический план у кадастрового инженера и постановка на учёт; без этого дом не продать вместе с участком',T('t-own','собственник · платно')))
   +c('comm','Коммуникации'+((o.comm||[]).length?' ('+o.comm.map(x=>({el:'свет',gas:'газ',water:'вода',sew:'канализация'}[x])).join(', ')+')':'')+': договоры с поставщиками, справки об отсутствии долгов',T('t-own','собственник'))
-  +(o.land==='snt'?c('snt','Справка СНТ об отсутствии долгов по взносам',T('t-own','собственник · правление СНТ')):'')}
+  +(LA(o.land).includes('snt')?c('snt','Справка СНТ об отсутствии долгов по взносам',T('t-own','собственник · правление СНТ')):'')}
  else{h=c('egrn','Выписка ЕГРН'+(o.otype==='room'?': комната — отдельный объект или доля в праве на квартиру':''),T('t-own','собственник · Госуслуги или сайт Росреестра'))
   +c('reg','Справка о зарегистрированных',T('t-own','собственник · '+D.reg))+c('debt','Справка об отсутствии долгов ЖКУ и капремонта',T('t-own','собственник · '+D.debt))
   +(['room','shr'].includes(o.otype)?c('nb','Извещения соседей-собственников или их нотариальные отказы',T('t-any','ст. 250 ГК РФ')):'')}
@@ -1292,7 +1291,7 @@ const HOBJ=[['house','Дом'],['dacha','Дача'],['land','Участок бе
 function bParams(j){const lt=bLt(j);
  if(lt==='house'){const L=bGet(j,'hobj')==='land';return `<div class="lbl" style="margin-top:6px">Что именно</div>${bChips(j,'hobj',HOBJ)}
   <div class="row" style="margin-top:5px">${L?'':`<div style="flex:1"><div class="lbl">Дом, м² · примерно</div>${bInp(j,'adesired','например, 100',1)}</div>`}<div style="flex:1"><div class="lbl">Участок от, сот.</div>${bInp(j,'hsot','например, 8',1)}</div></div>
-  <div class="lbl" style="margin-top:6px">Земля · ВРИ</div>${bChips(j,'hland',[['izhs','ИЖС'],['snt','Садоводство (СНТ)'],['lph','ЛПХ'],['dk','Не важно']])}
+  <div class="lbl" style="margin-top:6px">Земля · ВРИ</div>${bChips(j,'hland',[['izhs','ИЖС'],['snt','Садоводство (СНТ)'],['lph','ЛПХ'],['dk','Не важно']],1)}<div class="hint">Можно отметить несколько.</div>
   <div class="lbl" style="margin-top:6px">Что важно</div>${bChips(j,'hneed',[['gas','Газ'],['el','Свет 15 кВт'],['water','Вода и канализация'],['road','Дорога круглый год'],['reg','Можно прописаться']],1)}`}
  if(lt==='room')return `<div class="lbl" style="margin-top:6px">Сколько комнат покупаете</div>${bChips(j,'kcnt',[['1','1'],['2','2 в одной квартире'],['3','3 и больше']])}
   <div class="lbl" style="margin-top:6px">Как оформлено</div>${bChips(j,'kform',[['room','Комнаты'],['shr','Доли в квартире'],['any','Не важно']])}
@@ -1334,7 +1333,7 @@ function adSpec(j){const lt=bLt(j),reg=bReg(j),h=bGet(j,'hobj')||'house';
  if(lt==='house'){const land=h==='land',da=h==='dacha';const ar=n0(bGet(j,'adesired'))||(da?60:100),so=n0(bGet(j,'hsot'))||(da?6:10);
   const typical=(land?0:ppmOf('house',reg)*ar)+so*(SOTP[reg]||50000)*(land?1:.3);
   const nm=land?'Участок':da?'Дача':'Дом с участком';return {typical,mk:(k)=>{const F=[[.85,1],[1.1,1.5],[.95,.8],[1.25,1.2]][k];const a=Math.round(ar*F[0]),s=Math.max(4,Math.round(so*F[1]));
-   return land?`${nm} ${s} сот.${bGet(j,'hland')&&bGet(j,'hland')!=='dk'?', '+({izhs:'ИЖС',snt:'СНТ',lph:'ЛПХ'}[bGet(j,'hland')]):''}`:`${nm} ${s} сот., дом ${a} м²`}}}
+   return land?`${nm} ${s} сот.${lnTxt(bGet(j,'hland'),1)?', '+lnTxt(bGet(j,'hland'),1):''}`:`${nm} ${s} сот., дом ${a} м²`}}}
  if(lt==='room'){const ar=n0(bGet(j,'karea'))||(bGet(j,'kcnt')==='2'?30:16);const n2=bGet(j,'kcnt')==='2';return {typical:ppmOf('room',reg)*ar,mk:k=>`${n2?'Две комнаты в одной квартире':'Комната в коммунальной квартире'}, ${Math.round(ar*[1,1.15,.9,1.25][k])} м²`}}
  const ar=n0(bGet(j,'adesired'))||44;const R=(bGet(j,'lrooms')||[]).filter(Boolean);const rw=r=>r==='st'?'Студия':r==='4'?'4-комнатная квартира':r+'-комнатная квартира';
  return {typical:ppmOf('flat',reg)*ar,mk:k=>`${R.length?rw(R[k%R.length]):(lt==='new'?'Квартира в новостройке':'Квартира')}${lt==='new'&&R.length?' в новостройке':''}, ${Math.round(ar*[1,1.1,.92,1.2][k])} м²`}}
@@ -1360,7 +1359,7 @@ const HNEED=[['gas','Газ'],['el','Свет'],['water','Вода'],['sew','К�
 function houseB(j){const L=bGet(j,'hobj')==='land';
  return `<div class="lbl" style="margin-top:6px">Что именно</div>${bChips(j,'hobj',HOBJ)}
   <div class="row" style="margin-top:5px">${L?'':`<div style="flex:1"><div class="lbl">Дом, м² · примерно</div>${bInp(j,'adesired','например, 100',1)}</div>`}<div style="flex:1"><div class="lbl">Участок от, сот.</div>${bInp(j,'hsot','например, 8',1)}</div></div>
-  <div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${bChips(j,'hland',HLAND)}
+  <div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${bChips(j,'hland',HLAND,1)}<div class="hint">Можно отметить несколько.</div>
   <div class="lbl" style="margin-top:6px">Межевание</div>${bChips(j,'hmezh',[['y','Только с межеванием'],['dk','Не важно']])}
   <div class="lbl" style="margin-top:6px">Коммуникации · что нужно</div>${bChips(j,'hneed',HNEED,1)}
   <div class="lbl" style="margin-top:6px">Удалённость ${kadW(bReg(j))}</div>${bChips(j,'hkad',KADO)}`}
@@ -1779,6 +1778,32 @@ SVCD.refin=()=>`<b>Первичная консультация бесплатн�
 // «Нужна помощь»: ипотека и рефинансирование — отдельными строками с заявкой
 {const oh=openHelp;openHelp=function(f){oh(f);const o=$('helpopts');if(!o)return;const row=(k,t)=>`<div class="opt"><div><b>${t}</b><div class="hint" style="margin:0">Партнёр Ситиуса · первичная консультация — бесплатно</div></div><button class="btn ghost" style="padding:5px 9px;font-size:12px;white-space:nowrap" onclick="sheet.style.display='none';A.osvc='${k}';A.oback=cur;A.osent=0;go('order')">Заявка</button></div>`;
  o.insertAdjacentHTML('beforeend',(buys()?row('mortgage','Ситиус поможет с ипотекой'):'')+row('refin','Ситиус поможет с рефинансированием'))};if($('helpbtn'))$('helpbtn').onclick=e=>openHelp(e)}
+
+// ===== (26) Старт «Продать и купить» / «Продать»: несколько объектов продажи, у каждого свой тип и место; назначение земли — несколько
+const LA=v=>Array.isArray(v)?v:(v?[v]:[]);
+const LNM={izhs:'ИЖС',snt:'садоводство',lph:'ЛПХ',oth:'другое'},LNS={izhs:'ИЖС',snt:'СНТ',lph:'ЛПХ',oth:'другое'};
+function lnTxt(v,short){return LA(v).filter(x=>x!=='dk').map(x=>(short?LNS:LNM)[x]||x).join(', ')}
+const LANDK=['land','hland'];
+function landX(a,v){a=LA(a);return v==='dk'?(a.includes('dk')?[]:['dk']):a.filter(x=>x!=='dk')}
+{const p0=pick;pick=function(k,v,m){if(LANDK.includes(k)&&m){A[k]=LA(A[k]);p0(k,v,m);A[k]=v==='dk'?(A[k].includes('dk')?['dk']:[]):A[k].filter(x=>x!=='dk');show(cur,true);return}return p0(k,v,m)}}
+{const q0=pickO;pickO=function(i,k,v,m){if(LANDK.includes(k)&&m){const o=OB(i);o[k]=LA(o[k]);q0(i,k,v,m);o[k]=v==='dk'?(o[k].includes('dk')?['dk']:[]):o[k].filter(x=>x!=='dk');show(cur,true);return}return q0(i,k,v,m)}}
+{const b0=bPick;bPick=function(j,k,v,m){if(LANDK.includes(k)&&m){const a=LA(bGet(j,k));bSet(j,k,v==='dk'?(a.includes('dk')?[]:['dk']):(a.includes(v)?a.filter(x=>x!==v&&x!=='dk'):[...a.filter(x=>x!=='dk'),v]));show(cur,true);return}return b0(j,k,v,m)}}
+// старые ответы (строкой) → список
+{const sy=syncO;syncO=function(){const r=sy.apply(this,arguments);[A,...(A.so||[])].forEach(o=>{if(o&&typeof o.land==='string')o.land=[o.land]});if(typeof A.hland==='string')A.hland=[A.hland];
+ [A.bp0,...(A.bo||[])].forEach(o=>{if(o&&typeof o.hland==='string')o.hland=[o.hland]});return r}}
+// старт: объекты продажи
+const STY=[['flat','Квартира'],['room','Комната'],['house','Дом, дача, участок'],['shr','Доля']];
+function sStartType(i,v){const o=OB(i);if(!i){A.otype=v;A.kind=v==='house'?'house':'flat';if(v!=='room')A.so=(A.so||[]).filter(x=>!(x.otype==='room'&&x.same==='y'))}else{o.otype=v;if(v!=='room')o.same='n'}show(cur,true)}
+function saleStart(){if(!['sell','alt'].includes(A.goal))return '';const U=sUnits().length?sUnits():[[0]],n=U.length;let h='';
+ U.forEach((g,k)=>{const i=g[0],o=OB(i),ot=o.otype||(i?'flat':(A.kind==='house'?'house':(A.kind?'flat':'')));
+  h+=`<div class="f"><div class="lbl">${n>1?'Объект '+(k+1)+' · что продаёте':'Что продаёте'}</div><div class="chips">${STY.map(([v,t])=>`<span class="${ot===v?'on':''}" onclick="sStartType(${i},'${v}')">${t}</span>`).join('')}</div>
+  ${g.length>1?`<div class="hint">${g.length} ${kW(g.length)} в одной квартире.</div>`:''}
+  ${ot==='house'?'<div class="hint">Дальше спросим про землю (ИЖС, садоводство, ЛПХ) и межевание — у каждого участка своё.</div>':''}
+  <div class="lbl" style="margin-top:6px">${n>1?'Где этот объект':'Где ваше жильё'}</div>${rgSel(sReg(i),`sSetLoc(${i},'reg',this.value,1)`,'Регион'+(n>1?' объекта '+(k+1):''))}
+  <div class="lbl" style="margin-top:6px">Населённый пункт</div><input aria-label="Населённый пункт${n>1?' объекта '+(k+1):''}" placeholder="город или посёлок" value="${hq(sCity(i))}" oninput="sSetLoc(${i},'city',this.value)">
+  ${i&&!o.reg?`<div class="hint">Регион подставили из объекта 1. Можно изменить.</div>`:''}
+  ${n>1?`<a href="#" class="s gld" style="font-size:12px" onclick="delObj(${i});return false">Убрать объект ${k+1}</a>`:''}</div>`});
+ return h+`<button class="btn ghost" style="width:100%;padding:7px;margin:-2px 0 10px;font-size:12.5px" onclick="addObj()">+ Добавить ещё объект продажи</button><div class="hint" style="margin:-6px 0 10px">${n>1?`Объектов: ${n}. Площадь, адрес и документы каждого — на следующем экране. Оценим каждый и сложим сумму.`:'Продаёте несколько квартир, комнат, домов или участков, в том числе в разных городах? Добавьте каждый.'}</div>`}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
