@@ -2184,6 +2184,28 @@ genText=function(u){u=u||0;featMig();const U=featU();const g=U[u]||[0],j=g[0],o=
   :`${has('metro')?'Рядом метро. ':''}${has('school')?'Рядом школа или детский сад. ':''}${has('park')?'Рядом парк. ':''}`;
  return (`${head}${fl&&!hs?', этаж '+fl:''}${city?', '+city:''}.\n${l1}\n${l2}\n${C.includes('clean')?cleanW(sReg(j))+'. ':''}${C.includes('altc')?'Альтернативная сделка. ':''}${C.includes('mortok')&&!mortObj?'Подходит под ипотеку. ':''}${C.includes('fast')?'Готовы быстро выйти на сделку. ':''}${adpOf(u)?'Цена: '+fmt(adpOf(u))+'.\n':''}Расчёт через безопасные расчёты банка или аккредитив.\nПродаёт собственник, агентам просьба не беспокоить.`).replace(/ +\n/g,'\n').replace(/\n{2,}/g,'\n')};
 
+// ===== (39) 18.11 №14: «Посчитаю сам» — калькулятор вычета при покупке (как у ДОМ.РФ, по 13 %), без интернета
+// Лимиты — FEES.tax.buyDed (2 млн, пп. 1 п. 3 ст. 220 НК) и FEES.tax.intDed (3 млн, п. 4 ст. 220 НК); за год — не больше уплаченного НДФЛ, остаток переносится (п. 9 ст. 220 НК)
+var DOMRF_DED='https://спроси.дом.рф/calculators/kalkulyator-nalogovogo-vycheta-pri-pokupke-kvartiri/';
+function dcInp(k,lab,ph){return `<div class="lbl" style="margin-top:6px">${lab}</div><input inputmode="numeric" aria-label="${hq(lab)}" placeholder="${hq(ph)}" value="${hq(A[k]||'')}" oninput="A['${k}']=this.value" onchange="show(cur,true)">`}
+function dedCalc(){const T=FEES.tax,r=T.r1/100;
+ const pr=num(A.dc_price),it=num(A.dc_int),used=num(A.dc_used),sal=num(A.dc_sal),nd=num(A.dc_ndfl);
+ const rest=Math.max(0,T.buyDed-used),b1=Math.min(pr,rest),b2=A.dc_intu==='y'?0:Math.min(it,T.intDed),r1=Math.round(b1*r),r2=Math.round(b2*r),tot=r1+r2;
+ const inc=sal*12,ny=nd||(inc?Math.round(Math.min(inc,T.th)*r+Math.max(0,inc-T.th)*T.r2/100):0),yrs=tot&&ny?Math.ceil(tot/ny):0;
+ const res=pr||it?`<div class="card dcres"><b>Вернут всего: ${fmt(tot)||'0 ₽'}</b><br>
+  <span class="hint">С покупки: ${r1?fmt(r1)+' — '+T.r1+'\u00a0% от '+sp(b1)+'\u00a0₽':'0 ₽'}${pr>rest?' (лимит '+sp(rest)+'\u00a0₽'+(used?' с учётом уже полученного':'')+')':''}</span><br>
+  <span class="hint">С процентов по ипотеке: ${A.dc_intu==='y'?'0 ₽ — вычет по процентам дают только один раз':r2?fmt(r2)+' — '+T.r1+'\u00a0% от '+sp(b2)+'\u00a0₽'+(it>T.intDed?' (лимит '+sp(T.intDed)+'\u00a0₽)':''):'0 ₽'}</span><br>
+  ${yrs?`<b>Примерно за ${yrs} ${yrs===1?'год':yrs<5?'года':'лет'}</b> <span class="hint">— если НДФЛ за год около ${fmt(ny)}. За год вернут не больше уплаченного НДФЛ, остаток переносится на следующие годы${law('п. 9 ст. 220 НК')}.</span>`:`<span class="hint">Укажите зарплату или НДФЛ за год — посчитаем, за сколько лет вернут.</span>`}</div>`:'';
+ return `<div class="f dcalc"><div class="lbl">Посчитаю сам · калькулятор вычета</div><div class="hint">Как у ДОМ.РФ: по ставке ${T.r1}\u00a0%. Работает без интернета, ничего не отправляется.</div>
+ ${dcInp('dc_price','Цена покупки жилья, ₽','например, 6 000 000')}<div class="hint">Вычет — не больше чем с ${mln(T.buyDed)}\u00a0₽: до ${sp(T.buyDed*r)}\u00a0₽${law('пп. 1 п. 3 ст. 220 НК')}. Часть, оплаченную маткапиталом или господдержкой, не считают.</div>
+ ${dcInp('dc_int','Проценты по ипотеке за весь срок, ₽','если ипотека')}<div class="hint">Не больше чем с ${mln(T.intDed)}\u00a0₽: до ${sp(T.intDed*r)}\u00a0₽${law('п. 4 ст. 220 НК')}. Возвращают по мере уплаты процентов — за годы, когда вы их платили.</div>
+ ${dcInp('dc_used','Вычет на покупку уже получали — с какой суммы, ₽','если не получали — пусто')}<div class="hint">Остаток до ${mln(T.buyDed)}\u00a0₽ можно получить с этой покупки. Если вычет получали за покупку до 2014 года, второй раз его не дают — проверьте на ДОМ.РФ.</div>
+ <div class="lbl" style="margin-top:6px">Вычет по процентам по ипотеке уже получали?</div>${chips('dc_intu',[['n','Нет'],['y','Да']])}
+ ${dcInp('dc_sal','Зарплата в месяц до вычета налога, ₽','например, 100 000')}
+ ${dcInp('dc_ndfl','Или НДФЛ за год из справки о доходах, ₽','если знаете — точнее')}
+ ${res}<div class="hint" style="margin-top:6px;font-size:11px">Ориентир, не решение налоговой. <a href="${DOMRF_DED}" target="_blank" rel="noopener">Проверить на ДОМ.РФ</a></div></div>`}
+{const o=SCR.s10b.b;SCR.s10b.b=()=>{const h=o();if(!buys())return h;const k=h.lastIndexOf('<div class="f"><div class="lbl">Ипотека · вычет по процентам');return k>=0?h.slice(0,k)+dedCalc()+h.slice(k):h+dedCalc()}}
+
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
  if(h.get('demo')){Object.assign(A,{goal:'alt',reg:'Ленинградская область',city:'Кудрово',when:'6',otype:'flat',rooms:'2',area:'58',floor:'7/17',pay:['sale','mort','msk'],mort:true,msk:true,
