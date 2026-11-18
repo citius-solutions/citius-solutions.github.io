@@ -2346,7 +2346,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='18.11.2026 22:51';
+var APPV='18.11.2026 23:01';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2432,6 +2432,14 @@ SCR.s3b.b=(()=>{const o0=SCR.s3b.b;return ()=>{let h=o0();const U=featU();if(!kT
  return h.replace(/^[\s\S]*?(<div class="hint" style="margin:-4px 0 8px">)/,U.map((g,u)=>`<div class="f">${U.length>1?`<div class="lbl">Объявление ${u+1} · ${g.length>1?'объекты '+g.map(x=>x+1).join(', ')+' · комнаты вместе':uNo(uOf(g[0])).toLowerCase()} · ${sLocLine(g[0])}</div>`:''}<textarea aria-label="Текст объявления ${u+1}">${genText(u)}</textarea></div>`).join('')+'$1').replace('У каждого объекта своё объявление, у каждой комнаты тоже: их могут купить разные люди.','Комнаты одной квартиры — одно объявление (вы выбрали «вместе»); другие объекты — отдельно.')}})();
 // перенос: «5 и больше» → пусто с подсказкой
 {const s0=syncO;syncO=function(){s0.apply(this,arguments);if(!A.kt5m){[A,...(A.so||[])].forEach(o=>{if(o.ktot==='5'){o.ktot='';o.ktot5=1}});A.kt5m=1}}}
+// ===== (48) 18.11 №31: «Проверки по каждой покупке» раскрываются на месте (▸/▾), отметки сохраняются как раньше · №32: строка «Другая сторона» на «Полной проверке»
+{const o=SCR.s6.b;SCR.s6.b=()=>{let h=o();const n=bN();if(n<2)return h;const i=h.indexOf('<div class="card"><b>Проверки по каждой покупке</b>');if(i<0)return h;
+ const op=A.bchk!=null&&A.bchk<n?A.bchk:-1;
+ return h.slice(0,i)+`<div class="f"><div class="lbl">Проверки по каждой покупке</div>${Array.from({length:n},(_,j)=>{const t=BCHK[bLt(j)]||BCHK.sec;const on=j===op;let inner='';
+  if(on){try{const s=SCR[t[0]];inner=`<div class="acc" style="margin:6px 0 4px;padding-left:8px;border-left:2px solid rgba(201,164,106,.6)">${typeof s.b==='function'?s.b():''}</div>`}catch(e){inner='<div class="hint">Не открылось — откройте этап проверки.</div>'}}
+  return `<div style="margin-top:6px"><a href="#" aria-expanded="${on}" onclick="bchkTog(${j});return false">${on?'▾':'▸'} Покупка ${j+1} · ${t[1]}</a> <span class="hint">· ${bLocLine(j)}</span>${inner}</div>`}).join('')}</div>`}}
+function bchkTog(j){if(A.bchk===j){A.bchk=null;show(cur,true);return}setBuyObj(j,1);A.bchk=j;show(cur,true)}
+{const o=SCR.s8.b;SCR.s8.b=function(){return o.apply(this,arguments).replace('Другая сторона: паспорт, ФССП, банкротство, суды','Другая сторона: паспорт, долги у приставов (ФССП), банкротство, суды, кредитная история (с согласия продавца)').replace(/(Другая сторона: паспорт, долги[^<]*<br><span class="tag [^>]*>)([^<]*)/,'$1$2 · кредитная история — по 218-ФЗ')}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
