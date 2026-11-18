@@ -2206,6 +2206,25 @@ function dedCalc(){const T=FEES.tax,r=T.r1/100;
  ${res}<div class="hint" style="margin-top:6px;font-size:11px">Ориентир, не решение налоговой. <a href="${DOMRF_DED}" target="_blank" rel="noopener">Проверить на ДОМ.РФ</a></div></div>`}
 {const o=SCR.s10b.b;SCR.s10b.b=()=>{const h=o();if(!buys())return h;const k=h.lastIndexOf('<div class="f"><div class="lbl">Ипотека · вычет по процентам');return k>=0?h.slice(0,k)+dedCalc()+h.slice(k):h+dedCalc()}}
 
+// ===== (40) 18.11 №15: телефон в горизонтали (высота ≤ 500) — шапка в одну строку, кнопки и вкладки — боковой колонкой справа
+{const st=document.createElement('style');st.textContent=`@media (orientation:landscape) and (max-height:500px){
+#phone{display:grid!important;grid-template-columns:minmax(0,1fr) 200px;grid-template-rows:auto auto auto minmax(0,1fr)}
+#phone>*{grid-column:1/-1}
+#phone>.top{grid-row:1;padding:6px 96px 6px 14px}
+.top .brand,.top .step,#devbig{display:none!important}
+#devbtn{display:flex!important;top:5px;width:30px;height:30px}#thbtn{top:5px;width:30px;height:30px}
+.top h1{margin:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .prog{margin-top:5px}
+#phone>#body{grid-column:1;grid-row:2/5;min-height:0;border-right:1px solid rgba(201,164,106,.5)}
+#phone>#nav{grid-column:2;grid-row:2;flex-direction:column;gap:6px;padding:8px 10px 6px}
+#nav .btn{flex:none;padding:8px}
+#phone>#helpbtn{grid-column:2;grid-row:3;margin:0 10px 8px;padding:7px 8px}
+#phone>.tab{grid-column:2;grid-row:4;height:auto;flex-direction:column;align-items:stretch;justify-content:flex-end;gap:0;padding:4px 10px 6px;border-top:1px solid rgba(201,164,106,.5);font-size:12.5px}
+.tab span{padding:5px 8px;text-align:left;border-radius:7px}
+.tab .on{box-shadow:inset 3px 0 #c9a46a}
+.sheet .in{max-height:calc(100% - 6px);overflow-y:auto;box-sizing:border-box}
+}`;document.head.appendChild(st)}
+
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
  if(h.get('demo')){Object.assign(A,{goal:'alt',reg:'Ленинградская область',city:'Кудрово',when:'6',otype:'flat',rooms:'2',area:'58',floor:'7/17',pay:['sale','mort','msk'],mort:true,msk:true,
