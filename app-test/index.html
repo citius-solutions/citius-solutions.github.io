@@ -737,7 +737,7 @@ function cianRoomURL(town){const p=[['deal_type','sale'],['engine_version',2],['
 function avitoRoomURL(town){const city=town?town[3]:'sankt-peterburg';if(!city)return null;const [lo,hi]=pRange();const q=[];if(hi)q.push('pmin='+lo,'pmax='+hi);if(A.kkw)q.push('q='+encodeURIComponent(A.kkw));return 'https://www.avito.ru/'+city+'/komnaty/prodam'+(q.length?'?'+q.join('&'):'')}
 function domRoomURL(map){const [lo,hi]=pRange();const pr=hi?'sale_price__gte='+lo+'&sale_price__lte='+hi:'';return map?DC+'/search/on-map?deal_type=sale&category=living&offer_type=room'+(pr?'&'+pr:''):DC+'/pokupka/komnaty/kommunalnaja'+(pr?'?'+pr:'')}
 SCR.kom={st:-11,t:'Комнаты в коммуналке',i:'Параметры, которых нет на площадках',b:()=>`
- <div class="f"><div class="lbl">${sells()&&!buys()?'Сколько комнат продаёте (ищем похожие)':'Сколько комнат покупаете'}</div>${chips('kcnt',[['1','1'],['2','2 в одной квартире'],['3','3 и больше']])}</div>
+ <div class="f"><div class="lbl">${sells()&&!buys()?'Сколько комнат продаёте (ищем похожие)':'Сколько комнат покупаете'}</div>${chips('kcnt',sells()&&!buys()?[['1','1'],['2','2 в одной квартире'],['3','3 и больше']]:KCNT)}</div>
  <div class="f"><div class="lbl">Всего комнат в квартире</div>${chips(buys()?'kbtot':'ktot',[['2','2'],['3','3'],['4','4'],['5','5 и больше']])}</div>
  <div class="f"><div class="lbl">Соседей-собственников останется</div>${chips('knb',[['0','Нет — вся квартира'],['1','1'],['2','2'],['3','3 и больше']])}<div class="hint">Чем меньше соседей, тем проще жить и потом продать. Если покупаете все комнаты, квартира становится вашей целиком.</div></div>
  <div class="f"><div class="lbl">Площадь комнат вместе, м² · ±10%</div>${inp('karea','например, 30')}<div class="hint">${kRange()[1]?kRange()[0]+'–'+kRange()[1]+' м². ':''}Площадки фильтруют общую площадь квартиры, не комнат — сверяйте в объявлении.</div></div>
@@ -2007,6 +2007,13 @@ const saveKeep=()=>{try{if(localStorage.getItem(SVK)!==null)saveSt()}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveKeep()});
 document.addEventListener('input',()=>saveSt());document.addEventListener('change',()=>saveSt());
 setInterval(()=>saveSt(),5000);
+// ===== (30) 18.11: характеристики каждой покупки — прямо на этапе поиска (раньше на поиске были только у первой / только кнопка)
+function bChar(j){const lt=bLt(j),n=bN();return `<div class="f bchar" data-b="${j}"><div class="lbl">Что ищем${n>1?' · покупка '+(j+1):''}</div>${n>1?bChips(j,'lt',BLT):''}${bParams(j)}<div class="hint" style="margin-top:5px">${n>1?'У каждой покупки свои характеристики — переключайте покупки вверху.':'Те же характеристики, что на первом экране.'}</div></div>`}
+{const o=SCR.s6.b;SCR.s6.b=()=>{let h=o();if(!buys())return h;const j=bAct();const a=h.indexOf('<div class="f"><div class="lbl">'+(buyOnly()?'Что важно':'Что важно в новом жилье'));const c=h.indexOf('<div class="card"><b>Начните с избранного');
+ if(a<0)return h;if(bLt(j)==='house'&&c>a)return h.slice(0,a)+bChar(j)+h.slice(c);return h.slice(0,a)+bChar(j)+h.slice(a)}}
+{const o=SCR.live.b;SCR.live.b=()=>{let h=o();if(!buys()||A.ltype!=='room')return h;const j=bAct();
+ const a=h.indexOf('<div class="f"><div class="lbl">Коммуналка</div>'),e=h.indexOf('Параметры коммуналки</button></div>',a);if(a<0||e<0)return h;
+ return h.slice(0,a)+`<div class="f bchar" data-b="${j}"><div class="lbl">Комнаты${bN()>1?' · покупка '+(j+1):''}</div>${bParams(j)}<button class="btn ghost" style="width:100%;padding:7px;margin-top:6px" onclick="go('kom')">Ещё: всего комнат в квартире, соседи, слова для поиска</button></div>`+h.slice(e+'Параметры коммуналки</button></div>'.length)}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
