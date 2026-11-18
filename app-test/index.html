@@ -2065,6 +2065,54 @@ function SECP(){return `<div class="secp" role="heading" aria-level="2"><span cl
 {const b0=boBlock;boBlock=function(){const h=b0();if(A.goal!=='alt'||!h)return h;
  return SECP()+h.replace(/<div class="lbl">Что покупаете<\/div>/,'<div class="lbl">Что ищете</div>')}}
 
+// ===== (33) 18.11: целые регионы в подсказках «Город или адрес» («Лен», «ЛО», «лен.область», «Подмосковье»); «Ищем по всей … области, до N км»
+const rnorm=s=>lnorm(s).replace(/[.,\-–—()]/g,' ').replace(/\s+/g,' ').trim();
+const RGAL2={'ло':'Ленинградская область','лен обл':'Ленинградская область','ленобл':'Ленинградская область','ленобласть':'Ленинградская область','ленинградка':'Ленинградская область',
+ 'мо':'Московская область','подмосковье':'Московская область','мособл':'Московская область','моск обл':'Московская область','московия':'Московская область',
+ 'спб':'Санкт-Петербург','питер':'Санкт-Петербург','петербург':'Санкт-Петербург','санкт петербург':'Санкт-Петербург','мск':'Москва','москва':'Москва'};
+const RGFED=['Москва','Санкт-Петербург','Севастополь'];
+const RGW=RG_ALL.map(r=>({r,w:rnorm(r).split(' ').filter(Boolean)}));
+function rgMatch(t){const q=rnorm(t);if(!q)return [];if(RGAL2[q])return [RGAL2[q]];const T=q.split(' ');
+ if(T[0].length<2)return [];return RGW.filter(o=>T.every(x=>o.w.some(w=>w.startsWith(x)))&&o.w.some(w=>w.startsWith(T[0]))).map(o=>o.r)}
+function rgSure(t){const q=rnorm(t);if(!q)return null;if(RGAL2[q])return RGAL2[q];const M=rgMatch(t);if(!M.length)return null;
+ const T=q.split(' ');return (/(^| )(обл|край|респ|округ|ао)/.test(q)||RGW.find(o=>o.r===M[0]).w.includes(T[0]))?M[0]:null}
+function rgKind(r){return /область$/.test(r)?'вся область':/край$/.test(r)?'весь край':/Республик/.test(r)?'вся республика':/округ/.test(r)?'весь округ':'весь регион'}
+function rgAll(r){if(r==='Москва')return 'по всей Москве';if(r==='Санкт-Петербург')return 'по всему Санкт-Петербургу';if(r==='Севастополь')return 'по всему Севастополю';
+ const b=r.split(' — ')[0],W=b.split(' ');
+ if(/область$/.test(b))return 'по всей '+W.map(w=>w==='область'?'области':w.replace(/ая$/,'ой')).join(' ');
+ if(/край$/.test(b))return 'по всему '+W.map(w=>w==='край'?'краю':w.replace(/(ий|ый|ой)$/,'ому')).join(' ');
+ if(/^Республика /.test(b))return 'по всей Республике '+b.slice(11);
+ if(/Республика$/.test(b))return 'по всей '+W.map(w=>w==='Республика'?'Республике':w.replace(/ая$/,'ой')).join(' ');
+ return 'по всему региону: '+r}
+function locWhole(k){return !!((A.locw||{})[k])}
+function locSetWhole(k,v){A.locw=A.locw||{};if(v)A.locw[k]=1;else delete A.locw[k]}
+function locSugAll(t){const q=t.split(',')[0];const C=citySug(q),qn=lnorm(q);let R=rgMatch(q);
+ const fed=R.filter(r=>RGFED.includes(r)),reg=R.filter(r=>!RGFED.includes(r)).slice(0,2);
+ const F=fed.map(r=>CITY.find(c=>c.n===r&&c.r===r)).filter(Boolean).filter(c=>!C.includes(c));
+ const exact=C.some(c=>c.k===qn);const RI=reg.map(r=>({reg:1,n:r,r}));const CI=[...F,...C].slice(0,6);
+ return exact?[...CI,...RI]:[...RI,...CI]}
+function locType(el){const k=el.closest('.loc').dataset.k;locSetWhole(k,0);locPut(k,'city',el.value);const S=locSugAll(el.value);const box=el.parentNode.querySelector('.locs');
+ const hn=el.closest('.loc').querySelector('.lochint');if(hn)hn.innerHTML='';
+ box.innerHTML=S.map((c,n)=>`<div class="locsug${n?'':' on'}" role="option" data-n="${hq(c.n)}" data-r="${hq(c.r)}"${c.reg?' data-w="1"':''} onpointerdown="event.preventDefault();locPick(this)" onclick="locPick(this)">${c.reg?`<b>${hq(c.n)}</b> — ${rgKind(c.n)}`:`<b>${hq(c.n)}</b>, ${hq(c.r)}`}</div>`).join('');box.style.display=S.length?'block':'none'}
+function locPick(d){const box=d.parentNode,w=d.closest('.loc'),el=w.querySelector('.locin'),k=w.dataset.k;if(!el)return;el.value=d.dataset.n;box.innerHTML='';box.style.display='none';el.dataset.done='1';
+ locApply(k,d.dataset.n,d.dataset.w?{city:'',reg:d.dataset.r,known:true,rest:'',whole:1}:{city:d.dataset.n,reg:d.dataset.r,known:true,rest:''})}
+{const lp=locParse;locParse=function(t){const P=String(t||'').split(',').map(x=>x.trim()).filter(Boolean);
+ if(P.length&&!cityFind(P[0])){const r=rgSure(P[0]);if(r){if(RGFED.includes(r))return {city:r,reg:r,known:true,rest:P.slice(1).join(', ')};return {city:'',reg:r,known:true,rest:P.slice(1).join(', '),whole:1}}}
+ return lp(t)}}
+{const la=locApply;locApply=function(k,txt,pick){const p=pick||locParse(txt);const was=locWhole(k);locSetWhole(k,!!p.whole);const r=la(k,txt,p);
+ if(was!==!!p.whole&&k[0]==='b')locRerender();return r}}
+function locWholeT(k){const L=locGet(k);if(!locWhole(k)||!L.reg)return '';const s=k[0]==='s';
+ if(s)return `Регион: ${hq(L.reg)}. Город или посёлок можно дописать.`;
+ let t='Ищем '+rgAll(L.reg);if(k[0]==='b'){const j=+k.slice(1)||0,x=num(bGet(j,'hkadx'));if(bLt(j)==='house'&&x)t+=', до '+x+' км '+kadW(L.reg)}return hq(t)+'.'}
+function locHintT(k){const L=locGet(k);if(locAsk(k))return '';if(locWhole(k)&&L.reg)return locWholeT(k);return L.reg?`Регион: ${hq(L.reg)}`:''}
+{const li=locIn;locIn=function(k,lab,ph){let h=li(k,lab,ph);const L=locGet(k);if(locWhole(k)&&!L.city&&L.reg)h=h.replace('value=""',`value="${hq(L.reg)}"`);return h}}
+{const kx=kadXB;kadXB=function(j){let h=kx(j);if(locWhole('b'+j)){const x=num(bGet(j,'hkadx'));if(x)h=h.replace(/<div class="hint">Ищем от 0 до \d+ км [^<]*<\/div>/,`<div class="hint">${locWholeT('b'+j)}</div>`)}return h}}
+
+// ===== (34) 18.11: при переходе на другой экран («Дальше», «Назад», меню, ссылки) — сразу к началу экрана
+function scrTop(){const b=document.getElementById('body');if(b)b.scrollTop=0;const ph=document.getElementById('phone');if(ph)ph.scrollTop=0;try{window.scrollTo(0,0)}catch(e){}if(document.scrollingElement)document.scrollingElement.scrollTop=0}
+{const sh=show;show=function(id,keep){const prev=cur;const r=sh.apply(this,arguments);if(!keep&&id!==prev)scrTop();return r}}
+{const g0=go;go=function(id){const r=g0.apply(this,arguments);scrTop();return r}}
+
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
  if(h.get('demo')){Object.assign(A,{goal:'alt',reg:'Ленинградская область',city:'Кудрово',when:'6',otype:'flat',rooms:'2',area:'58',floor:'7/17',pay:['sale','mort','msk'],mort:true,msk:true,
@@ -2072,4 +2120,4 @@ function SECP(){return `<div class="secp" role="heading" aria-level="2"><span cl
   for(const [k,v] of h){if(!['s','demo','help','done','scroll','theme','nosplash','splashhold'].includes(k))A[k]=v;}
   (h.get('done')||'').split(',').filter(Boolean).forEach(x=>done.add(+x));}
  if(h.get('demo'))window.__noSave=1;show(h.get('s')||(window.__restored&&SCR[window.__restored.cur]?window.__restored.cur:'s0a'));if(h.get('help'))$('helpbtn').click();if(h.get('scroll'))$('body').scrollTop=+h.get('scroll');})();
-</script><script id="sw-reg">if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})});</script></body></html>
+</script><script id="sw-reg">if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})});navigator.serviceWorker.addEventListener("message",function(e){if(e.data!=="sitius-upd"||document.getElementById("updbar"))return;var d=document.createElement("div");d.id="updbar";d.setAttribute("role","status");d.style.cssText="position:fixed;left:10px;right:10px;bottom:12px;z-index:9999;background:#1e2f4a;color:#f7f3ea;border:1.5px solid #c9a46a;border-radius:12px;padding:10px 12px;font:600 14px/1.35 system-ui,sans-serif;display:flex;gap:10px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.35)";d.innerHTML="<span style=\"flex:1\">Вышла новая версия Аппа. Ответы сохранятся.</span><button style=\"background:#c9a46a;color:#1e2f4a;border:0;border-radius:9px;padding:8px 12px;font:700 14px system-ui,sans-serif\">Обновить</button>";d.querySelector("button").onclick=function(){location.reload()};document.body.appendChild(d)})}</script></body></html>
