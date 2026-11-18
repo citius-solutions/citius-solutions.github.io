@@ -269,7 +269,7 @@ SCR.s0c={st:0,t:'Самопроверка готовности',i:'Этап 0 ·
  ${buys()?ck('r6','Понятно, сколько своих денег на покупку'):''}</div>
  ${sells()?taxHint(''):''}`,next:()=>'s0d'};
 SCR.s0d={st:0,t:'Ваш ориентир по срокам',i:'Этап 0 · Старт · 4/4',b:()=>{const L=STAGES.filter(s=>s.n>0&&s.show());
- const warn=[];if(sells()&&!A.ck.r3)warn.push('Доли детей / маткапитал → нужны опека и нотариус');{const O=sObjs(),mu=O.length>1;if(O.some(o=>o.omort))O.forEach((o,j)=>{if(o.omort==='y')warn.push('Ипотека или залог'+(mu?' на объекте '+(j+1):'')+' → согласие банка; остаток долга'+(num(o.odebt)?' '+mln(num(o.odebt)):'')+' гасится из денег покупателя при сделке')});else if(sells()&&!A.ck.r2)warn.push('Ипотека на квартире → согласование с банком');O.forEach((o,j)=>{if((o.oregx||[]).length&&o.oreg==='y')warn.push('Среди зарегистрированных'+(mu?' на объекте '+(j+1):'')+' дети или недееспособные → заранее решите, где их зарегистрируют; если они собственники — разрешение опеки')});}if(A.goal==='share'||sObjs().some(o=>o.otype==='shr'))warn.push('Сделка с долей → нотариус обязателен');if(sells()&&(isRoomS()&&!kAll()||sObjs().slice(1).some(o=>['room','shr'].includes(o.otype)&&o.same!=='y')))warn.push('Комната в коммуналке → соседям нужно дать месяц на ответ (право преимущественной покупки) — заложите в сроки');
+ const warn=[];if(sells()&&!A.ck.r3)warn.push('Доли детей / маткапитал → нужны опека и нотариус');{const O=sObjs(),mu=O.length>1;if(O.some(o=>o.omort))O.forEach((o,j)=>{if(o.omort==='y')warn.push('Ипотека или залог'+(mu?' · '+oRef(j):'')+' → согласие банка; остаток долга'+(num(o.odebt)?' '+mln(num(o.odebt)):'')+' гасится из денег покупателя при сделке')});else if(sells()&&!A.ck.r2)warn.push('Ипотека на квартире → согласование с банком');O.forEach((o,j)=>{if((o.oregx||[]).length&&o.oreg==='y')warn.push('Среди зарегистрированных'+(mu?' · '+oRef(j):'')+' дети или недееспособные → заранее решите, где их зарегистрируют; если они собственники — разрешение опеки')});}if(A.goal==='share'||sObjs().some(o=>o.otype==='shr'))warn.push('Сделка с долей → нотариус обязателен');if(sells()&&(isRoomS()&&!kAll()||sObjs().slice(1).some(o=>['room','shr'].includes(o.otype)&&o.same!=='y')))warn.push('Комната в коммуналке → соседям нужно дать месяц на ответ (право преимущественной покупки) — заложите в сроки');
  return `<div class="f"><div class="lbl">${L.length} этапов · ориентир ${A.goal==='alt'?'3–6':'2–4'} мес. ⚠</div>${L.map(s=>`<div class="row" style="font-size:11.5px;margin:2px 0"><span style="flex:3">${dispNo(s.n)}. ${s.t}</span><span class="mut" style="flex:1;text-align:right">${s.w}</span></div>`).join('')}</div>
  ${warn.length?`<div class="note risk">${warn.join('<br>')}</div>`:''}<div class="hint">Сроки — ориентир; ⚠ требует проверки на реальных сделках.</div><div class="row"><button class="btn ghost" style="padding:7px;font-size:12px" onclick="go('live')">Объекты на площадках</button><button class="btn ghost" style="padding:7px;font-size:12px" onclick="go('work')">Сколько работы вас ждёт</button></div>`},next:()=>{done.add(0);return sells()?'path':'sum'}};
 // --- Этап 1 Оценка
@@ -874,7 +874,7 @@ function oName(o,j){return 'Объект '+(j+1)+(o.otype?' · '+OTN[o.otype]:''
 function oTabs(){const O=[A,...(A.so||[])];if(O.length<2)return '';const i=Math.min(A.oi||0,O.length-1);return `<div class="chips" style="margin-bottom:8px">${O.map((o,j)=>`<span class="${j===i?'on':''}" onclick="A.oi=${j};show(cur,true)">${oName(o,j)}</span>`).join('')}</div>`}
 function setAd(i,b,v){OB(i).ad[b]=v;syncO();show(cur,true)}
 function acqBlock(i,opts,full){const o=OB(i);oNorm(o);const B=o.acqs;
- return `<div class="f"><div class="lbl">Как получили${(A.so||[]).length?' · объект '+(i+1):''}. Если части объекта получены по-разному (например, половина куплена, половина по наследству), отметьте каждый способ.</div>${chipsO(i,'acqs',opts,1)}
+ return `<div class="f"><div class="lbl">Как получили${(A.so||[]).length?' · '+oRef(i):''}. Если части объекта получены по-разному (например, половина куплена, половина по наследству), отметьте каждый способ.</div>${chipsO(i,'acqs',opts,1)}
  ${B.map(b=>`<div class="row" style="margin-top:5px;align-items:center"><span style="flex:1.1;font-size:12px">${capF(ACQN[b])}</span><input style="flex:1.5" type="${b==='inh'||full?'date':'text'}" ${b==='inh'||full?'':'placeholder="год, например 2022"'} value="${b==='inh'||full?(/^\d{4}$/.test(o.ad[b]||'')?'':(o.ad[b]||'')):(o.ad[b]||'')}" aria-label="${b==='inh'?'Дата смерти наследодателя':'Когда получили: '+ACQN[b]}" onchange="setAd(${i},'${b}',this.value)"></div>${(b==='inh'||full)&&/^\d{4}$/.test(o.ad[b]||'')?`<div class="hint" style="margin:2px 0 0">${capF(ACQN[b])}: указан год ${o.ad[b]} — уточните дату по выписке ЕГРН.</div>`:''}`).join('')}
  ${B.length>1?`<div class="lbl" style="margin-top:6px">Доли сейчас</div>${chipsO(i,'dmode',[['merge','Объединены — продаю объект целиком'],['split','Доля выделена или разделена']])}`:''}<div class="hint">${B.includes('inh')?'Наследство: укажите дату смерти наследодателя — с неё считается срок владения, а не с даты свидетельства. ':''}${B.includes('gift')?'Дар от близкого родственника — супруг, родители, дети, бабушки и дедушки, внуки, братья и сёстры: налога при получении нет, минимальный срок владения для продажи без налога — 3 года (ст. 217.1 и п. 18.1 ст. 217 НК РФ, ст. 14 СК РФ). ':''}${B.includes('gift2')?'Дар от другого человека — например, тётя, дядя, друг: при получении платят НДФЛ 13 % с кадастровой стоимости, минимальный срок владения — 5 лет, если нет другого основания для 3 лет (ст. 217.1 НК РФ). ':''}${B.length>1?'По общему правилу: если доли объединены и вы продаёте объект целиком, срок владения считается с более ранней доли; если долю выделили или разделили — с более поздней даты. ':(full?'Дата регистрации права — из выписки ЕГРН или свидетельства. ':'Год, когда вы стали собственником. Нужно для налога с продажи.')}</div></div>`}
 function pDate(v){if(!v)return null;if(/^\d{4}$/.test(String(v).trim()))return new Date(+v,11,31);const d=new Date(v);return isNaN(d)?null:d}
@@ -1030,7 +1030,7 @@ function sDist(i){if(!i)return A.sdist||'';const o=OB(i);return o.same==='y'?(A.
 function sLocLine(i){return locLine([sReg(i),sCity(i),sDist(i)])}
 function sSetLoc(i,k,v,re){const o=i?OB(i):A;o[k]=v;if(k==='reg')o.sdist='';if(!i&&k==='sdist'&&!buys())A.dist=v?[v]:[];if(re)show(cur,true)}
 function sLocBlock(i){const r=sReg(i),o=OB(i);
- return `<div class="f"><div class="lbl">${i?'Где этот объект':'Где ваше жильё'}</div>${locIn('s'+i,'Город или адрес'+(i?' объекта '+(i+1):''))}
+ return `<div class="f"><div class="lbl">${i?'Где этот объект':'Где ваше жильё'}</div>${locIn('s'+i,'Город или адрес'+(i?' объекта '+(uOf(i)+1):''))}
  ${r==='Санкт-Петербург'?`<select style="margin-top:5px" aria-label="Район" onchange="sSetLoc(${i},'sdist',this.value)"><option value="">Район — для похожих объявлений</option>${SPB.map(d=>`<option ${sDist(i)===d[0]?'selected':''}>${d[0]}</option>`).join('')}</select>`:''}
  ${i&&!o.reg?`<div class="hint">Подставили из объекта 1${o.otype==='house'&&obl(sReg(0))!==sReg(0)?' — для дома или дачи взяли область':''}. Можно изменить.</div>`:''}</div>`}
 // ---------- комнаты в одной квартире
@@ -1057,8 +1057,13 @@ function uTitle(u){const g=sUnits()[u]||[0],o=OB(g[0]);
  if(o.otype==='shr')return 'Доля в квартире'+(o.area?', общая площадь '+arS(o.area)+' м²':'');
  if(o.otype==='house')return 'Дом'+(o.area?' '+arS(o.area)+' м²':'')+(o.sot?' на участке '+arS(o.sot)+' сот.':'')+(o.okad?', '+(KADO.find(x=>x[0]===o.okad)||['',''])[1]+' '+kadW(sReg(g[0])):'')+(ohwyName(g[0])?', '+ohwyName(g[0]):'');
  return ({0:'Студия',1:'1-комнатная квартира',2:'2-комнатная квартира',3:'3-комнатная квартира',4:'Многокомнатная квартира'}[o.rooms]||'Квартира')+(o.area?', '+arS(o.area)+' м²':'')}
-function uNo(u){const g=sUnits()[u]||[0];return g.length>1?'Объекты '+(g[0]+1)+'–'+(g[g.length-1]+1):'Объект '+(g[0]+1)}
-function uTab(u){const g=sUnits()[u]||[0],o=OB(g[0]);return uNo(u)+' · '+(g.length>1?g.length+' '+kW(g.length):OTN[o.otype||'flat'])+' · '+rgShort(sReg(g[0]))}
+function uOf(j){const u=sUnits().findIndex(g=>g.includes(j));return u<0?0:u}
+function uNo(u){return 'Объект '+((u||0)+1)}
+function uKind(u){const g=sUnits()[u]||[0];return g.length>1?g.length+' '+kW(g.length)+' в одной квартире':OTN[OB(g[0]).otype||'flat']}
+function uLab(u){return uNo(u)+' · '+uKind(u)}
+function oRef(j){const k=vRoomNo(j),m=sUnits().length>1;return k?'комната '+k+(m?' объекта 1':''):'объект '+(uOf(j)+1)}
+function oAcc(j){const k=vRoomNo(j),m=sUnits().length>1;return k?'комнату '+k+(m?' объекта 1':''):'объект '+(uOf(j)+1)}
+function uTab(u){const g=sUnits()[u]||[0];return uLab(u)+' · '+rgShort(sReg(g[0]))}
 function uTabs(key){const U=sUnits();if(U.length<2)return '';const c=Math.min(A[key]||0,U.length-1);return `<div class="chips" style="margin-bottom:8px">${U.map((g,u)=>`<span class="${u===c?'on':''}" onclick="A['${key}']=${u};show(cur,true)">${uTab(u)}</span>`).join('')}</div>`}
 function addObj(){A.so=[...(A.so||[]),{otype:'flat',same:'n',acqs:[],ad:{},sh:{}}];A.oi=A.so.length;show(cur,true)}
 const OKEYS=['otype','rooms','area','floor','sot','addr','sdist','acqs','ad','sh','dmode','acq','regd','since','omort','odebt','oreg','oregx','reg','city','land','mezh','ktot','comps','compsig','e1','e2','e3'];
@@ -1113,7 +1118,7 @@ function syncO(){A.so=A.so||[];
  if(A.lt0&&(A.bi||0)>0&&!A.bp0){A.bp0={lt:A.lt0}}delete A.lt0;if((A.bi||0)>=bN())A.bi=0;
  if(A.goal==='alt'&&bAct()===0&&['sec','room','new','house'].includes(A.ltype))A.buytype=A.ltype==='room'?'sec':A.ltype}
 // ---------- этап 0 · объекты продажи
-SCR.s0b={st:0,get t(){const U=sUnits();if(U.length>1)return 'Ваши объекты · '+(1+(A.so||[]).length);return isHouse()?'Ваш дом и участок':A.otype==='room'&&kN()>1?'Ваши комнаты':isRoomS()?'Ваша комната':'Ваша квартира'},i:'Этап 0 · Старт · 2/4',b:()=>{
+SCR.s0b={st:0,get t(){const U=sUnits();if(U.length>1)return 'Ваши объекты · '+U.length;return isHouse()?'Ваш дом и участок':A.otype==='room'&&kN()>1?'Ваши комнаты':isRoomS()?'Ваша комната':'Ваша квартира'},i:'Этап 0 · Старт · 2/4',b:()=>{
  const U=sUnits().length?sUnits():[[0]];let cu=U.findIndex(g=>g[0]===(A.oi||0));if(cu<0)cu=0;const g=U[cu],i=g[0];A.oi=i;const o=OB(i);
  const R=o.otype==='room'||o.otype==='shr',H=o.otype==='house',RG=!i&&o.otype==='room',mu=U.length>1;
  const tabs=mu?`<div class="chips" style="margin-bottom:8px">${U.map((x,u)=>`<span class="${u===cu?'on':''}" onclick="A.oi=${x[0]};show(cur,true)">${uTab(u)}</span>`).join('')}</div>`:'';
@@ -1137,7 +1142,7 @@ function ppmOf(typ,reg){const t=PPMT[reg]||[110000,70000,45000];return typ==='ho
 function vN(){return Math.max(1,sObjs().length)}
 function vCur(){const n=vN();const i=A.vi||0;return i<n?i:0}
 function vRoomNo(j){const g=(sUnits()[0]||[0]);return g.length>1&&g.includes(j)?g.indexOf(j)+1:0}
-function vLab(j){const o=OB(j),k=vRoomNo(j);return (k?'Комната '+k:'Объект '+(j+1)+' · '+OTN[o.otype||'flat'])+(o.area?' · '+arS(o.area)+' м²':'')}
+function vLab(j){const o=OB(j),k=vRoomNo(j),m=sUnits().length>1;return (k?(m?'Объект 1 · комната '+k:'Комната '+k):'Объект '+(uOf(j)+1)+' · '+OTN[o.otype||'flat'])+(o.area?' · '+arS(o.area)+' м²':'')}
 function vArea(j){const o=OB(j);return parseFloat(String(o.area||'').replace(',','.'))||UDEF[o.otype||'flat']||58}
 function objLineV(j){const o=OB(j);const ad=o.same==='y'?A.addr:o.addr;return [sCity(j)||sReg(j),ad||'',vRoomNo(j)?'комната '+arS(o.area||'')+' м²':(o.area?arS(o.area)+' м²':'')].filter(x=>x&&x!=='комната  м²').join(', ')}
 function objLine(){return objLineV(vCur())}
@@ -1218,7 +1223,7 @@ function docCity(r){const R=r||sReg(0);if(['Санкт-Петербург','Ле
  return {reg:'справка о зарегистрированных — УК или ТСЖ, МФЦ; для частного дома — администрация поселения или МФЦ ⚠ уточните заранее',plan:'поэтажный план — БТИ или кадастровый инженер ⚠ уточните в своём регионе',debt:'УК, ТСЖ или расчётный центр',orgs:['МФЦ','УК или ТСЖ','БТИ региона ⚠']}}
 function sRegs(){return [...new Set(sObjs().map((o,j)=>sReg(j)))]}
 {const o=SCR.reg9.b;SCR.reg9.b=()=>{const base=['Санкт-Петербург','Ленинградская область','Москва'];const R=[...new Set([...sRegs(),...base])];if(!R.includes(A.reg9))A.reg9=sReg(0);
- const lab=r=>{const j=sObjs().findIndex((x,k)=>sReg(k)===r);return (r==='Ленинградская область'?'Ленобласть':r)+(j>=0&&sObjs().length>1?' · объект '+(j+1):'')};
+ const lab=r=>{const j=sObjs().findIndex((x,k)=>sReg(k)===r);return (r==='Ленинградская область'?'Ленобласть':r)+(j>=0&&sUnits().length>1?' · объект '+(uOf(j)+1):'')};
  const ch=`<div class="f"><div class="lbl">Где объект</div><div class="chips">${R.map(r=>`<span class="${A.reg9===r?'on':''}" onclick="A.reg9='${r}';show(cur,true)">${lab(r)}</span>`).join('')}</div></div>`;
  if(base.includes(A.reg9))return o().replace(/<div class="f"><div class="lbl">Ваш город<\/div>[\s\S]*?<\/div><\/div>/,ch);
  return ch+`<div class="card"><b>${A.reg9}</b><br>Справку о зарегистрированных обычно выдают управляющая компания или ТСЖ, а также МФЦ; для частного дома — администрация поселения или МФЦ. Где именно и в какой форме — уточните заранее по телефону ⚠.</div>`}}
@@ -1257,7 +1262,7 @@ function sumBreak(){const V=vAll();const mu=V.n>1;
  return V.E.map(e=>{const o=OB(e.j);const d=o.omort==='y'?num(o.odebt):0;const ok=vDone(e.j)||!mu;
   return `<div class="sl"><span class="nm"><b>${vLab(e.j)}</b>${sObjs().length>1?' · '+sLocLine(e.j):''}<br><span class="hint">${ok&&e.price?'~'+mln(e.price)+(e.own?' — ваша цена':' — по аналогам'):'ещё не оценено'}${o.omort==='y'?(d?'; в ипотеке — остаток долга '+mln(d)+' гасится из денег за этот объект'+(ok&&e.price?', остаётся ~'+mln(Math.max(0,e.price-d)):''):'; в ипотеке — укажите остаток долга на этапе 0'):''}</span></span></div>`}).join('')}
 SCR.sum.b=()=>{const t=workTotals();const L=STAGES.filter(s=>s.show()&&!done.has(s.n));const V=sells()?vAll():null;const ready=vReady();const pe=sells()?priceEst():null;const bud=budget();const [lo,hi]=buyRange(bud);const nx=vNext();
- const notReady=sells()&&!ready?`<div class="card risk"><b>Оценено ${V.done} из ${V.n} — оцените ${vLab(nx).split(' · ')[0].replace(/^Объект/,'объект').replace(/^Комната/,'комнату')}</b><div class="hint" style="margin:3px 0 6px">Пока не оценены все объекты, сумму продажи и бюджет покупки не считаем — иначе цифры будут занижены.</div><button class="btn primary" style="width:100%;padding:7px" onclick="A.vi=${nx};go('s1a')">Оценить: ${vLab(nx)}</button></div>`:'';
+ const notReady=sells()&&!ready?`<div class="card risk"><b>Оценено ${V.done} из ${V.n} — оцените ${oAcc(nx)}</b><div class="hint" style="margin:3px 0 6px">Пока не оценены все объекты, сумму продажи и бюджет покупки не считаем — иначе цифры будут занижены.</div><button class="btn primary" style="width:100%;padding:7px" onclick="A.vi=${nx};go('s1a')">Оценить: ${vLab(nx)}</button></div>`:'';
  return `${notReady}${sells()?`<div class="f"><div class="lbl">Вы можете получить за ${sObjs().length>1?'свои объекты · все вместе':'свою '+objWord(1)}</div><div class="big">${pe?r10(pe.fast)+' – '+r10(pe.max):'—'}</div>${sObjs().length>1||sDebt()?sumBreak():''}<div class="hint">${pe?'По ценам похожих объявлений, которые вы вставили, или по вашей цене. Цена сделки обычно ниже цены объявления. Ориентир, не оценка.':ready?'Вставьте цены похожих объявлений на этапе 1.':'Сумма появится, когда будут оценены все объекты.'}</div>${pe?taxNote(pe.mkt):''}</div>`:''}
  ${buys()?`<div class="f"><div class="lbl">Бюджет на покупку</div><div class="row mut" style="font-size:10.5px"><span>Свои деньги, ₽</span><span>Одобренная ипотека, ₽</span></div><div class="row">${inp('own','0')}${inp('mortsum','0')}</div>
  <div class="big" style="margin-top:4px">${bud?rngT(lo,hi):'—'}</div>
@@ -1492,7 +1497,7 @@ function showDayT(u){const g=sUnits()[u]||[0],o=OB(g[0]),r=sReg(g[0]);
  const rm=o.otype==='room'||o.otype==='shr';
  return 'В день показа: чистота '+pc+' и двора, свет в '+pv+' и на этаже, работают домофон и лифт, если есть, свободный проход у двери'+(rm?'; убраны общие кухня, коридор и санузел, соседи предупреждены о показе':'')}
 {const o=SCR.s2a.b;SCR.s2a.b=()=>{const h=o();const U=sUnits();const many=U.length>1;
- const add=U.map((g,u)=>ck(u?'d7_'+u:'d7',(many?'<b>'+vLab(g[0])+'.</b> ':'')+showDayT(u))).join('');
+ const add=U.map((g,u)=>ck(u?'d7_'+u:'d7',(many?'<b>'+uLab(u)+'.</b> ':'')+showDayT(u))).join('');
  const k=h.lastIndexOf('</div>');return k>=0?h.slice(0,k)+add+h.slice(k):h+add}}
 // ===== 16.11.2026 (11): «Кто делает фотографии» — два варианта, по каждому объекту
 SVC.photo='Продающие фотографии от Ситиуса';
@@ -1505,7 +1510,7 @@ function photoU(u,many){const g=sUnits()[u]||[0],i=g[0],o=OB(i),hs=o.otype==='ho
   <div class="f"><div class="lbl">Удобная дата</div><input type="date" value="${hq(o.pdate||'')}" onchange="OB(${i}).pdate=this.value"></div>
   <div class="f"><div class="lbl">Время</div>${chipsO(i,'ptime',[['m','Утро'],['d','День'],['e','Вечер']])}<div class="hint">Подготовьте ${accObj(o)} по чек-листу 2.1 до приезда фотографа.</div></div>`
   :v==='self'?`<div class="note">${hs?'Днём, в солнечную погоду':'Днём, все лампы включены'}, горизонтально, с уровня груди, широкоугольный режим. 15–25 фото.</div><div class="f">${tips.map(([k,t])=>ck(k+sf,t)).join('')}</div>`:'';
- return `<div class="f"><div class="lbl">Кто делает фотографии${many?' · '+vLab(i):''}</div>${chipsO(i,'photo',[['self','Делаю сам'],['sitius','Ситиус делает продающие фотографии']])}</div>${body}`}
+ return `<div class="f"><div class="lbl">Кто делает фотографии${many?' · '+uLab(u).toLowerCase():''}</div>${chipsO(i,'photo',[['self','Делаю сам'],['sitius','Ситиус делает продающие фотографии']])}</div>${body}`}
 SCR.s2b.t='Фотографии';
 SCR.s2b.b=()=>{const U=sUnits();return U.map((g,u)=>photoU(u,U.length>1)).join('')};
 // ===== 16.11.2026 (12): скрипт первого звонка — простыми словами, цена по типу объекта
@@ -1513,7 +1518,7 @@ function priceWhy(g){const o=OB(g[0]);if(o.otype==='house')return 'по прод
  if(o.otype==='room'||o.otype==='shr')return g.length>1?'по продажам похожих комнат в этом доме и рядом':'по продажам похожих '+(o.otype==='shr'?'долей и комнат':'комнат')+' в этом доме и рядом';
  return 'по продажам похожих квартир в этом доме и рядом'}
 SCR.s4a.b=()=>{const U=sUnits(),many=U.length>1;
- const pr=U.map(g=>`${many?'<br><b>'+vLab(g[0])+':</b> ':''}«Цена — ${priceWhy(g)}. Обсудить цену можно после просмотра, особенно если вы готовы быстро оформить покупку».`).join('');
+ const pr=U.map((g,u)=>`${many?'<br><b>'+uLab(u)+':</b> ':''}«Цена — ${priceWhy(g)}. Обсудить цену можно после просмотра, особенно если вы готовы быстро оформить покупку».`).join('');
  return `<div class="card"><b>1. «Вы для себя ищете?»</b> Если звонит агент, он обычно уходит от ответа или предлагает своего покупателя, но с выплатой вами комиссии ему, — можно вежливо закончить разговор.</div>
  <div class="card"><b>2. «Как будете платить?»</b> Свои деньги, ипотека (уже одобрена банком?), маткапитал, жилищный сертификат.</div>
  <div class="card"><b>3. «Нужно ли вам сначала что-то продать?»</b> Если да, спросите: «Ваше жильё уже выставлено на продажу? Покупатель на него уже есть?» От этого зависит, когда получится оформить сделку.</div>
@@ -2164,7 +2169,7 @@ function adpField(u,mu){const g=featU()[u],j=g[0],e=adpEst(g),lab='Цена в �
  return `<div class="f"><div class="lbl">${lab}</div><input inputmode="numeric" aria-label="${hq(lab)}" placeholder="${hq(ph)}" value="${hq(v||'')}" oninput="${mu&&j?'OB('+j+')':'A'}['${k}']=this.value"><div class="hint">${e?'Если не укажете, в текст попадёт цена из этапа 1'+(g.length>1?' — сумма за комнаты этого объявления':'')+'.':'Цены из этапа 1 пока нет — укажите здесь или оцените объект на этапе 1.'}</div></div>`}
 function featU(){return sUnits().length?sUnits():[[0]]}
 function featMig(){if(A.fm13)return;const U=featU();if(U.length<2)return;U.forEach((g,u)=>{if(!u)return;const o=OB(g[0]);['feat','cond'].forEach(k=>{if(o[k]==null&&(A[k]||[]).length)o[k]=[...A[k]]})});A.fm13=1}
-function featHead(u){const g=featU()[u];return (g.length>1?uNo(u)+' · комнаты в одной квартире':vLab(g[0]))+' · '+sLocLine(g[0])}
+function featHead(u){const g=featU()[u];return (g.length>1?uLab(u):vLab(g[0]))+' · '+sLocLine(g[0])}
 function featBlock(u,mu){const g=featU()[u],j=g[0],mo=g.some(x=>OB(x).omort==='y');
  const b=`<div class="f"><div class="lbl">Особенности (для текста)</div>${chipsO(j,'feat',featL(j),1)}</div>
  <div class="f"><div class="lbl">Условия продажи</div>${chipsO(j,'cond',[['clean',cleanW(sReg(j))],['altc','Альтернатива'],['mortok','Подходит под ипотеку'],['fast','Быстрый выход на сделку']],1)}${mo?`<div class="hint">${mu?'Этот объект':'Объект'} в ипотеке: «Подходит под ипотеку» в текст не попадёт, пока не снят залог.</div>`:''}</div>`;
@@ -2291,6 +2296,53 @@ SCR.s10c.b=()=>{const st=taxStatus();
  <div class="row" style="margin-top:6px"><button class="btn ${self?'primary':'ghost'}" style="padding:8px;font-size:12.5px" aria-pressed="${!!self}" onclick="A.taxself=1;show(cur,true)">Справлюсь сам</button><button class="btn primary" style="padding:8px;font-size:12.5px" onclick="A.osvc='taxlow';A.oback=cur;A.osent=0;go('order')">Ситиус проверит, можно ли снизить налог</button></div>
  ${self?`${TAXCALC_B()}<div class="card" style="margin-top:8px"><b>Памятка</b><br>Декларация 3-НДФЛ — до 30 апреля следующего года, налог — до 15 июля.<br>Подать декларацию можно в <a href="https://lkfl2.nalog.ru" target="_blank" rel="noopener">личном кабинете ФНС — lkfl2.nalog.ru</a> (сайт nalog.gov.ru).<b style="display:block;margin-top:8px;font-size:12.5px">Сколько налога получилось, ₽ · если посчитали иначе</b><input inputmode="numeric" aria-label="Сколько налога получилось" placeholder="${c&&c.t!==null?'по расчёту выше: '+sp(c.t):'например, 150 000'}" value="${hq(A.taxsum||'')}" oninput="A.taxsum=this.value"><div class="hint">Покажем на итоге сумму после налога${c&&c.t!==null?' — по расчёту выше, если не впишете своё':''}.</div><div class="note" style="margin:6px 0 0">${TAXWARN}</div>${taxChkBtn()}<div class="hint" style="margin:6px 0 0">Дальше — следующий этап: кнопка внизу.</div></div>`:''}`};
 taxAfter=function(sum){if(!done.has(10))return null;const st=taxStatus();if(st.free)return {t:0,s:sum};let t=num(A.taxsum);if(!t&&A.taxself){const c=taxCalc();if(c.t!==null)t=c.t}return t?{t,s:Math.max(0,sum-t)}:(A.taxself&&taxCalc().t===0?{t:0,s:sum}:null)};
+
+// ===== (42) 18.11 №19–№21: 2/4 со «Старта» — с объекта 1; самопроверка по объектам (комнаты одной квартиры — один блок); планшет/ПК в горизонтали; «Назад» — туда, где были
+{const n0=SCR.s0a.next;SCR.s0a.next=function(){const r=n0.apply(this,arguments);if(r==='s0b'){A.oi=0;A.ui=0}return r}}
+function objChk1(j,lab,sub){const o=OB(j);
+ return `<div class="${sub?'osub':'f'}"><div class="lbl">${lab}</div>${chipsO(j,'omort',[['n','Нет ипотеки или залога'],['y','Есть ипотека или залог']])}
+ ${o.omort==='y'?`<div class="row" style="margin-top:6px"><div style="flex:1"><div class="lbl">Остаток долга, ₽</div>${j?`<input inputmode="numeric" aria-label="Остаток долга, ₽" placeholder="например, 1 100 000" value="${o.odebt||''}" oninput="OB(${j}).odebt=this.value" onchange="show(cur,true)">`:inpR('odebt','например, 1 100 000')}</div></div><div class="hint">Остаток гасится из денег покупателя при сделке, нужно согласие банка-залогодержателя. В бюджете покупки вычтем его из цены продажи.</div>`:''}
+ <div style="margin-top:6px">${chipsO(j,'oreg',[['y','Зарегистрированные есть, снимутся с регистрации'],['n','Нет зарегистрированных']])}</div>
+ ${o.oreg==='y'?`<div class="lbl" style="margin-top:5px">Среди зарегистрированных · если есть</div>${chipsO(j,'oregx',[['kid','Дети до 18'],['inc','Недееспособные']],1)}${(o.oregx||[]).length?`<div class="hint">Заранее решите, где их зарегистрируют после продажи: об этом спросят покупатель и банк. Если ребёнок или подопечный — собственник, на продажу нужно разрешение органа опеки (ст. 37 ГК РФ, ст. 21 ФЗ «Об опеке и попечительстве»).</div>`:''}`:''}</div>`}
+function objChecks(j){const U=sUnits(),u=uOf(j),g=U[u]||[j],mu=U.length>1;
+ if(g.length>1){if(j!==g[0])return '';return `<div class="f ogrp"><div class="lbl">${mu?uLab(u)+' · '+rgShort(sReg(j)):capF(uKind(u))}</div><div class="hint" style="margin:-2px 0 4px">Ипотеку и зарегистрированных отметьте по каждой комнате.</div>${g.map((k,r)=>objChk1(k,'Комната '+(r+1)+(OB(k).area?' · '+arS(OB(k).area)+' м²':''),1)).join('')}</div>`}
+ return objChk1(j,mu?vLab(j):'Ипотека и зарегистрированные')}
+{const st=document.createElement('style');st.textContent=`.osub{margin:8px 0 2px;padding:9px 10px;border-radius:10px;border:1px solid rgba(201,164,106,.55)}.osub>.lbl:first-child{font-weight:700}
+@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){
+#phone{display:grid!important;grid-template-columns:minmax(0,1fr) 250px;grid-template-rows:auto auto auto minmax(0,1fr)}
+#phone>*:not(#splash){zoom:1.2!important}
+#phone>*{grid-column:1/-1}
+#phone>.top{grid-row:1;padding:6px 96px 6px 16px}
+.top .brand,.top .step,#devbig{display:none!important}
+#devbtn{display:flex!important;top:6px;width:30px;height:30px}#thbtn{top:6px;width:30px;height:30px}
+.top h1{margin:0;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .prog{margin-top:5px}
+#phone>#body{grid-column:1;grid-row:2/5;min-height:0;border-right:1px solid rgba(201,164,106,.5)}
+#phone>#nav{grid-column:2;grid-row:2;flex-direction:column;gap:7px;padding:10px 12px 6px!important}
+#nav .btn{flex:none;padding:9px}
+#phone>#helpbtn{grid-column:2;grid-row:3;margin:0 12px 8px!important;padding:8px}
+#phone>.tab{grid-column:2;grid-row:4;height:auto;flex-direction:column;align-items:stretch;justify-content:flex-end;gap:0;padding:4px 12px 8px;border-top:1px solid rgba(201,164,106,.5);font-size:13px}
+.tab span{padding:6px 9px;text-align:left;border-radius:7px}
+.tab .on{box-shadow:inset 3px 0 #c9a46a}
+.sheet .in{max-height:calc(100% - 6px);overflow-y:auto;box-sizing:border-box}
+}`;document.head.appendChild(st)}
+// «Назад» — на ту прокрутку, где человек был на этом экране, когда ушёл дальше; нет позиции — сверху
+var SPOS={};
+function bodyY(){const b=document.getElementById('body');return Math.max(b?b.scrollTop:0,window.scrollY||0)}
+{const g1=go;go=function(id){if(cur&&id!==cur)SPOS[cur]=bodyY();return g1.apply(this,arguments)}}
+function goBackPos(){if(!hist.length)return;const id=hist.pop();show(id);const y=SPOS[id]||0;const b=document.getElementById('body');if(b)b.scrollTop=y;if(y&&b&&b.scrollTop<y-2)try{window.scrollTo(0,y)}catch(e){}}
+{const bb=document.getElementById('back');if(bb)bb.onclick=goBackPos;document.addEventListener('DOMContentLoaded',()=>{const b2=document.getElementById('back');if(b2)b2.onclick=goBackPos})}
+// №22: «Этап готов» не должен молча ничего не делать. Если экран не смог отрисоваться, раньше менялись заголовок и подпись, а содержимое и кнопка оставались от прошлого экрана — нажатие повторяло ту же ошибку.
+// Теперь: ошибка экрана записывается (localStorage «sitius-err») и показывается запасной вид; у «Моего пути» — простой список этапов.
+function logErr(id,e){try{const L=JSON.parse(localStorage.getItem('sitius-err')||'[]');L.push({id,m:String(e&&e.message||e),s:String(e&&e.stack||'').slice(0,400),t:new Date().toISOString()});localStorage.setItem('sitius-err',JSON.stringify(L.slice(-10)))}catch(x){}try{console.error('screen',id,e)}catch(x){}}
+function stT(s){try{return s.t}catch(e){return 'Этап '+dispNo(s.n)}}
+function pathSafe(){let L=[];try{L=STAGES.filter(s=>{try{return s.show()}catch(e){return true}})}catch(e){L=STAGES}const d=L.filter(s=>done.has(s.n)).length;
+ return `<div class="f"><div class="lbl">Пройдено ${d} из ${L.length} этапов</div><div class="bar"><div style="width:${L.length?d/L.length*100:0}%"></div></div></div><div class="f">${L.map(s=>`<div class="st"><div class="dot ${done.has(s.n)?'done':''}" onclick="go('${s.first}')">${done.has(s.n)?'✓':dispNo(s.n)}</div><div style="flex:1"><div class="t" onclick="go('${s.first}')">${stT(s)}</div><div class="s">${done.has(s.n)?'готово · ':''}<a href="#" class="gld" onclick="go('${s.first}');return false">открыть</a></div></div></div>`).join('')}</div>`}
+Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescriptor(s,'b');if(!d||typeof d.value!=='function')return;const b0=d.value;
+ s.b=function(){try{return b0.apply(this,arguments)}catch(e){logErr(id,e);if(id==='path')return pathSafe();return `<div class="card risk"><b>Этот экран не открылся</b><br>Ваши ответы сохранены. Вернитесь назад или откройте «Мой путь».<button class="btn ghost" style="width:100%;padding:7px;margin-top:6px" onclick="go('path')">Мой путь</button></div>`}};
+ if(typeof s.next==='function'){const n0=s.next;s.next=function(){try{return n0.apply(this,arguments)}catch(e){logErr(id+'.next',e);return 'path'}}}});
+// «Безопасность сделки» открывается вкладкой и этап не закрывает — на кнопке «Мой путь», а не «Этап готов»
+{const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
