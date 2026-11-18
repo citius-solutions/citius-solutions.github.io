@@ -2151,6 +2151,39 @@ function docsMulti(){return sObjs().some((x,j)=>j&&OB(j).same!=='y')}
   const add=ck('d'+j+'hregd',HREG_T,T('t-own',HREG_W));h=at>=0?h.slice(0,at)+add+h.slice(at):h}return h}}
 {const o=SCR.s2c.b;SCR.s2c.b=()=>{const h=o();return sells()&&docsMulti()?h+DOCS_NOTE():h}}
 
+// ===== (38) 18.11 №13: особенности и условия продажи — по каждому объекту (объявлению); списки по типу
+var FEAT_FLAT=[['rem','Свежий ремонт'],['view','Хороший вид'],['metro','Рядом метро'],['school','Школа / сад рядом'],['park','Парк рядом'],['furn','Мебель остаётся'],['quiet','Тихий двор'],['park2','Парковка']];
+var FEAT_HOUSE=[['rem','Свежий ремонт'],['view','Хороший вид'],['furn','Мебель остаётся'],['gas','Газ'],['el','Свет'],['water','Вода'],['sew','Канализация'],['road','Дорога круглый год'],['reg','Можно прописаться'],['school','Школа / сад рядом'],['quiet','Тихое место'],['park2','Место для машины']];
+var FEAT_LAND=[['view','Хороший вид'],['gas','Газ по участку или рядом'],['el','Свет'],['water','Вода'],['road','Дорога круглый год'],['quiet','Тихое место']];
+function featL(j){const o=OB(j);return o.otype==='house'?(o.hobj==='land'?FEAT_LAND:FEAT_HOUSE):FEAT_FLAT}
+function featOf(j,k){const L=k==='feat'?featL(j).map(x=>x[0]):['clean','altc','mortok','fast'];return (OB(j)[k]||[]).filter(x=>L.includes(x))}
+function adpEst(g){const P=g.map(x=>vEst(x).price);return P.every(x=>x>0)?P.reduce((a,b)=>a+b,0):0}
+function adpOf(u){const g=featU()[u]||[0];const own=featU().length>1?num(OB(g[0]).adp):num(A.price);return own||adpEst(g)}
+function adpField(u,mu){const g=featU()[u],j=g[0],e=adpEst(g),lab='Цена в объявлении'+(mu?' этого объекта':'')+', ₽',ph=e?'из этапа 1: '+sp(e):'из этапа 1';
+ const k=mu?'adp':'price',v=mu?OB(j).adp:A.price;
+ return `<div class="f"><div class="lbl">${lab}</div><input inputmode="numeric" aria-label="${hq(lab)}" placeholder="${hq(ph)}" value="${hq(v||'')}" oninput="${mu&&j?'OB('+j+')':'A'}['${k}']=this.value"><div class="hint">${e?'Если не укажете, в текст попадёт цена из этапа 1'+(g.length>1?' — сумма за комнаты этого объявления':'')+'.':'Цены из этапа 1 пока нет — укажите здесь или оцените объект на этапе 1.'}</div></div>`}
+function featU(){return sUnits().length?sUnits():[[0]]}
+function featMig(){if(A.fm13)return;const U=featU();if(U.length<2)return;U.forEach((g,u)=>{if(!u)return;const o=OB(g[0]);['feat','cond'].forEach(k=>{if(o[k]==null&&(A[k]||[]).length)o[k]=[...A[k]]})});A.fm13=1}
+function featHead(u){const g=featU()[u];return (g.length>1?uNo(u)+' · комнаты в одной квартире':vLab(g[0]))+' · '+sLocLine(g[0])}
+function featBlock(u,mu){const g=featU()[u],j=g[0],mo=g.some(x=>OB(x).omort==='y');
+ const b=`<div class="f"><div class="lbl">Особенности (для текста)</div>${chipsO(j,'feat',featL(j),1)}</div>
+ <div class="f"><div class="lbl">Условия продажи</div>${chipsO(j,'cond',[['clean',cleanW(sReg(j))],['altc','Альтернатива'],['mortok','Подходит под ипотеку'],['fast','Быстрый выход на сделку']],1)}${mo?`<div class="hint">${mu?'Этот объект':'Объект'} в ипотеке: «Подходит под ипотеку» в текст не попадёт, пока не снят залог.</div>`:''}</div>`;
+ return mu?`<div class="featobj"><div class="secp" role="heading" aria-level="2" style="font-size:15.5px;margin:${u?16:4}px 0 8px;padding:9px 12px">${featHead(u)}</div>${b}${adpField(u,1)}</div>`:b}
+SCR.s3a.b=()=>{featMig();const U=featU(),mu=U.length>1;const rm=sObjs().some(o=>['room','shr'].includes(o.otype))||isRoomS();
+ return `${mu?`<div class="hint" style="margin-bottom:8px">У каждого объекта свои отметки и своя цена. Текст объявления каждого объекта строится только из его отметок.${num(A.price)?' Раньше была одна цена на все объекты: '+fmt(num(A.price))+'. Проверьте цену у каждого объекта.':''}</div>`:''}${U.map((g,u)=>featBlock(u,mu)).join('')}
+ <div class="hint" style="margin:-2px 0 8px">В текст попадёт только то, что вы отметили. «Подходит под ипотеку» отмечайте, если банк покупателя это подтвердит: ${rm?'комнаты и доли берут не все банки':'уточните в банке'}.</div>
+ ${mu?'':adpField(0,0)}`};
+Object.defineProperty(SCR.s3a,'t',{get(){return featU().length>1?'Чем хороши объекты':isHouse()?(A.hobj==='land'?'Чем хорош участок':'Чем хороши дом и участок'):'Чем хороша '+objWord()},configurable:true});
+genText=function(u){u=u||0;featMig();const U=featU();const g=U[u]||[0],j=g[0],o=OB(j);const F=featOf(j,'feat'),C=featOf(j,'cond');
+ const tot=A.ktot?(A.ktot==='5'?'5 и больше':A.ktot):'';let head=uTitle(u);if(!u&&A.otype==='room'&&tot)head+=g.length>1?' (всего комнат в квартире: '+tot+')':' (всего комнат: '+tot+')';
+ const fl=j?o.floor:A.floor;const city=sCity(j)||(sReg(j)!=='Санкт-Петербург'||j?sReg(j):'');const mortObj=g.some(x=>OB(x).omort==='y');const hs=o.otype==='house';const has=k=>F.includes(k);
+ const cm=['gas','el','water','sew'].filter(has).map(x=>({gas:'газ',el:'свет',water:'вода',sew:'канализация'}[x]));
+ const l1=hs?`${has('rem')?'Свежий ремонт. ':''}${has('view')?'Хороший вид. ':''}${has('furn')?'Мебель остаётся. ':''}${cm.length?(o.hobj==='land'?'Есть: ':'Коммуникации: ')+cm.join(', ')+'. ':''}${has('reg')?'Можно прописаться. ':''}${has('park2')?'Есть место для машины. ':''}`
+  :`${has('rem')?'Свежий ремонт. ':''}${has('view')?'Хороший вид из окон. ':''}${has('furn')?'Мебель остаётся. ':''}${has('quiet')?'Тихий двор. ':''}${has('park2')?'Есть парковка. ':''}`;
+ const l2=hs?`${has('road')?'Дорога круглый год. ':''}${has('school')?'Рядом школа или детский сад. ':''}${has('quiet')?'Тихое место. ':''}`
+  :`${has('metro')?'Рядом метро. ':''}${has('school')?'Рядом школа или детский сад. ':''}${has('park')?'Рядом парк. ':''}`;
+ return (`${head}${fl&&!hs?', этаж '+fl:''}${city?', '+city:''}.\n${l1}\n${l2}\n${C.includes('clean')?cleanW(sReg(j))+'. ':''}${C.includes('altc')?'Альтернативная сделка. ':''}${C.includes('mortok')&&!mortObj?'Подходит под ипотеку. ':''}${C.includes('fast')?'Готовы быстро выйти на сделку. ':''}${adpOf(u)?'Цена: '+fmt(adpOf(u))+'.\n':''}Расчёт через безопасные расчёты банка или аккредитив.\nПродаёт собственник, агентам просьба не беспокоить.`).replace(/ +\n/g,'\n').replace(/\n{2,}/g,'\n')};
+
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
  if(h.get('demo')){Object.assign(A,{goal:'alt',reg:'Ленинградская область',city:'Кудрово',when:'6',otype:'flat',rooms:'2',area:'58',floor:'7/17',pay:['sale','mort','msk'],mort:true,msk:true,
