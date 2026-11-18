@@ -415,14 +415,14 @@ SCR.s10={st:10,t:'Регистрация и передача',i:'Этап 10',b:
  <div class="card"><b>Госпошлина:</b> 4 000 ₽ за право (кадастр. стоимость ≤ 20 млн ₽)${hBuy()||isHouse()?'. Дом и участок — два объекта: пошлина за каждый; для садового участка она ниже ⚠ — уточните на сайте Росреестра':''}</div>
  <div class="f">${ck('z1','Акт приёма-передачи, ключи, показания счётчиков')}${ck('z2','Продавец снялся с регистрационного учёта')}${ck('z3','Налог продавца и вычет покупателя — следующие экраны')}${ck('z4','Доли детям (маткапитал) — в срок по обязательству ⚠')}</div>`,next:()=>'s10b'};
 SCR.s10b={st:10,tax:1,t:'Налог при продаже и вычет',i:'Этап 10 · Налог и вычет',b:()=>{
- const kz=A.kids2==='y';const y3=['inh','gift','priv','rent'].includes(A.acq)||A.sole==='y';const yrs=kz?0:(y3?3:5);let till='';
+ const kz=A.kids2==='y';const y3=['inh','gift','priv','rent'].includes(A.acq)||A.sole==='y';const yrs=y3?3:5;let till='';
  if(A.regd){const d=new Date(A.regd);if(!isNaN(d)){d.setFullYear(d.getFullYear()+yrs);till=d.toLocaleDateString('ru-RU');}}
  return `<div class="taxc"><b>🧾 Налоговый консультант Ситиус</b><div class="hint">Срок владения на этом экране проверяем бесплатно. Налоговый консультант Ситиуса проверит, можно ли законно снизить налог: вычеты, доли, зарубежная недвижимость / ОАЭ${A.abroad==='y'?' — рекомендуем: у вас есть объект за рубежом':''}. Ответственность за результат несёт Ситиус.</div>${taxChkBtn()}</div>
  ${sells()?`${oTabs()}${acqBlock(Math.min(A.oi||0,(A.so||[]).length),ACQ6,1)}
  <div class="f"><div class="lbl">Единственное жильё</div>${chips('sole',[['y','Да'],['n','Нет']])}</div>
- <div class="f"><div class="lbl">Двое и более детей до 18 лет (до 24, если учатся очно)?</div>${chips('kids2',[['y','Да'],['n','Нет']])}</div>
- <div class="f"><div class="lbl">Есть недвижимость за рубежом (ОАЭ и др.)?</div>${chips('abroad',[['y','Да'],['n','Нет']])}</div>
- <div class="card"><b>Базовый расчёт · бесплатно</b><br>${allRows().length?'<b>Срок владения:</b> '+taxLines()+'<br>':`<b>Минимальный срок владения: ${kz?'не нужен при условиях ⚠':(yrs===3?'3 года':'5 лет')}${till&&!kz?' — до '+till:''}</b><br>`}${kz?'Семьи с 2+ детьми — освобождение при выполнении условий (покупка другого жилья и др.) — проверит налоговый консультант. ':''}${y3?'Льготный срок 3 года (наследство, дар родственника, приватизация, рента, единственное жильё).':'Общий срок 5 лет.'} Раньше срока — налог 13 %, с части дохода за год свыше 2,4 млн ₽ — 15 %${law('п. 1.1 ст. 224 НК')}. ${KADLINE()} 3-НДФЛ до 30 апреля, уплата до 15 июля.</div>`:''}
+ <div class="f"><div class="lbl">Двое и более детей до 18 лет (до 24, если учатся очно)?</div>${chips('kids2',[['y','Да'],['n','Нет']])}${A.kids2==='y'?KIDS_CK():''}</div>
+ <div class="f"><div class="lbl">Есть недвижимость за рубежом (ОАЭ и др.)?</div>${chips('abroad',[['y','Да'],['n','Нет']])}</div>${RESID_F()}
+ <div class="card"><b>Базовый расчёт · бесплатно</b><br>${allRows().length?'<b>Срок владения:</b> '+taxLines()+'<br>':`<b>Минимальный срок владения: ${yrs===3?'3 года':'5 лет'}${till?' — до '+till:''}</b><br>`}${kz?KIDS_LINE()+' ':''}${y3?'Льготный срок 3 года (наследство, дар родственника, приватизация, рента, единственное жильё).':'Общий срок 5 лет.'} Раньше срока — налог 13 %, с части дохода за год свыше 2,4 млн ₽ — 15 %${law('п. 1.1 ст. 224 НК')}. ${KADLINE()} 3-НДФЛ до 30 апреля, уплата до 15 июля.</div>`:''}
  ${buys()?`<div class="card">${buyDedText()}</div>${MORTDED()}`:''}`},next:()=>sells()?'s10c':(done.add(10),'path')};
 SCR.notary={st:-1,t:'Нотариус',i:'Модуль «Нотариус»',b:()=>`
  <div class="f"><div class="lbl">Кто организует нотариуса</div>${chips('mode',[['self','Я сам(а)'],['sitius','Ситиус (агентский договор)']])}</div>
@@ -2224,6 +2224,69 @@ function dedCalc(){const T=FEES.tax,r=T.r1/100;
 .tab .on{box-shadow:inset 3px 0 #c9a46a}
 .sheet .in{max-height:calc(100% - 6px);overflow-y:auto;box-sizing:border-box}
 }`;document.head.appendChild(st)}
+
+// ===== (41) 18.11 №16: налог с продажи — один срок для всех путей; семьи с детьми — по условиям; доля; 183 дня; коэффициент по региону; проценты в расходах
+// Источники (сверено 18.11.2026): п. 2.1 ст. 217.1 НК (consultant.ru, ФНС rn53); п. 5, 9 ст. 214.10 НК, письма Минфина 15.04.2025 № 03-04-05/37481, ФНС 26.03.2026 № БС-36-11/2340@ (коэффициент — по месту жительства продавца);
+// пп. 1 п. 1, пп. 1–3 п. 2 ст. 220 НК (вычет 1 млн, доли); п. 2 ст. 207, п. 3 ст. 224 НК (183 дня, 30 %); проценты по ипотеке в расходах — ФНС rn33 (2026), письмо Минфина 13.09.2011 № 03-04-08/4-166.
+var FNS_CALC='https://www.nalog.gov.ru/rn77/service/ndflcalc/';
+function minYrs(b){return ['inh','gift','priv','rent'].includes(b)||A.sole==='y'?3:5}
+bRows=function(o){oNorm(o);const now=new Date();const mk=(b,d,x)=>{const min=minYrs(b);let yrs=null,till=null;if(d){yrs=(now-d)/31557600000;till=new Date(d);till.setFullYear(till.getFullYear()+min)}return Object.assign({b,d,yrs,min,till,ok:yrs!==null&&yrs>=min,sh:''},x||{})};
+ if(o.acqs.length<2)return o.acqs.map(b=>mk(b,pDate(o.ad[b])));const mode=o.dmode==='split'?'split':'merge';const D=o.acqs.map(b=>[b,pDate(o.ad[b])]);
+ if(D.some(x=>!x[1]))return [mk(o.acqs[0],null,{mode})];D.sort((a,c)=>a[1]-c[1]);const [b,d]=mode==='merge'?D[0]:D[D.length-1];return [mk(b,d,{mode,raw:o.ad[b]})]};
+var KIDS_C=[['kc1','Другое жильё или доля куплены на вас или семью и право зарегистрировано в год продажи или до 30 апреля следующего года (или полностью оплачен договор долевого участия)'],
+ ['kc2','Новое жильё больше проданного по общей площади или по кадастровой стоимости — считают с долями вас, супруга и детей'],
+ ['kc3','Кадастровая стоимость проданного жилья — не больше 50 млн ₽'],
+ ['kc4','У вас, супруга и детей до 18 лет вместе нет больше половины в другом жилье, которое больше нового по площади или кадастровой стоимости']];
+function kidsOK(){return A.kids2==='y'&&KIDS_C.every(c=>A.ck[c[0]])}
+function KIDS_LINE(){return kidsOK()?'Семья с 2+ детьми: все условия отмечены — налога с продажи жилья нет, срок владения не важен'+law('п. 2.1 ст. 217.1 НК')+'.':'Семья с 2+ детьми: налога не будет, только если выполнены все условия льготы'+law('п. 2.1 ст. 217.1 НК')+'. Пока не отмечены все — считаем по общему правилу.'}
+function KIDS_CK(){return `<div class="hint" style="margin-top:6px">Налога не будет независимо от срока, только если выполнено всё ниже${law('п. 2.1 ст. 217.1 НК')}. Возраст детей — на день регистрации сделки.</div>${KIDS_C.map(c=>ck(c[0],c[1])).join('')}<div class="hint">${kidsOK()?'Все условия отмечены — налога с этой продажи нет.':'Отмечено '+KIDS_C.filter(c=>A.ck[c[0]]).length+' из '+KIDS_C.length+'. Пока не все — налог считаем по общему правилу.'}</div>`}
+function RESID_F(){return `<div class="f"><div class="lbl">В год продажи вы будете в России 183 дня и больше?</div>${chips('resid',[['y','Да'],['n','Нет']])}<div class="hint">Это не про гражданство: считают дни, когда вы были в России${law('п. 2 ст. 207 НК')}. ${A.resid==='n'?'Если меньше 183 дней — налог 30\u00a0% со всей суммы, без вычета 1 млн и без расходов на покупку'+law('п. 3 ст. 224 НК')+'. Если срок владения прошёл, налога нет и в этом случае.':''}</div></div>`}
+// срок: одна функция для всех путей (s10c, итог, taxAfter)
+function taxStatus(){const RR=allRows(),known=RR.length&&RR.every(r=>r.yrs!==null);const y=ownYears();
+ if(kidsOK())return {free:true,why:'kids',RR,known};const free=known?RR.every(r=>r.ok):(y!==null&&y>=minYrs(A.acq));return {free,why:free?'term':'',RR,known}}
+// доля
+function parseFrac(v){const t=String(v||'').replace(',','.').trim();let m=t.match(/^(\d+)\s*\/\s*(\d+)$/);if(m){const a=+m[1],b=+m[2];return b&&a>0&&a<=b?a/b:0}m=t.match(/^(\d+(?:\.\d+)?)\s*%$/);if(m){const x=+m[1]/100;return x>0&&x<=1?x:0}const x=parseFloat(t);return x>0&&x<1?x:0}
+taxFrac=function(j){j=j||0;const o=OB(j);return o.otype==='shr'?(parseFrac(o.shf)||1):1};
+// коэффициент к кадастру — по региону, где продавец живёт (прописан) на день регистрации
+function taxYear(){return new Date().getFullYear()}
+function resReg(){return A.treg||sReg(0)}
+kadK=function(){const r=resReg(),y=taxYear(),e=FEES.kadK.ref.find(x=>x.r===r&&x.from<=y);return {r,k:e?e.k:FEES.kadK.base,known:!!e,e}};
+function taxObjs(st){const R=st.RR;const n=sObjs().length||1;const J=[...new Set(R.filter(r=>!r.ok).map(r=>r.j))];return J.length?J:(st.known?[]:Array.from({length:n},(_,j)=>j))}
+function tv(j,k){return num(OB(j)[k])}
+function tIn(j,k,lab,ph,hint){return `<div class="lbl" style="margin-top:6px">${lab}</div><input inputmode="decimal" aria-label="${hq(lab)}" placeholder="${hq(ph)}" value="${hq(OB(j)[k]||'')}" oninput="OB(${j})['${k}']=this.value" onchange="show(cur,true)">${hint?`<div class="hint">${hint}</div>`:''}`}
+function taxCalc(){const st=taxStatus();const T=FEES.tax,K=kadK();const J=taxObjs(st);const nr=A.resid==='n';
+ const R=J.map(j=>{const o=OB(j),sh=o.otype==='shr',f=taxFrac(j),pr=tv(j,'tprice')||(j?0:sellPrice())||vEst(j).price||0,ks=tv(j,'tkad');
+  const kb=ks?Math.round(ks*(sh?f:1)*K.k):0,inc=Math.max(pr,kb);const ded=sh&&o.shmode2==='one'?Math.round(T.saleDed*f):T.saleDed;return {j,o,sh,f,pr,ks,kb,inc,ded,ex:tv(j,'texp')}});
+ const inc=R.reduce((a,r)=>a+r.inc,0);if(!inc)return {R,inc:0,t:null,nr,K};
+ if(nr){const t=Math.round(inc*0.3);return {R,inc,t,nr,K,v:'nr'}}
+ const d1=Math.min(T.saleDed,R.reduce((a,r)=>a+r.ded,0)),b1=Math.max(0,inc-d1),t1=ndfl(b1);
+ const hasEx=R.some(r=>r.ex),b2=Math.max(0,R.reduce((a,r)=>a+Math.max(0,r.inc-r.ex),0)),t2=hasEx?ndfl(b2):null;
+ const best=t2!==null&&t2<t1?2:1;return {R,inc,d1,b1,t1,b2,t2,best,t:best===2?t2:t1,nr,K}}
+function TAXCALC_B(){const st=taxStatus(),T=FEES.tax,K=kadK(),mu=sObjs().length>1;const J=taxObjs(st);
+ const rows=J.map(j=>{const o=OB(j),sh=o.otype==='shr',f=taxFrac(j),pe=(j?0:sellPrice())||vEst(j).price||0;const acq=(o.acqs&&o.acqs[0])||o.acq;
+  const exL=acq==='inh'?'Расходы наследодателя на покупку, ₽ · по документам':acq==='gift'?'Расходы дарителя на покупку, ₽ · по документам':acq==='gift2'?'С какой суммы вы платили НДФЛ при получении в дар, ₽':'Расходы на покупку, ₽ · по документам';
+  return `<div class="f">${mu?`<div class="lbl">${vLab(j)} · ${sLocLine(j)}</div>`:''}
+  ${tIn(j,'tprice',sh?'Цена вашей доли по договору, ₽':'Цена продажи по договору, ₽',pe?'из оценки: '+sp(pe):'например, 6 000 000')}
+  ${sh?tIn(j,'shf','Ваша доля','например, 1/3 или 50 %',parseFrac(o.shf)?'Доля: '+Math.round(parseFrac(o.shf)*1000)/10+'\u00a0%':'Как в выписке ЕГРН: 1/3, 1/2 …')
+   +`<div class="lbl" style="margin-top:6px">Как продаёте</div>${chipsO(j,'shmode2',[['sep','Свою долю — отдельным договором'],['one','Вся квартира одним договором со всеми собственниками']])}<div class="hint">Отдельный договор — вычет до 1 млн\u00a0₽ целиком; один договор на всех — 1 млн делят по долям${law('пп. 3 п. 2 ст. 220 НК')}.</div>`:''}
+  ${tIn(j,'tkad',sh?'Кадастровая стоимость всей квартиры на 1 января года продажи, ₽':'Кадастровая стоимость на 1 января года продажи, ₽','из выписки ЕГРН',sh?'Для доли берём кадастр × вашу долю.':'')}
+  ${A.resid==='n'?'':tIn(j,'texp',exL,'например, 4 500 000','Можно включить уплаченные проценты по ипотеке, взятой на покупку этого жилья, — нужны кредитный договор, справка банка об уплаченных процентах и платёжки'+law('пп. 2 п. 2 ст. 220 НК')+'. Часть, оплаченную маткапиталом, не включают.')}</div>`}).join('');
+ const regOpts=RG_ALL.map(r=>`<option${r===resReg()?' selected':''}>${r}</option>`).join('');
+ const regF=`<div class="f"><div class="lbl">Где вы прописаны на день регистрации сделки</div><select aria-label="Регион, где вы прописаны" onchange="A.treg=this.value;show(cur,true)" style="width:100%;padding:8px;border-radius:8px">${regOpts}</select><div class="hint">Коэффициент к кадастру берут по региону, где живёт продавец, а не где объект${law('п. 9 ст. 214.10 НК, письмо Минфина 03-04-05/37481')}. ${K.known?'Коэффициент '+String(K.k).replace('.',',')+' — '+K.e.law+'.':'Берём общий 0,7'+law('п. 5 ст. 214.10 НК')+' — уточните коэффициент вашего региона: регион может поднять его до 1.'}</div></div>`;
+ const c=taxCalc();let res='';
+ if(c.t!==null){const ln=c.R.map(r=>`<br><span class="hint">${mu?vLab(r.j)+': ':''}доход ${mln(r.inc)}${r.kb&&r.kb>=r.pr?' — по кадастру'+(r.sh?' × доля':'')+' × '+String(c.K.k).replace('.',','):''}</span>`).join('');
+  res=c.nr?`<div class="card tcres"><b>Налог: ${c.t?fmt(c.t):'0 ₽'}</b>${ln}<br><span class="hint">30\u00a0% со всей суммы, без вычетов и расходов — вы в России меньше 183 дней в году${law('п. 3 ст. 224 НК')}.</span></div>`
+  :`<div class="card tcres"><b>Налог: ${c.t?fmt(c.t):'0 ₽'}</b>${ln}<br><span class="hint">Вариант 1 · вычет ${mln(c.d1)}: (${mln(c.inc)} − ${mln(c.d1)}) → ${fmt(c.t1)}${ndflSplit(c.b1)}</span>${c.t2!==null?`<br><span class="hint">Вариант 2 · расходы по документам: ${mln(c.b2)} → ${fmt(c.t2)}${ndflSplit(c.b2)}</span>`:''}<br><span class="hint">Выгоднее: вариант ${c.best}. Вычет 1 млн\u00a0₽ — в сумме за год на всё проданное жильё${law('пп. 1 п. 2 ст. 220 НК')}.</span></div>`}
+ return `<div class="f tcalc"><div class="lbl">Посчитаю сам · налог с продажи</div><div class="hint">${J.length<(sObjs().length||1)?'Считаем только объекты, по которым срок владения не прошёл.':'Срок владения ещё не прошёл или не указан — считаем налог.'} Ставка — ${T.r1}\u00a0%, с части дохода за год больше ${mln(T.th)}\u00a0₽ — ${T.r2}\u00a0%.</div></div>
+ ${regF}${rows}${res}<div class="hint" style="margin-top:6px;font-size:11px">Ориентир, не решение налоговой. <a href="${FNS_CALC}" target="_blank" rel="noopener">Проверить в калькуляторе ФНС</a></div>`}
+SCR.s10c.b=()=>{const st=taxStatus();
+ if(st.free)return `<div class="card">${st.why==='kids'?KIDS_LINE():NOTAX}</div>${st.RR.length>1?`<div class="hint">${taxLines()}</div>`:''}<div class="hint">Сомневаетесь в сроке, в том, как получено жильё, или в условиях льготы, — лучше проверить.</div>${taxChkBtn()}`;
+ const self=A.taxself;const c=self?taxCalc():null;
+ return `${st.known&&st.RR.some(r=>r.ok)?`<div class="note">Срок прошёл не по всем объектам. ${taxLines()}</div>`:''}${A.kids2==='y'?`<div class="note">${KIDS_LINE()} <a href="#" onclick="go('s10b');return false">Отметить условия</a></div>`:''}<div class="card"><b>С этой продажи может быть налог.</b> Сколько — зависит от цены, кадастровой стоимости, расходов на покупку и вычетов. Есть законные способы снизить налог, иногда до нуля.<br>${KADLINE()}</div>
+ <div class="hint">${COOWN()}</div>
+ <div class="row" style="margin-top:6px"><button class="btn ${self?'primary':'ghost'}" style="padding:8px;font-size:12.5px" aria-pressed="${!!self}" onclick="A.taxself=1;show(cur,true)">Справлюсь сам</button><button class="btn primary" style="padding:8px;font-size:12.5px" onclick="A.osvc='taxlow';A.oback=cur;A.osent=0;go('order')">Ситиус проверит, можно ли снизить налог</button></div>
+ ${self?`${TAXCALC_B()}<div class="card" style="margin-top:8px"><b>Памятка</b><br>Декларация 3-НДФЛ — до 30 апреля следующего года, налог — до 15 июля.<br>Подать декларацию можно в <a href="https://lkfl2.nalog.ru" target="_blank" rel="noopener">личном кабинете ФНС — lkfl2.nalog.ru</a> (сайт nalog.gov.ru).<b style="display:block;margin-top:8px;font-size:12.5px">Сколько налога получилось, ₽ · если посчитали иначе</b><input inputmode="numeric" aria-label="Сколько налога получилось" placeholder="${c&&c.t!==null?'по расчёту выше: '+sp(c.t):'например, 150 000'}" value="${hq(A.taxsum||'')}" oninput="A.taxsum=this.value"><div class="hint">Покажем на итоге сумму после налога${c&&c.t!==null?' — по расчёту выше, если не впишете своё':''}.</div><div class="note" style="margin:6px 0 0">${TAXWARN}</div>${taxChkBtn()}<div class="hint" style="margin:6px 0 0">Дальше — следующий этап: кнопка внизу.</div></div>`:''}`};
+taxAfter=function(sum){if(!done.has(10))return null;const st=taxStatus();if(st.free)return {t:0,s:sum};let t=num(A.taxsum);if(!t&&A.taxself){const c=taxCalc();if(c.t!==null)t=c.t}return t?{t,s:Math.max(0,sum-t)}:(A.taxself&&taxCalc().t===0?{t:0,s:sum}:null)};
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
