@@ -2346,7 +2346,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='18.11.2026 23:08';
+var APPV='18.11.2026 23:19';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2381,7 +2381,7 @@ function kAgree(S,T){return ['omort','oreg'].every(k=>!T[k]||!S[k]||T[k]===S[k])
 function kFilled(o){return Object.keys(o).some(k=>!['otype','same','ad','sh','acqs','dmode','kmok'].includes(k)&&!kEmpty(o[k]))||(o.acqs||[]).length>0}
 const kEmpty=v=>v==null||v===''||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length);
 function migRooms(){if(A.otype!=='room'||!(A.so||[]).length)return;const L=A.so;let ch=0;const ar=v=>String(v||'').replace(',','.').trim();
- for(let t=L.length-1;t>=0;t--){const T=L[t];if(!(T&&T.otype==='room'&&T.same==='y'))continue;const emp=!kFilled(T);if(!emp&&!ar(T.area))continue;
+ for(let t=L.length-1;t>=0;t--){const T=L[t];if(!(T&&T.otype==='room'&&T.same==='y'))continue;const emp=!kFilled(T);const own=['acqs','omort','oreg','odebt','addr','adp','sprice'].some(k=>!kEmpty(T[k]));if(own||(!emp&&!ar(T.area)))continue;
   const C=L.map((S,k)=>[S,k]).filter(([S,k])=>k!==t&&S.otype==='room'&&S.same!=='y'&&(emp||ar(S.area)===ar(T.area)));
   const hit=C.find(([S])=>kAgree(S,T))||C[0];if(!hit)continue;const S=hit[0];
   if(!kAgree(S,T)){A.dupBak=(A.dupBak||[]).concat([JSON.parse(JSON.stringify(T))]).slice(-5)}
@@ -2389,7 +2389,7 @@ function migRooms(){if(A.otype!=='room'||!(A.so||[]).length)return;const L=A.so;
  L.forEach(o=>delete o.kmok);if(ch){A.oi=0;A.ui=0;try{saveSt()}catch(e){}}}
 // №29: при первой загрузке сохранения пустые «комнаты той же квартиры» (остаток старых подблоков / «Сколько комнат продаёте») убираются; пустые объекты не считаются
 function migEmpty(){if(!(A.so||[]).length)return;const n0=A.so.length;A.so=A.so.filter(o=>!(o.otype==='room'&&o.same==='y'&&!kFilled(o)));if(A.so.length!==n0){A.oi=0;A.ui=0;try{saveSt()}catch(e){}}}
-{const s0=syncO;let first=1;syncO=function(){s0.apply(this,arguments);try{migRooms();if(first){first=0;migEmpty()}}catch(e){}}}
+{const s0=syncO;let first=1;syncO=function(){s0.apply(this,arguments);try{if(first){first=0;migRooms();migEmpty()}}catch(e){}}}
 objTotal=function(){return (sells()?sObjs().filter((o,j)=>!j||kFilled(o)).length:0)+(['buy','alt'].includes(A.goal)?bN():0)};
 // №26: окно ПК высотой до 500 — не «телефон в рамке», а на всю ширину; длинные слова и варианты переносятся внутри карточек
 {const st=document.createElement('style');st.textContent=`.flr{display:flex;align-items:center;gap:6px;max-width:300px}.flr input{flex:1 1 0;min-width:0;width:auto}.flr span{flex:none;font-size:13px}
