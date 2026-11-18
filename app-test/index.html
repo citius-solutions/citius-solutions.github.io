@@ -1487,8 +1487,10 @@ function stageName(kind){const S=sells(),B=['buy','alt'].includes(A.goal)&&!nbMo
  const s6=STAGES.find(x=>x.n===6);Object.defineProperty(s6,'t',{get(){return nbMode()?'Покупка в строящемся доме':stageName(6)},configurable:true})}
 // ===== 16.11.2026 (10): подготовка — пункт «в день показа» по типу и региону каждого объекта
 function showDayT(u){const g=sUnits()[u]||[0],o=OB(g[0]),r=sReg(g[0]);
- if(o.otype==='house')return 'В день показа: порядок на участке и подъезд к дому';
- const pd=SPBLO(r)?'парадной':'подъезде',pc=SPBLO(r)?'парадной':'подъезда';return 'В день показа: чистота '+pc+' и двора, свет в '+(SPBLO(r)?'парадной':'подъезде')+' и на этаже, работают домофон и лифт, если есть'}
+ if(o.otype==='house')return (o.hobj||(g[0]?'':A.hobj))==='land'?'В день показа: порядок на участке и в постройках, если есть, свободный подъезд к участку':'В день показа: порядок в доме, на участке, в хозпостройках и бане, свободный подъезд к дому';
+ const pc=SPBLO(r)?'парадной':'подъезда',pv=SPBLO(r)?'парадной':'подъезде';
+ const rm=o.otype==='room'||o.otype==='shr';
+ return 'В день показа: чистота '+pc+' и двора, свет в '+pv+' и на этаже, работают домофон и лифт, если есть, свободный проход у двери'+(rm?'; убраны общие кухня, коридор и санузел, соседи предупреждены о показе':'')}
 {const o=SCR.s2a.b;SCR.s2a.b=()=>{const h=o();const U=sUnits();const many=U.length>1;
  const add=U.map((g,u)=>ck(u?'d7_'+u:'d7',(many?'<b>'+vLab(g[0])+'.</b> ':'')+showDayT(u))).join('');
  const k=h.lastIndexOf('</div>');return k>=0?h.slice(0,k)+add+h.slice(k):h+add}}
@@ -2104,7 +2106,7 @@ function locPick(d){const box=d.parentNode,w=d.closest('.loc'),el=w.querySelecto
 function locWholeT(k){const L=locGet(k);if(!locWhole(k)||!L.reg)return '';const s=k[0]==='s';
  if(s)return `Регион: ${hq(L.reg)}. Город или посёлок можно дописать.`;
  let t='Ищем '+rgAll(L.reg);if(k[0]==='b'){const j=+k.slice(1)||0,x=num(bGet(j,'hkadx'));if(bLt(j)==='house'&&x)t+=', до '+x+' км '+kadW(L.reg)}return hq(t)+'.'}
-function locHintT(k){const L=locGet(k);if(locAsk(k))return '';if(locWhole(k)&&L.reg)return locWholeT(k);return L.reg?`Регион: ${hq(L.reg)}`:''}
+function locHintT(k){const L=locGet(k);if(locAsk(k))return '';if(locWhole(k)&&L.reg)return k[0]==='s'?locWholeT(k):hq('Ищем '+rgAll(L.reg))+'.';return L.reg?`Регион: ${hq(L.reg)}`:''}
 {const li=locIn;locIn=function(k,lab,ph){let h=li(k,lab,ph);const L=locGet(k);if(locWhole(k)&&!L.city&&L.reg)h=h.replace('value=""',`value="${hq(L.reg)}"`);return h}}
 {const kx=kadXB;kadXB=function(j){let h=kx(j);if(locWhole('b'+j)){const x=num(bGet(j,'hkadx'));if(x)h=h.replace(/<div class="hint">Ищем от 0 до \d+ км [^<]*<\/div>/,`<div class="hint">${locWholeT('b'+j)}</div>`)}return h}}
 
@@ -2112,6 +2114,22 @@ function locHintT(k){const L=locGet(k);if(locAsk(k))return '';if(locWhole(k)&&L.
 function scrTop(){const b=document.getElementById('body');if(b)b.scrollTop=0;const ph=document.getElementById('phone');if(ph)ph.scrollTop=0;try{window.scrollTo(0,0)}catch(e){}if(document.scrollingElement)document.scrollingElement.scrollTop=0}
 {const sh=show;show=function(id,keep){const prev=cur;const r=sh.apply(this,arguments);if(!keep&&id!==prev)scrTop();return r}}
 {const g0=go;go=function(id){const r=g0.apply(this,arguments);scrTop();return r}}
+
+// ===== (35) 18.11: «За сколько хотите продать» — у каждого объекта своя цена (OB(j).myp — то же поле, что «Хочу продать за» на этапе 1); общая — сумма
+function spMig(){if(A.sprice&&!A.spmig){if(!num(A.myp))A.myp=A.sprice;A.sprice='';A.spmig=1}}
+{const sy=syncO;syncO=function(){const r=sy.apply(this,arguments);spMig();return r}}
+vOwnP=function(j){return num(OB(j).myp)};
+sellPrice=function(){const n=sells()?vN():1;let t=0;for(let j=0;j<n;j++)t+=num(OB(j).myp);return t||n0(A.price)};
+function spTotal(){const n=vN();if(n<2)return '';const P=Array.from({length:n},(_,j)=>num(OB(j).myp));const k=P.filter(Boolean).length;if(!k)return '';
+ return `<div class="card sptot"><b>Всего: ${fmt(P.reduce((t,x)=>t+x,0))}</b>${k<n?`<br><span class="hint">Цена указана у ${k} из ${n} объектов — остальные оценим по похожим на этапе 1.</span>`:''}</div>`}
+function spField(j,lab){return `<div class="f spf"><div class="lbl">${lab}</div><input inputmode="numeric" aria-label="${hq(lab)}" placeholder="например, 3 500 000" value="${hq(OB(j).myp||'')}" oninput="OB(${j}).myp=this.value;saveSt()" onchange="show(cur,true)"><div class="hint">Проверим по похожим объявлениям на этапе 1.</div></div>`}
+{const b0=SCR.s0b.b;SCR.s0b.b=function(){let h=b0.apply(this,arguments);
+ h=h.replace(/<div class="f"><div class="lbl">За сколько хотите продать, ₽ · [^<]*<\/div><input[^>]*><div class="hint">Проверим по похожим объявлениям на этапе 1\.<\/div><\/div>/,'');
+ const U=sUnits().length?sUnits():[[0]];let cu=U.findIndex(g=>g[0]===(A.oi||0));if(cu<0)cu=0;const g=U[cu];
+ const L='За сколько хотите продать этот объект, ₽ (если уже думали)';
+ const F=g.length>1?g.map((j,k)=>spField(j,`За сколько хотите продать комнату ${k+1}, ₽ (если уже думали)`)).join(''):spField(g[0],L);
+ const a=h.indexOf('<button class="btn ghost" style="width:100%;padding:7px;margin:0 0 6px;font-size:12.5px" onclick="addObj()">');
+ return a>=0?h.slice(0,a)+F+h.slice(a)+spTotal():h+F+spTotal()}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
