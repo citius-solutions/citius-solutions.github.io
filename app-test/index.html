@@ -1035,12 +1035,12 @@ function sLocBlock(i){const r=sReg(i),o=OB(i);
  ${i&&!o.reg?`<div class="hint">Подставили из объекта 1${o.otype==='house'&&obl(sReg(0))!==sReg(0)?' — для дома или дачи взяли область':''}. Можно изменить.</div>`:''}</div>`}
 // ---------- комнаты в одной квартире
 function kN(){return A.otype==='room'?1+(A.so||[]).filter(o=>o.otype==='room'&&o.same==='y').length:1}
-function kAll(){return A.otype==='room'&&!!A.ktot&&A.ktot!=='5'&&kN()>=+A.ktot}
+function kAll(){return A.otype==='room'&&+A.ktot>0&&kN()>=+A.ktot}
 const kW=n=>n%10>=2&&n%10<=4&&(n<10||n>20)?'комнаты':'комнат';
 function setKsell(n){A.so=A.so||[];let c=kN()-1;while(c<n-1){A.so.push({otype:'room',same:'y',acqs:[],ad:{},sh:{}});c++}
  while(c>n-1){let k=-1;A.so.forEach((o,x)=>{if(o.otype==='room'&&o.same==='y')k=x});if(k<0)break;A.so.splice(k,1);c--}
- if(A.ktot&&A.ktot!=='5'&&+A.ktot<n)A.ktot=String(Math.min(n,5));A.oi=0;show(cur,true)}
-function kSellHint(){const ot=sObjs().map((o,j)=>j&&o.same!=='y'&&['room','shr'].includes(o.otype)?vLab(j)+(o.otype==='shr'&&!/доля/.test(vLab(j))?' (доля)':'')+(o.ktot?' — квартира из '+(o.ktot==='5'?'5+':o.ktot)+' комнат':''):'').filter(Boolean);const tail=ot.length?' Отдельно: '+ot.join('; ')+' — соседей-собственников этих квартир нужно известить о продаже.':'';
+ if(+A.ktot&&+A.ktot<n)A.ktot=String(n);A.oi=0;show(cur,true)}
+function kSellHint(){const ot=sObjs().map((o,j)=>j&&o.same!=='y'&&['room','shr'].includes(o.otype)?vLab(j)+(o.otype==='shr'&&!/доля/.test(vLab(j))?' (доля)':'')+(o.ktot?' — квартира из '+o.ktot+' комнат':''):'').filter(Boolean);const tail=ot.length?' Отдельно: '+ot.join('; ')+' — соседей-собственников этих квартир нужно известить о продаже.':'';
  if(!['room','shr'].includes(A.otype))return tail.trim();return kSellHint0()+tail}
 function kSellHint0(){if(A.otype==='shr')return 'Продаёте долю: других сособственников нужно известить о продаже.';const n=kN();
  if(kAll())return `Вы продаёте все комнаты квартиры (${n} из ${A.ktot}): других собственников нет, извещать соседей не нужно.`;
@@ -1128,7 +1128,7 @@ SCR.s0b={st:0,get t(){const U=sUnits();if(U.length>1)return 'Ваши объек
  return `${tabs}<div class="f"><div class="lbl">Что продаёте${mu?' · '+uNo(cu).toLowerCase():''}</div>${chipsO(i,'otype',[['flat','Квартира'],['room','Комната в коммуналке'],['house','Дом или дача с участком'],['shr','Доля']])}
  ${i&&o.otype==='room'&&A.otype==='room'?`<div class="lbl" style="margin-top:6px">Где эта комната</div>${chipsO(i,'same',[['y','В той же квартире, что объект 1'],['n','В другой квартире']])}`:''}
  ${RG?`<div class="lbl" style="margin-top:6px">Сколько комнат продаёте в этой квартире</div><div class="chips">${[1,2,3,4,5].map(n=>`<span class="${Math.min(kN(),5)===n?'on':''}" onclick="setKsell(${n})">${n===5?'5+':n}</span>`).join('')}</div>${kN()>=5?`<a href="#" class="s gld" style="font-size:12px" onclick="setKsell(kN()+1);return false">+ ещё комната</a>`:''}`:''}
- ${!i&&R?`<div class="lbl" style="margin-top:6px">Сколько всего комнат в квартире</div>${chips('ktot',[['2','из 2'],['3','из 3'],['4','из 4'],['5','из 5+']])}${o.otype==='room'?`<div class="hint">${kSellHint()}${kN()>1?' Ипотеку и зарегистрированных отметите по каждой комнате на следующем экране.':''}</div>`:''}`:''}${i&&R&&o.same!=='y'?`<div class="lbl" style="margin-top:6px">Сколько всего комнат в этой квартире</div>${chipsO(i,'ktot',[['2','из 2'],['3','из 3'],['4','из 4'],['5','из 5+']])}<div class="hint">${o.otype==='shr'?'Продаёте долю: других сособственников нужно известить о продаже; договор — у нотариуса.':'Соседей — собственников остальных комнат этой квартиры нужно известить о продаже.'}</div>`:''}${H?`<div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${chipsO(i,'land',[['izhs','ИЖС'],['snt','Садоводство (СНТ)'],['lph','ЛПХ'],['oth','Другое'],['dk','Не знаю']],1)}<div class="hint">Можно отметить несколько, если у участков разное назначение.</div>${''}<div class="lbl" style="margin-top:5px">Границы участка</div>${chipsO(i,'mezh',[['y','Межевание есть'],['n','Нет'],['dk','Не знаю']])}<div class="lbl" style="margin-top:5px">Коммуникации</div>${chipsO(i,'comm',[['el','Свет'],['gas','Газ'],['water','Вода'],['sew','Канализация'],['road','Дорога круглый год']],1)}${okadO(i)}<div class="lbl" style="margin-top:5px">Дом в ЕГРН</div>${chipsO(i,'hreg',[['y','Зарегистрирован'],['n','Не зарегистрирован'],['dk','Не знаю']])}<div class="hint">Всё это видно в выписке ЕГРН — покажем, где посмотреть.</div>`:''}${!R&&!H?'<div class="lbl" style="margin-top:5px">Сколько комнат</div>'+chipsO(i,'rooms',[['0','Студия'],['1','1'],['2','2'],['3','3'],['4','4+']]):''}</div>
+ ${RG&&kN()>1?ktogQ():''}${!i&&R?`<div class="lbl" style="margin-top:6px">Всего комнат в квартире</div>${ktotIn(0)}${o.otype==='room'?`<div class="hint">${kSellHint()}${kN()>1?' Ипотеку и зарегистрированных отметите по каждой комнате на следующем экране.':''}</div>`:''}`:''}${i&&o.same==='y'&&o.otype==='room'&&A.otype==='room'&&A.ktot?`<div class="hint">Всего комнат в квартире — как у объекта 1: ${A.ktot}.</div>`:''}${i&&R&&o.same!=='y'?`<div class="lbl" style="margin-top:6px">Всего комнат в этой квартире</div>${ktotIn(i)}<div class="hint">${o.otype==='shr'?'Продаёте долю: других сособственников нужно известить о продаже; договор — у нотариуса.':'Соседей — собственников остальных комнат этой квартиры нужно известить о продаже.'}</div>`:''}${H?`<div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${chipsO(i,'land',[['izhs','ИЖС'],['snt','Садоводство (СНТ)'],['lph','ЛПХ'],['oth','Другое'],['dk','Не знаю']],1)}<div class="hint">Можно отметить несколько, если у участков разное назначение.</div>${''}<div class="lbl" style="margin-top:5px">Границы участка</div>${chipsO(i,'mezh',[['y','Межевание есть'],['n','Нет'],['dk','Не знаю']])}<div class="lbl" style="margin-top:5px">Коммуникации</div>${chipsO(i,'comm',[['el','Свет'],['gas','Газ'],['water','Вода'],['sew','Канализация'],['road','Дорога круглый год']],1)}${okadO(i)}<div class="lbl" style="margin-top:5px">Дом в ЕГРН</div>${chipsO(i,'hreg',[['y','Зарегистрирован'],['n','Не зарегистрирован'],['dk','Не знаю']])}<div class="hint">Всё это видно в выписке ЕГРН — покажем, где посмотреть.</div>`:''}${!R&&!H?'<div class="lbl" style="margin-top:5px">Сколько комнат</div>'+chipsO(i,'rooms',[['0','Студия'],['1','1'],['2','2'],['3','3'],['4','4+']]):''}</div>
  ${rooms}
  <div class="f"><div class="lbl">Адрес или кадастровый номер</div>${inpO(i,'addr','для оценки и выписки ЕГРН')}<div class="hint">Номер квартиры нигде не публикуется.</div></div>
  ${i&&o.same==='y'&&o.otype==='room'?'<div class="hint" style="margin:-2px 0 8px">Город и район — как у объекта 1.</div>':i||mu?sLocBlock(i):(sReg(0)==='Санкт-Петербург'?`<div class="f"><select aria-label="Район" onchange="sSetLoc(0,'sdist',this.value)"><option value="">Район — для похожих объявлений</option>${SPB.map(d=>`<option ${A.sdist===d[0]?'selected':''}>${d[0]}</option>`).join('')}</select></div>`:'')}
@@ -1242,7 +1242,7 @@ function docsObj(j){const o=OB(j),r=sReg(j),D=docCity(r),c=(k,t,g)=>ck('d'+j+k,t
   +c('reg','Справка о зарегистрированных',T('t-own','собственник · '+D.reg))+c('debt','Справка об отсутствии долгов ЖКУ и капремонта',T('t-own','собственник · '+D.debt))
   +(['room','shr'].includes(o.otype)?c('nb','Извещения соседей-собственников или их нотариальные отказы',T('t-any','ст. 250 ГК РФ')):'')}
  return `<div class="f"><div class="lbl">${vLab(j)} · ${sLocLine(j)}</div>${h}</div>`}
-{const o=SCR.s2c.b;SCR.s2c.b=()=>{const h=o();const O=sObjs();if(O.length<2)return h;const idx=O.map((x,j)=>j).filter(j=>j&&OB(j).same!=='y');if(!idx.length)return h;
+{const o=SCR.s2c.b;SCR.s2c.b=()=>{const h=o();const O=sObjs();if(O.length<2)return h;const idx=O.map((x,j)=>j).filter(j=>j);if(!idx.length)return h;  // №28: комната той же квартиры — отдельный объект со своими документами
  return h+`<div class="lbl" style="margin-top:4px">Другие объекты — документы по их типу</div>`+idx.map(docsObj).join('')}}
 const BCHK={house:['hb6','дом и участок: земля, границы, дом, коммуникации'],room:['km6','комната: соседи, извещения, доли'],new:['nb1','новостройка: ЖК и застройщик'],sec:['s8','квартира: полная проверка'],any:['s8','полная проверка']};
 {const o=SCR.s6.b;SCR.s6.b=()=>{const h=o();const n=bN();if(n<2)return h;
@@ -2180,7 +2180,7 @@ SCR.s3a.b=()=>{featMig();const U=featU(),mu=U.length>1;const rm=sObjs().some(o=>
  ${mu?'':adpField(0,0)}`};
 Object.defineProperty(SCR.s3a,'t',{get(){return featU().length>1?'Чем хороши объекты':isHouse()?(A.hobj==='land'?'Чем хорош участок':'Чем хороши дом и участок'):'Чем хороша '+objWord()},configurable:true});
 genText=function(u){u=u||0;featMig();const U=featU();const g=U[u]||[0],j=g[0],o=OB(j);const F=featOf(j,'feat'),C=featOf(j,'cond');
- const tot=A.ktot?(A.ktot==='5'?'5 и больше':A.ktot):'';let head=uTitle(u);if(!u&&A.otype==='room'&&tot)head+=g.length>1?' (всего комнат в квартире: '+tot+')':' (всего комнат: '+tot+')';
+ let head=lHead(g);
  const fl=j?o.floor:A.floor;const city=sCity(j)||(sReg(j)!=='Санкт-Петербург'||j?sReg(j):'');const mortObj=g.some(x=>OB(x).omort==='y');const hs=o.otype==='house';const has=k=>F.includes(k);
  const cm=['gas','el','water','sew'].filter(has).map(x=>({gas:'газ',el:'свет',water:'вода',sew:'канализация'}[x]));
  const l1=hs?`${has('rem')?'Свежий ремонт. ':''}${has('view')?'Хороший вид. ':''}${has('furn')?'Мебель остаётся. ':''}${cm.length?(o.hobj==='land'?'Есть: ':'Коммуникации: ')+cm.join(', ')+'. ':''}${has('reg')?'Можно прописаться. ':''}${has('bath')?'Есть баня. ':''}${has('park2')?'Есть место для машины. ':''}`
@@ -2346,7 +2346,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='18.11.2026 22:40';
+var APPV='18.11.2026 22:51';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2410,6 +2410,28 @@ function zoomFix(){try{const b=document.getElementById('body');if(!b||document.d
  if(bad){document.documentElement.classList.add('nz');try{logErr('zoom',{message:'overflow '+Math.round(r.left)+'..'+Math.round(r.right)+' / '+W})}catch(e){}}}catch(e){}}
 {const s0=show;show=function(){const r=s0.apply(this,arguments);requestAnimationFrame(zoomFix);return r}}
 addEventListener('resize',()=>{document.documentElement.classList.remove('nz');requestAnimationFrame(zoomFix)});
+
+// ===== (47) 18.11 №29–№30: «Всего комнат в квартире» — числом; комнаты одной квартиры — продаёте вместе или по отдельности
+function ktOf(j){const o=OB(j);return (!j||(o.same==='y'&&o.otype==='room'&&A.otype==='room'))?A.ktot:o.ktot}
+function ktotIn(i){const o=OB(i),v=o.ktot||'';const low=+v>0&&!i&&+v<kN();
+ return `<input inputmode="numeric" aria-label="Всего комнат в квартире" placeholder="например, 5" value="${String(v).replace(/\D/g,'')}" oninput="OB(${i}).ktot=this.value.replace(/\\D/g,'').slice(0,2);delete OB(${i}).ktot5;try{saveSt()}catch(e){}" onchange="show(cur,true)">${o.ktot5&&!v?'<div class="hint">Раньше было отмечено «5 и больше» — укажите точное число комнат.</div>':''}${low?`<div class="hint">Комнат в квартире меньше, чем вы продаёте (${kN()}), — проверьте.</div>`:''}`}
+function kTog(){return A.otype==='room'&&sells()&&kN()>1&&A.ktog==='tog'}
+function kGroup(){return [0,...sObjs().map((o,j)=>j).filter(j=>j&&OB(j).otype==='room'&&OB(j).same==='y')]}
+function ktogQ(){return `<div class="lbl" style="margin-top:6px">Продаёте вместе или по отдельности?</div>${chips('ktog',[['sep','По отдельности'],['tog','Вместе, одним объявлением']])}<div class="hint">${A.ktog==='tog'?'Одно объявление на все комнаты и одна цена (по умолчанию — сумма). Документы, налог и история у каждой комнаты остаются свои.':'У каждой комнаты своё объявление и своя цена — их могут купить разные люди.'}</div>`}
+featU=function(){const U=sUnits().length?sUnits():[[0]];if(!kTog())return U;const g=kGroup();return [g,...U.filter(x=>!g.includes(x[0]))]};
+const KNWl={2:'Две',3:'Три',4:'Четыре',5:'Пять',6:'Шесть'};
+function lHead(g){const j=g[0],o=OB(j);
+ if(g.length>1){const ar=g.map(x=>OB(x).area).filter(Boolean).map(arS);const n=g.length;const L=ar.length===n?(n===2?ar.join(' и '):ar.slice(0,-1).join(', ')+' и '+ar[n-1])+' м²':'';const t=+A.ktot;
+  return `${KNWl[n]||n} ${kW(n)}${L?' '+L:''} в ${t?t+'-комнатной ':''}коммунальной квартире`}
+ const h=uTitle(uOf(j));if(o.otype==='room'){const t=ktOf(j);return t?h+' (всего комнат: '+t+')':h}return h}
+// цена объявления «вместе» — своя, по умолчанию сумма
+{const a0=adpOf;adpOf=function(u){const g=featU()[u]||[0];if(g.length>1&&kTog())return num(A.kadp)||adpEst(g);return a0(u)}}
+{const f0=adpField;adpField=function(u,mu){const g=featU()[u]||[0];if(!(g.length>1&&kTog()))return f0(u,mu);const e=adpEst(g);
+ return `<div class="f"><div class="lbl">Цена в объявлении · все комнаты вместе, ₽</div><input inputmode="numeric" aria-label="Цена в объявлении, все комнаты вместе" placeholder="${e?'сумма: '+sp(e):'сумма цен комнат'}" value="${A.kadp||''}" oninput="A.kadp=this.value"><div class="hint">По умолчанию — сумма цен комнат. Можно изменить.</div></div>`}}
+SCR.s3b.b=(()=>{const o0=SCR.s3b.b;return ()=>{let h=o0();const U=featU();if(!kTog())return h;
+ return h.replace(/^[\s\S]*?(<div class="hint" style="margin:-4px 0 8px">)/,U.map((g,u)=>`<div class="f">${U.length>1?`<div class="lbl">Объявление ${u+1} · ${g.length>1?'объекты '+g.map(x=>x+1).join(', ')+' · комнаты вместе':uNo(uOf(g[0])).toLowerCase()} · ${sLocLine(g[0])}</div>`:''}<textarea aria-label="Текст объявления ${u+1}">${genText(u)}</textarea></div>`).join('')+'$1').replace('У каждого объекта своё объявление, у каждой комнаты тоже: их могут купить разные люди.','Комнаты одной квартиры — одно объявление (вы выбрали «вместе»); другие объекты — отдельно.')}})();
+// перенос: «5 и больше» → пусто с подсказкой
+{const s0=syncO;syncO=function(){s0.apply(this,arguments);if(!A.kt5m){[A,...(A.so||[])].forEach(o=>{if(o.ktot==='5'){o.ktot='';o.ktot5=1}});A.kt5m=1}}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
