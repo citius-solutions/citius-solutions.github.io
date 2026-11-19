@@ -1196,13 +1196,17 @@ SCR.s3b={st:3,t:'Текст объявления',i:'Этап 3 · Объявл�
 // ---------- ссылки на площадки для любого региона
 const CIANR={'Санкт-Петербург':2,'Ленинградская область':4588,'Москва':1,'Московская область':4593};
 const AVS={'Санкт-Петербург':'sankt-peterburg','Ленинградская область':'leningradskaya_oblast','Москва':'moskva','Московская область':'moskovskaya_oblast'};
-function regLinks(o){const cr=CIANR[o.reg],av=AVS[o.reg],hs=o.typ==='house',rm=o.typ==='room';
+// 19.11 №50: крупные города — регион прямо в ссылке Циана и Авито (id Циана проверены по переадресации и заголовку страницы, адреса Авито — по страницам Авито, 19.11.2026)
+const CIANC={'Москва':1,'Санкт-Петербург':2,'Самара':4966,'Новосибирск':4897,'Екатеринбург':4743,'Казань':4777,'Нижний Новгород':4885,'Краснодар':4820,'Ростов-на-Дону':4959,'Уфа':176245,'Челябинск':5048,'Воронеж':4713,'Пермь':4927,'Волгоград':4704,'Красноярск':4827,'Омск':4914};
+const AVC={'Москва':'moskva','Санкт-Петербург':'sankt-peterburg','Самара':'samara','Новосибирск':'novosibirsk','Екатеринбург':'ekaterinburg','Казань':'kazan','Нижний Новгород':'nizhniy_novgorod','Краснодар':'krasnodar','Ростов-на-Дону':'rostov-na-donu','Уфа':'ufa','Челябинск':'chelyabinsk','Воронеж':'voronezh','Пермь':'perm','Волгоград':'volgograd','Красноярск':'krasnoyarsk','Омск':'omsk'};
+function cityKey(c){c=String(c||'').trim().replace(/^(г\.|город)\s*/i,'').trim().toLowerCase().replace(/ё/g,'е');return Object.keys(CIANC).find(k=>k.toLowerCase().replace(/ё/g,'е')===c)||''}
+function regLinks(o){const ck=CIANR[o.reg]?'':cityKey(o.city),cr=CIANR[o.reg]||CIANC[ck],av=AVS[o.reg]||AVC[ck],hs=o.typ==='house',rm=o.typ==='room';
  const cp=[['deal_type','sale'],['engine_version',2],['offer_type',hs?'suburban':'flat']];if(cr)cp.push(['region',cr]);if(hs)cp.push(['object_type[0]',1]);if(rm)cp.push(['room0',1]);if(o.hi)cp.push(['minprice',o.lo],['maxprice',o.hi]);
  const c='https://www.cian.ru/cat.php?'+qs(cp);const a='https://www.avito.ru/'+(av||'rossiya')+'/'+(hs?'doma_dachi_kottedzhi':rm?'komnaty':'kvartiry')+'/prodam'+(o.hi?'?pmin='+o.lo+'&pmax='+o.hi:'');
  const dc=(SPBLO(o.reg)?'https://spb.domclick.ru':'https://domclick.ru')+(hs?'/search?'+qs([['deal_type','sale'],['category','living_house'],['offer_type','house']]):rm?'/pokupka/komnaty/kommunalnaja':'/pokupka/kvartiry')+(o.hi&&!hs?'?sale_price__gte='+o.lo+'&sale_price__lte='+o.hi:'');
  const B=(t,u,p)=>`<a class="btn ${p?'primary':'ghost'}" style="display:block;text-align:center;text-decoration:none;padding:7px;margin-bottom:5px" target="_blank" rel="noopener" href="${u}">${t} ↗</a>`;
  return `<div class="f"><div class="lbl">${o.label} · ${locLine([o.reg,o.city])}${o.hi?' · '+mln(o.lo)+'–'+mln(o.hi):''}</div>${B('Смотреть на Циане',c,1)}${B('на Авито',a)}${B('на Домклике',dc)}
- <div class="hint">${cr&&av?'В ссылке — регион, тип и цена.':'В ссылке — тип и цена; регион'+(o.city?' и населённый пункт':'')+' выберите на сайте: «'+o.reg+'»'+(o.city?', «'+hq(o.city)+'»':'')+'.'} Остальные фильтры задайте на сайте.</div></div>`}
+ <div class="hint">${ck?'В ссылках Циана и Авито — город «'+ck+'», тип и цена; на Домклике город выберите на сайте.':cr&&av?'В ссылке — регион, тип и цена.':'В ссылке — тип и цена; регион'+(o.city?' и населённый пункт':'')+' выберите на сайте: «'+o.reg+'»'+(o.city?', «'+hq(o.city)+'»':'')+'.'} Остальные фильтры задайте на сайте.</div></div>`}
 function saleLinks(j){const n=vN(),o=OB(j);const e=vEst(j);const c=e.price;
  return `${n>1?`<div class="chips" style="margin-bottom:8px">${Array.from({length:n},(_,k)=>`<span class="${k===j?'on':''}" onclick="A.lsale=${k};show(cur,true)">${vLab(k)}</span>`).join('')}</div>`:''}${regLinks({label:'Похожие · '+vLab(j).toLowerCase(),reg:sReg(j),city:sCity(j),typ:o.otype==='house'?'house':['room','shr'].includes(o.otype)?'room':'flat',lo:c?Math.max(0,c-PSPAN):0,hi:c?c+PSPAN:0})}${MAPTIP}`}
 {const o=SCR.links.b;SCR.links.b=()=>{if(A.lsale!=null&&sells())return saleLinks(Math.min(A.lsale,vN()-1));const r=buys()?regB():sReg(0);
@@ -2346,7 +2350,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='19.11.2026 12:52';
+var APPV='19.11.2026 16:47';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2490,6 +2494,20 @@ html[data-theme=light] #upbtn{background:#fff;color:#243248;border-color:#b08d57
 function upPos(){const b=document.getElementById('body');if(!b)return;const r=b.getBoundingClientRect();const y=Math.max(b.scrollTop,window.scrollY||0);const on=y>300&&r.height>140;UPB.classList.toggle('on',on);if(!on)return;
  const bot=Math.min(r.bottom,innerHeight);UPB.style.left=Math.round(Math.min(r.right,innerWidth)-46-12)+'px';UPB.style.top=Math.round(bot-46-12)+'px'}
 document.getElementById('body').addEventListener('scroll',upPos,{passive:true});addEventListener('scroll',upPos,{passive:true});addEventListener('resize',upPos);
+
+// ---------- (52) 19.11 №49: типовые договоры + «Заказать у Ситиус»; №51: «вместе» — одна подборка похожих на общую площадь
+const TDOC_TXT='Типовой договор — это основа. Договор, который защищает вас, пишется под конкретную сделку. Условия вашей сделки придётся прописать самим: порядок расчёта, сроки, кто выписывается, что остаётся в квартире и многое другое. Ошибка здесь может стоить задатка или привести к отказу в регистрации. А в худшем случае можно остаться и без денег, и без недвижимости. Если сомневаетесь в формулировке, лучше показать договор специалисту до подписания';
+const TDOC_SCR={s5:'zad',b6z:'zad',s9:'dkp',km9:'dkp',s10:'day'};
+function tdocBlock(k){const L=(t,u)=>`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;padding:7px;margin-bottom:5px" target="_blank" rel="noopener" href="${u}">${t} ↗</a>`;
+ return `<div class="card tdoc" style="margin-top:10px"><b>Типовые договоры бесплатно</b><div style="margin-top:6px">${L('Циан · библиотека документов','https://www.cian.ru/magazine-biblioteka-dokumentov/')}${L('Яндекс Недвижимость · образцы документов','https://realty.yandex.ru/dokumenty/')}</div>
+ <div class="hint" style="margin:4px 0 8px">${TDOC_TXT}</div><button class="btn primary" style="width:100%;padding:8px" onclick="A.osvc='${k}';A.oback=cur;A.osent=0;go('order')">Заказать у Ситиус</button></div>`}
+Object.keys(TDOC_SCR).forEach(id=>{const s=SCR[id];if(!s||typeof s.b!=='function')return;const b0=s.b;s.b=function(){return b0.apply(this,arguments)+tdocBlock(TDOC_SCR[id])}});
+{const sl=saleLinks;saleLinks=function(j){if(!kTog())return sl(j);const G=kGroup();const tabs=[0,...Array.from({length:vN()},(_,k)=>k).filter(k=>!G.includes(k))];const jj=G.includes(j)?0:j;
+ const lab=k=>{if(k)return vLab(k);const ar=G.reduce((t,x)=>t+(parseFloat(String(OB(x).area||'').replace(',','.'))||0),0);return 'Объект 1 · комната'+(ar?' '+arS(ar)+' м²':'')+' ('+G.length+' '+(G.length<5?'комнаты':'комнат')+' вместе)'};
+ const chips=tabs.length>1?`<div class="chips" style="margin-bottom:8px">${tabs.map(k=>`<span class="${k===jj?'on':''}" onclick="A.lsale=${k};show(cur,true)">${lab(k)}</span>`).join('')}</div>`:'';
+ if(jj)return chips+sl(jj).replace(/^<div class="chips"[\s\S]*?<\/div>/,'');
+ const c=G.reduce((t,x)=>t+(vEst(x).price||0),0);
+ return chips+regLinks({label:'Похожие · '+lab(0).replace(/^Объект 1 · /,'').toLowerCase(),reg:sReg(0),city:sCity(0),typ:'room',lo:c?Math.max(0,c-PSPAN):0,hi:c?c+PSPAN:0})+MAPTIP}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
