@@ -1222,7 +1222,8 @@ function regLinks(o){const ck=['Москва','Санкт-Петербург'].i
  const dc=(SPBLO(o.reg)?'https://spb.domclick.ru':'https://domclick.ru')+(hs?'/search?'+qs([['deal_type','sale'],['category','living_house'],['offer_type','house']]):rm?'/pokupka/komnaty/kommunalnaja':'/pokupka/kvartiry')+(o.hi&&!hs?'?sale_price__gte='+o.lo+'&sale_price__lte='+o.hi:'');
  // 19.11 №59: Домклик, квартиры — поиск с городом (aids), ценой и площадью ±15 %
  const dk=ck||(['Москва','Санкт-Петербург'].includes(o.reg)?o.reg:'');let dcu=dc;
- if(!hs&&!rm&&DCA[dk]){const P=[['deal_type','sale'],['category','living'],['offer_type','flat'],['aids',DCA[dk]]];if(o.hi)P.push(['sale_price__gte',Math.round(o.lo)],['sale_price__lte',Math.round(o.hi)]);if(o.ar>0)P.push(['area__gte',Math.floor(o.ar*.85)],['area__lte',Math.ceil(o.ar*1.15)]);P.push(['offset',0]);
+ // 19.11 №60: комнаты — offer_type=room и room_area__gte/__lte (по ссылке пользователя)
+ if(!hs&&DCA[dk]){const P=[['deal_type','sale'],['category','living'],['offer_type',rm?'room':'flat'],['aids',DCA[dk]]];if(o.hi)P.push(['sale_price__gte',Math.round(o.lo)],['sale_price__lte',Math.round(o.hi)]);if(o.ar>0)P.push([rm?'room_area__gte':'area__gte',Math.floor(o.ar*.85)],[rm?'room_area__lte':'area__lte',Math.ceil(o.ar*1.15)]);P.push(['offset',0]);
   dcu=(DCH[dk]||'https://domclick.ru')+'/search?'+P.map(([k,v])=>k+'='+v).join('&')}
  const B=(t,u,p)=>`<a class="btn ${p?'primary':'ghost'}" style="display:block;text-align:center;text-decoration:none;padding:7px;margin-bottom:5px" target="_blank" rel="noopener" href="${u}">${t} ↗</a>`;
  return `<div class="f"><div class="lbl">${o.label} · ${locLine([o.reg,o.city])}${o.hi?' · '+mln(o.lo)+'–'+mln(o.hi):''}</div>${B('Смотреть на Циане',c,1)}${B('на Авито',a)}${B('на Домклике',dcu)}
@@ -2370,7 +2371,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='19.11.2026 21:06';
+var APPV='19.11.2026 21:09';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
