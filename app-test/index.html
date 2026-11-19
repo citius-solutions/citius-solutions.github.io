@@ -1205,8 +1205,8 @@ Object.assign(CIANR,{'Самарская область':4608,'Новосиби�
 Object.assign(AVS,{'Самарская область':'samarskaya_oblast','Новосибирская область':'novosibirskaya_oblast','Свердловская область':'sverdlovskaya_oblast','Республика Татарстан':'tatarstan','Нижегородская область':'nizhegorodskaya_oblast','Краснодарский край':'krasnodarskiy_kray','Ростовская область':'rostovskaya_oblast','Республика Башкортостан':'bashkortostan','Челябинская область':'chelyabinskaya_oblast','Воронежская область':'voronezhskaya_oblast','Пермский край':'permskiy_kray','Волгоградская область':'volgogradskaya_oblast','Красноярский край':'krasnoyarskiy_kray','Омская область':'omskaya_oblast'});
 function regLinks(o){const ck=['Москва','Санкт-Петербург'].includes(o.reg)?'':cityKey(o.city),cr=CIANC[ck]||CIANR[o.reg],av=AVC[ck]||AVS[o.reg],hs=o.typ==='house',rm=o.typ==='room';
  const cp=[['deal_type','sale'],['engine_version',2],['offer_type',hs?'suburban':'flat']];if(cr)cp.push(['region',cr]);if(hs)cp.push(['object_type[0]',1]);if(rm)cp.push(['room0',1]);if(o.hi)cp.push(['minprice',o.lo],['maxprice',o.hi]);
- // 19.11 №54: площадь ±20 % — параметры Циана проверены на сайте (квартира: mintarea/maxtarea «площадь от … до … м²»; комната: min_room_area/max_room_area «Площадь комнаты от … до … м²»); дом и Авито — без площади (не подтверждено)
- if(o.ar>0&&!hs){const a1=Math.floor(o.ar*.8),a2=Math.ceil(o.ar*1.2);cp.push(rm?['min_room_area',a1]:['mintarea',a1],rm?['max_room_area',a2]:['maxtarea',a2])}
+ // 19.11 №54: площадь ±20 % → 19.11 №57: ±15 % — параметры Циана проверены на сайте (квартира: mintarea/maxtarea «площадь от … до … м²»; комната: min_room_area/max_room_area «Площадь комнаты от … до … м²»); дом и Авито — без площади (не подтверждено)
+ if(o.ar>0&&!hs){const a1=Math.floor(o.ar*.85),a2=Math.ceil(o.ar*1.15);cp.push(rm?['min_room_area',a1]:['mintarea',a1],rm?['max_room_area',a2]:['maxtarea',a2])}
  const c='https://www.cian.ru/cat.php?'+qs(cp);const a='https://www.avito.ru/'+(av||'rossiya')+'/'+(hs?'doma_dachi_kottedzhi':rm?'komnaty':'kvartiry')+'/prodam'+(o.hi?'?pmin='+o.lo+'&pmax='+o.hi:'');
  const dc=(SPBLO(o.reg)?'https://spb.domclick.ru':'https://domclick.ru')+(hs?'/search?'+qs([['deal_type','sale'],['category','living_house'],['offer_type','house']]):rm?'/pokupka/komnaty/kommunalnaja':'/pokupka/kvartiry')+(o.hi&&!hs?'?sale_price__gte='+o.lo+'&sale_price__lte='+o.hi:'');
  const B=(t,u,p)=>`<a class="btn ${p?'primary':'ghost'}" style="display:block;text-align:center;text-decoration:none;padding:7px;margin-bottom:5px" target="_blank" rel="noopener" href="${u}">${t} ↗</a>`;
@@ -2355,7 +2355,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='19.11.2026 17:44';
+var APPV='19.11.2026 18:21';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
