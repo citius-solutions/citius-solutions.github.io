@@ -1229,9 +1229,11 @@ Object.assign(AVS,{'Хабаровский край':'habarovskiy_kray','При�
 function linkHint(o,x){const J=a=>a.length>1?a.slice(0,-1).join(', ')+' и '+a[a.length-1]:a[0];
  const big=['Москва','Санкт-Петербург'].includes(o.reg),ar=o.ar>0&&!x.hs,cq=hq(o.city||'');
  const rl=()=>big?'город «'+o.reg+'»':'регион «'+o.reg+'»';
- const miss=x.ck?['город «'+x.ck+'»']:big?[rl()]:['регион «'+o.reg+'»',...(o.city&&!x.cr?['населённый пункт «'+cq+'»']:[])];
- const site=(n,loc,pr,sq)=>{const F=[],M=[];if(loc)F.push(loc);else M.push(...miss);F.push('тип');if(o.hi)(pr?F:M).push(pr?'цена':'цену');if(ar)(sq?F:M).push(sq?'площадь ±15 %':'площадь');
-  return {n,f:J(F),m:M.length?J(M)+(!loc&&M.length===miss.length?' выберите':' задайте')+' на сайте':''}};
+ // 19.11 №65: регион в ссылке есть, а города/населённого пункта нет — просим выбрать его на сайте («город», если он из нашего списка)
+ const tw=o.city&&!big?(x.ck?'город «'+x.ck+'»':'населённый пункт «'+cq+'»'):'';
+ const miss=x.ck?['город «'+x.ck+'»']:big?[rl()]:['регион «'+o.reg+'»',...(tw?[tw]:[])];
+ const site=(n,loc,pr,sq)=>{const F=[],M=[];if(loc){F.push(loc);if(tw&&loc.startsWith('регион'))M.push(tw)}else M.push(...miss);const nl=M.length;F.push('тип');if(o.hi)(pr?F:M).push(pr?'цена':'цену');if(ar)(sq?F:M).push(sq?'площадь ±15 %':'площадь');
+  return {n,f:J(F),m:M.length?J(M)+(M.length===nl?' выберите':' задайте')+' на сайте':''}};
  const cl=x.cr?(x.ck?(CREG[x.ck]?'регион «'+CREG[x.ck]+'»':'город «'+x.ck+'»'):rl()):'';
  const al=x.av?(x.ck&&AVC[x.ck]?'город «'+x.ck+'»':rl()):'';
  const dcc=!x.hs&&DCA[x.dk];const dl=dcc?'город «'+x.dk+'»':(!x.hs&&SPBLO(o.reg)?rl():'');
@@ -2396,7 +2398,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='19.11.2026 22:31';
+var APPV='19.11.2026 23:04';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
