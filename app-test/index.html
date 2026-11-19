@@ -1215,12 +1215,21 @@ function avFq(o,rm){const R=[];if(o.ar>0)R.push([rm?1018:1156,Math.floor(o.ar*.8
 // Поддомен: samara — по ссылке пользователя, spb — как было; остальные — domclick.ru (поддомены не подтверждены). sale_price__gte — по аналогии с sale_price__lte.
 const DCA={'Москва':2299,'Санкт-Петербург':597,'Самара':5007,'Новосибирск':42978,'Екатеринбург':20561,'Казань':1967,'Нижний Новгород':8899,'Краснодар':860,'Ростов-на-Дону':6208,'Уфа':19186,'Челябинск':43036,'Воронеж':19027,'Пермь':42884,'Волгоград':443,'Красноярск':15544,'Омск':31090};
 const DCH={'Самара':'https://samara.domclick.ru','Санкт-Петербург':'https://spb.domclick.ru'};
+// 19.11 №63: ещё 13 городов и их регионы. Циан — id из геоподсказки Циана, проверены в браузере (заголовок «Продажа/Купить квартиру в …»);
+// Сортавала на Циане открывается как «Республика Карелия» — для неё на Циане только регион. Авито — адреса по страницам Авито; для Курской, Смоленской областей и Чувашии адрес области не подтверждён — не добавлен.
+// Домклик — aids из геосервиса Домклика, адрес domclick.ru + aids подтверждён пользователем (Казань).
+Object.assign(CIANC,{'Хабаровск':5039,'Владивосток':4701,'Ярославль':5075,'Тверь':176083,'Сочи':4998,'Курск':4835,'Смоленск':4987,'Чебоксары':5047,'Мурманск':4871,'Липецк':4847,'Выборг':174538,'Приозерск':175727,'Сортавала':4579});
+const CREG={'Сортавала':'Республика Карелия'};
+Object.assign(AVC,{'Хабаровск':'habarovsk','Владивосток':'vladivostok','Ярославль':'yaroslavl','Тверь':'tver','Сочи':'sochi','Курск':'kursk','Смоленск':'smolensk','Чебоксары':'cheboksary','Мурманск':'murmansk','Липецк':'lipetsk','Выборг':'vyborg','Приозерск':'priozersk','Сортавала':'sortavala'});
+Object.assign(DCA,{'Хабаровск':78259,'Владивосток':57471,'Ярославль':3704,'Тверь':555,'Сочи':4096,'Курск':20089,'Смоленск':23222,'Чебоксары':4041,'Мурманск':147650,'Липецк':26689,'Выборг':146282,'Приозерск':133085,'Сортавала':164320});
+Object.assign(CIANR,{'Хабаровский край':4627,'Приморский край':4604,'Ярославская область':4636,'Тверская область':4619,'Курская область':4587,'Смоленская область':4614,'Чувашская Республика':4633,'Мурманская область':4594,'Липецкая область':4589,'Республика Карелия':4579});
+Object.assign(AVS,{'Хабаровский край':'habarovskiy_kray','Приморский край':'primorskiy_kray','Ярославская область':'yaroslavskaya_oblast','Тверская область':'tverskaya_oblast','Мурманская область':'murmanskaya_oblast','Липецкая область':'lipetskaya_oblast','Республика Карелия':'kareliya'});
 // 19.11 №62: подсказка под ссылками — что именно уже стоит в ссылках (город/регион, тип, цена, площадь ±15 %) и что выбрать на сайте
 function linkHint(o,x){const J=a=>a.length>1?a.slice(0,-1).join(', ')+' и '+a[a.length-1]:a[0];const dcc=!x.hs&&DCA[x.dk];
  const pl=dcc?'город «'+x.dk+'»':x.cr&&x.av?(x.ck?'город «'+x.ck+'»':'регион «'+o.reg+'»'):'';
  const P=['тип'];if(o.hi)P.push('цена');if(o.ar>0&&!x.hs)P.push('площадь ±15 %');
  const pick='регион'+(o.city?' и населённый пункт':'')+' выберите на сайте: «'+o.reg+'»'+(o.city?', «'+hq(o.city)+'»':'');
- if(dcc)return 'В ссылках — '+J([pl,...P])+'.';
+ if(dcc)return 'В ссылках — '+J([pl,...P])+(CREG[x.dk]?' (на Циане — регион «'+CREG[x.dk]+'»)':'')+'.';
  const dm=[];if(!SPBLO(o.reg)||x.hs)dm.push('регион');if(x.hs&&o.hi)dm.push('цену');if(o.ar>0&&!x.hs)dm.push('площадь');
  const dtail=dm.length?'; на Домклике '+J(dm)+' задайте на сайте':'';
  if(pl)return 'В ссылках'+(dm.length?' Циана и Авито':'')+' — '+J([pl,...P])+dtail+'.';
@@ -2382,7 +2391,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='19.11.2026 21:15';
+var APPV='19.11.2026 21:30';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
