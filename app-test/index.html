@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='20.11.2026 10:05';
+var APPV='20.11.2026 18:11';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2565,6 +2565,48 @@ Object.keys(TDOC_SCR).forEach(id=>{const s=SCR[id];if(!s||typeof s.b!=='function
 function tdocHouse(){const s=sells(),b=buys();if(!s&&!b)return false;return (!s||sObjs().every((o,j)=>OB(j).otype==='house'))&&(!b||A.ltype==='house')}
 function tdocTxt(){return tdocHouse()?TDOC_TXT.replace('что остаётся в квартире','что остаётся в доме'):TDOC_TXT}
 Object.keys(TDOC_SCR).forEach(id=>{if(ORD[id])ORD[id]=ORD[id].filter(k=>k!==TDOC_SCR[id])});
+
+// ---------- 20.11 №67 (не опубликовано; тексты 1–4 и место одобрены 20.11): «Сохранить сделку» / «Открыть сделку» — файл на устройстве, без сервера
+// Вопрос перед заменой — только если на устройстве уже есть ответы. В файл попадает всё, что приложение хранит в браузере (ключи sitius-*), кроме журнала сбоев sitius-err. При открытии заменяются ответы (sitius-progress и предыдущая копия), тема остаётся как на этом устройстве.
+const DEAL_APP='sitius-deal',DEAL_KEYS=()=>Object.keys(localStorage).filter(k=>k.startsWith('sitius-')&&k!=='sitius-err');
+const DEAL_T={warn:'В файле — ваши паспортные и личные данные. Не отправляйте его посторонним и не выкладывайте в чаты. Храните на своём устройстве.',
+ how:'Файл можно открыть на другом телефоне или компьютере и продолжить с того же места.',
+ ask:(d)=>'Открыть сделку из файла'+(d?' от '+d:'')+'? Ответы на этом устройстве заменятся ответами из файла.',
+ bad:'Этот файл не подходит. Выберите файл, который вы сохранили кнопкой «Сохранить сделку», — его имя начинается с «sitius-sdelka».',
+ big:'Файл слишком большой — это не файл сделки.'};
+const p2=n=>String(n).padStart(2,'0');
+function dealSave(){saveSt();const d=new Date(),data={};DEAL_KEYS().forEach(k=>data[k]=localStorage.getItem(k));
+ const blob=new Blob([JSON.stringify({app:DEAL_APP,v:1,saved:d.toISOString(),appv:typeof APPV!=='undefined'?APPV:'',data},null,1)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sitius-sdelka-'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes())+'.json';
+ document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+function dealCheck(txt){let o;try{o=JSON.parse(txt)}catch(e){return null}
+ if(!o||o.app!==DEAL_APP||typeof o.data!=='object'||!o.data||typeof o.data[SVK]!=='string')return null;
+ try{const p=JSON.parse(o.data[SVK]);if(!p||typeof p.A!=='object'||!Array.isArray(p.done))return null}catch(e){return null}
+ if(Object.keys(o.data).some(k=>!k.startsWith('sitius-')||typeof o.data[k]!=='string'))return null;return o}
+function dealApply(o){const had=!!(A.goal||done.size||Object.keys(A.ck||{}).length);const d=o.saved?new Date(o.saved):null;const ds=d&&!isNaN(d)?p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear():'';
+ if(had&&!confirm(DEAL_T.ask(ds)))return false;
+ try{[SVK,SVKB].forEach(k=>localStorage.removeItem(k));Object.entries(o.data).forEach(([k,v])=>{if(k!==THK)localStorage.setItem(k,v)})}catch(e){alert(DEAL_T.bad);return false}
+ window.__noSave=1;location.hash='';location.reload();return true}
+function dealOpen(){let i=document.getElementById('dealfile');if(!i){i=document.createElement('input');i.type='file';i.id='dealfile';i.accept='.json,application/json';i.style.display='none';document.body.appendChild(i)}
+ i.value='';i.onchange=()=>{const f=i.files&&i.files[0];if(!f)return;if(f.size>30e6){alert(DEAL_T.big);return}
+  const r=new FileReader();r.onload=()=>{const o=dealCheck(String(r.result||''));if(!o){alert(DEAL_T.bad);return}dealApply(o)};r.onerror=()=>alert(DEAL_T.bad);r.readAsText(f)};i.click()}
+// 20.11 №68: на «Мой путь» — кнопка «Файл сделки» как «Объекты на площадках»; по нажатию — окно с текстами 1–2 и кнопками «Сохранить сделку» / «Открыть сделку»
+function dealBlock(){return `<button class="btn ghost dealbtn" style="padding:7px;font-size:12px;width:100%;margin-bottom:8px" onclick="dealSheet()">Файл сделки</button>`}
+{const _pb=SCR.path.b;SCR.path.b=()=>{const h=_pb();return h.includes('<div class="setlink">')?h.replace('<div class="setlink">',dealBlock()+'<div class="setlink">'):h+dealBlock()}}
+(function(){const top=document.querySelector('.top');if(!top)return;const sh=document.createElement('div');sh.className='sheet';sh.id='dealsheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');sh.setAttribute('aria-labelledby','dealttl');
+ sh.onclick=e=>{if(e.target===sh)dealClose()};(document.getElementById('sheet')||top).parentNode.appendChild(sh)})();
+function dealSheet(){const sh=$('dealsheet');if(!sh)return;
+ sh.innerHTML=`<div class="in"><div id="dealttl" style="font-weight:700;font-size:16px">Файл сделки</div>
+ <div class="dv-h" style="margin:4px 0 6px">${DEAL_T.warn}</div><div class="dv-h" style="margin:0 0 8px">${DEAL_T.how}</div>
+ <button class="btn primary dealsave" style="width:100%" onclick="dealSave()">Сохранить сделку</button>
+ <button class="btn ghost dealopen" style="width:100%;margin-top:6px" onclick="dealOpen()">Открыть сделку</button>
+ <button class="btn ghost" style="width:100%;margin-top:10px" onclick="dealClose()">Закрыть</button></div>`;
+ sh.style.display='block';setTimeout(()=>{const f=sh.querySelector('button');f&&f.focus()},0)}
+function dealClose(){const sh=$('dealsheet');if(sh)sh.style.display='none'}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('dealsheet')&&$('dealsheet').style.display==='block')dealClose()});
+// 20.11 №68: в окне «Продолжить на другом устройстве» — «Сохранить сделку» и текст 1 рядом
+{const _dr=devRender;devRender=function(){_dr();const sh=$('devsheet');if(!sh)return;const cl=[...sh.querySelectorAll('button')].pop();if(!cl)return;
+ cl.insertAdjacentHTML('beforebegin',`<div class="devdealbox" style="border-top:1px solid #3d5578;margin:12px 0 0;padding-top:10px"><div class="dv-h">${DEAL_T.warn}</div><button class="btn ghost devdeal" style="width:100%;margin-top:6px" onclick="dealSave()">Сохранить сделку</button></div>`)}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
