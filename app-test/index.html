@@ -270,7 +270,7 @@ SCR.s0c={st:0,t:'Самопроверка готовности',i:'Этап 0 ·
  ${sells()?taxHint(''):''}`,next:()=>'s0d'};
 SCR.s0d={st:0,t:'Ваш ориентир по срокам',i:'Этап 0 · Старт · 4/4',b:()=>{const L=STAGES.filter(s=>s.n>0&&s.show());
  const warn=[];if(sells()&&!A.ck.r3)warn.push('Доли детей / маткапитал → нужны опека и нотариус');{const O=sObjs(),mu=O.length>1;if(O.some(o=>o.omort))O.forEach((o,j)=>{if(o.omort==='y')warn.push('Ипотека или залог'+(mu?' · '+oRef(j):'')+' → согласие банка; остаток долга'+(num(o.odebt)?' '+mln(num(o.odebt)):'')+' гасится из денег покупателя при сделке')});else if(sells()&&!A.ck.r2)warn.push('Ипотека на квартире → согласование с банком');O.forEach((o,j)=>{if((o.oregx||[]).length&&o.oreg==='y')warn.push('Среди зарегистрированных'+(mu?' · '+oRef(j):'')+' дети или недееспособные → заранее решите, где их зарегистрируют; если они собственники — разрешение опеки')});}if(A.goal==='share'||sObjs().some(o=>o.otype==='shr'))warn.push('Сделка с долей → нотариус обязателен');if(sells()&&(isRoomS()&&!kAll()||sObjs().slice(1).some(o=>['room','shr'].includes(o.otype)&&o.same!=='y')))warn.push('Комната в коммуналке → соседям нужно дать месяц на ответ (право преимущественной покупки) — заложите в сроки');
- return `<div class="f"><div class="lbl">${L.length} этапов · ориентир ${A.goal==='alt'?'3–6':'2–4'} мес. ⚠</div>${L.map(s=>`<div class="row" style="font-size:11.5px;margin:2px 0"><span style="flex:3">${dispNo(s.n)}. ${s.t}</span><span class="mut" style="flex:1;text-align:right">${s.w}</span></div>`).join('')}</div>
+ return `<div class="f"><div class="lbl">${plw(L.length,'этап','этапа','этапов')} · ориентир ${A.goal==='alt'?'3–6':'2–4'} мес. ⚠</div>${L.map(s=>`<div class="row" style="font-size:11.5px;margin:2px 0"><span style="flex:3">${dispNo(s.n)}. ${s.t}</span><span class="mut" style="flex:1;text-align:right">${s.w}</span></div>`).join('')}</div>
  ${warn.length?`<div class="note risk">${warn.join('<br>')}</div>`:''}<div class="hint">Сроки — ориентир; ⚠ требует проверки на реальных сделках.</div><div class="row"><button class="btn ghost" style="padding:7px;font-size:12px" onclick="go('live')">Объекты на площадках</button><button class="btn ghost" style="padding:7px;font-size:12px" onclick="go('work')">Сколько работы вас ждёт</button></div>`},next:()=>{done.add(0);return sells()?'path':'sum'}};
 // --- Этап 1 Оценка
 SCR.s1a={st:1,t:'Откуда берём цену',i:'Этап 1 · Оценка · 1/3',b:()=>{const ad=A.addr||'',ar=sArea(1);
@@ -447,7 +447,7 @@ SCR.sec={st:8,t:'Безопасность сделки',i:'Объект — се
  <div class="f"><div class="lbl">Только человек</div>${HUM.map(x=>`<div class="sl"><span class="ic">👤</span><span class="nm">${x}</span><span class="md m-h" role="button" tabindex="0" onclick="tagTip(event,this)">${S?'Ситиус':'вы / юрист*'}</span></div>`).join('')}${S?'':'<div class="hint">* юрист — платно, кнопка «Нужна помощь человека».</div>'}</div>
  <div class="hint">Приложение не проверяет людей автоматически: обработка чужих персональных данных требует согласия человека (152-ФЗ). Поэтому — инструкция с официальными ссылками или проверка Ситиусом по договору.</div>`},next:()=>'path'};
 SCR.path={st:-2,t:'Мой путь',i:'',b:()=>{const L=STAGES.filter(s=>s.show());const d=L.filter(s=>done.has(s.n)).length;const t=workTotals();
- return `<div class="f"><div class="lbl">Пройдено ${d} из ${L.length} этапов</div><div class="bar"><div style="width:${d/L.length*100}%"></div></div><div class="hint" style="margin-top:5px">Осталось сами: ${t.st} шагов · ${t.dc} документов · ${t.vs} визитов · ${wk(t.dmin)}–${wk(t.dmax)} ⚠ · <a href="#" onclick="go('work');return false">подробнее</a></div></div>
+ return `<div class="f"><div class="lbl">Пройдено ${d} из ${plg(L.length,'этапа','этапов')}</div><div class="bar"><div style="width:${d/L.length*100}%"></div></div><div class="hint" style="margin-top:5px">Осталось сами: ${plw(t.st,'шаг','шага','шагов')} · ${plw(t.dc,'документ','документа','документов')} · ${plw(t.vs,'визит','визита','визитов')} · ${wk(t.dmin)}–${wk(t.dmax)} ⚠ · <a href="#" onclick="go('work');return false">подробнее</a></div></div>
  <div class="row" style="margin-bottom:7px"><button class="btn ghost" style="padding:7px;font-size:12px" onclick="go('live')">Объекты на площадках</button><button class="btn ghost" style="padding:7px;font-size:12px" onclick="go('fav')">Избранное · ${(A.fav||[]).length+(A.flinks||[]).length}</button></div>
  <div class="hint" style="margin:-2px 0 6px">Ответы сохраняются на этом устройстве, можно вернуться в любой момент. ⚠ В приложении — в личном кабинете, с напоминанием: например, через 2 недели после публикации спросим, сколько было звонков.</div><div class="setlink"><span class="mut">Настройки</span><a href="#" onclick="go('theme');return false">Оформление: ${{auto:'как на телефоне',light:'светлая тема',dark:'тёмная тема'}[thSel()]}</a></div>
  <div class="f">${L.map(s=>{const st=done.has(s.n)?'done':(s.n===L.find(x=>!done.has(x.n))?.n?'cur':'');const w=WK(s.n);return `<div class="st"><div class="dot ${st}" onclick="go('${s.first}')">${done.has(s.n)?'✓':dispNo(s.n)}</div><div style="flex:1"><div class="t" onclick="go('${s.first}')">${s.t}</div><div class="s">${done.has(s.n)?`готово · <a href="#" class="gld" onclick="go('${s.first}');return false">открыть и изменить</a>`:`осталось: ${w.st} шаг. · ${w.docs.length} док. · ${w.vis.length} виз. · ${w.d[0]===w.d[1]?wk(w.d[0]):wk(w.d[0])+'–'+wk(w.d[1])}${w.w?' ⚠':''}`}</div>${done.has(s.n)?'':`<a href="#" class="s gld" onclick="A.ctx='этап ${dispNo(s.n)}: ${s.t.toLowerCase()}';A.sent=0;go('agent');return false">Передать это Ситиусу</a>`}</div></div>`}).join('')}</div>`}};
@@ -754,7 +754,7 @@ const KCHK=()=>`
  ${ck('k1','Выписка ЕГРН: комната — отдельный объект или доля в праве на квартиру',T('t-any','от этого зависят правила ниже'))}
  ${ck('k2','Соседи-собственники имеют право преимущественной покупки — письменное извещение с ценой и условиями',T('t-any','ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ'))}
  ${ck('k3','Извещение: через нотариуса, заказным письмом с уведомлением или телеграммой; в мессенджере и по почте не считается',T('t-own','ст. 86 Основ о нотариате · платно'))}
- ${ck('k3n','Или нотариальный отказ: сосед сам приходит к нотариусу и подписывает отказ от преимущественной покупки — тогда месяц ждать не нужно',T('t-not','нотариус · сосед лично'))}
+ ${ck('k3n','Или нотариальный отказ: сосед сам приходит к нотариусу и подписывает отказ от преимущественного права покупки — тогда месяц ждать не нужно',T('t-not','нотариус · сосед лично'))}
  ${ck('k4','Месяц считается со дня получения извещения (или возврата письма); раньше — если все соседи отказались письменно',T('t-any','п. 2 ст. 250 ГК РФ'))}
  ${ck('k5','Одна из комнат принадлежит городу — извещение получает и город; куда направлять, подскажет нотариус',T('t-any','ч. 6 ст. 42 ЖК РФ'))}${kBuy()?ck('k12','Риск покупателя: если соседа не известили, он в течение 3 месяцев может через суд перевести права покупателя на себя. Если цену снизили после извещения — извещать заново',T('t-any','п. 3 ст. 250 ГК РФ')):''}
  <div class="hint">Услуги нотариуса — и извещение, и отказ соседа — оплачивает собственник-продавец.</div><div class="hint">${kSell()?kSellHint():A.kcnt!=='2'&&A.kcnt!=='3'?'Покупаете одну комнату: извещения отправляет продавец. Попросите копии извещений с уведомлениями о вручении или письменные отказы соседей — без них регистрацию приостановят.':'Две комнаты у разных продавцов: два договора в один день, каждый продавец собирает отказы остальных соседей; расчёт по обоим — через СБР или аккредитив.'}</div>`;
@@ -823,7 +823,7 @@ SCR.sum={st:-7,t:'Ваш реалистичный вариант',i:'Итог э
  return `${sells()?`<div class="f"><div class="lbl">Вы можете получить за ${sObjs().length>1?'свои объекты':'свою '+objWord(1)}</div><div class="big">${pe?r10(pe.fast)+' – '+r10(pe.max):'—'}</div><div class="hint">${pe?'По вашим аналогам и поправкам; цена сделки обычно ниже цены объявления. Ориентир ⚠, не оценка.':'Заполните аналоги на этапе 1.'}</div></div>`:''}
  ${buys()?`<div class="f"><div class="lbl">Бюджет на покупку</div><div class="row mut" style="font-size:10.5px"><span>Свои деньги, ₽</span><span>Одобренная ипотека, ₽</span></div><div class="row">${inp('own','0')}${inp('mortsum','0')}</div><div class="big" style="margin-top:4px">${bud?mln(buyRange(bud)[0]).replace(' млн','')+'–'+mln(buyRange(bud)[1]):'—'}</div><div class="hint">${budgetFormula()?'Расчёт: '+budgetFormula()+'. ':''}От бюджета −1 млн до +10% — запас на торг.</div></div>`:''}
  ${buys()?`<div class="f"><div class="lbl">Объекты под ваш бюджет</div><div class="hint">Откроем поиск на площадках: ${bud?'от бюджета −1 млн до +10%':'—'}, ваши районы и комнаты. Диапазон можно изменить.</div><button class="btn ghost" style="width:100%;padding:7px;margin-top:4px" onclick="A.pcenter='';A.pman=0;go('links')">Смотреть на Циане · Авито · Домклике</button></div>`:''}
- <div class="f"><div class="lbl">Что впереди · ${L.length} этапов · ${wk(t.dmin)}–${wk(t.dmax)} ⚠</div><div class="hint">${L.map(s=>dispNo(s.n)+'. '+s.t).join(' · ')}</div><div class="hint" style="margin-top:3px">Сами: ${t.st} шагов, ${t.dc} документов, ${t.vs} визитов. <a href="#" onclick="go('work');return false">Подробнее</a></div></div>
+ <div class="f"><div class="lbl">Что впереди · ${plw(L.length,'этап','этапа','этапов')} · ${wk(t.dmin)}–${wk(t.dmax)} ⚠</div><div class="hint">${L.map(s=>dispNo(s.n)+'. '+s.t).join(' · ')}</div><div class="hint" style="margin-top:3px">Сами: ${plw(t.st,'шаг','шага','шагов')}, ${plw(t.dc,'документ','документа','документов')}, ${plw(t.vs,'визит','визита','визитов')}. <a href="#" onclick="go('work');return false">Подробнее</a></div></div>
  <div class="row"><button class="btn primary" style="padding:8px;font-size:12.5px" onclick="go('path')">Продолжить самостоятельно</button><button class="btn ghost" style="padding:8px;font-size:12.5px" onclick="A.ctx='мой вариант';A.sent=0;go('agent')">Передать Ситиусу</button></div>`},next:()=>'path'};
 
 // ---------- рендер
@@ -973,10 +973,10 @@ function setBuyObj(j){const i=A.bi||0;if(i===j)return;if(i===0)A.lt0=A.ltype;els
 function MORTDED(){return `<div class="f"><div class="lbl">Ипотека · вычет по процентам${A.mort?' · у вас ипотека':''}</div><div class="hint">${mortDedText()} возвращают НДФЛ за годы, когда вы платили проценты и налог.</div>
  ${ck('ip1','Справка банка об уплаченных процентах за год')}${ck('ip2','Кредитный договор')}${ck('ip3','Документы на жильё: выписка ЕГРН, договор купли-продажи, платёжные документы')}${ck('ip4','Подать: в личном кабинете ФНС или через Госуслуги — декларация 3-НДФЛ или упрощённый порядок, если банк передаёт данные в ФНС; либо через работодателя')}</div>`}
 // ---------- этап 9: где подписать и подать
-const SIGN={bank:['В банке · СБР или аккредитив','Подписание — в офисе банка, где открыты безопасные расчёты или аккредитив. Документы на регистрацию банк часто подаёт в Росреестр электронно, тогда в МФЦ идти не нужно ⚠ уточните в банке.',['Паспорта всех сторон','Договор купли-продажи — проект банк проверяет заранее','Согласия, если нужны: супруга (не нужно, если по брачному договору объект принадлежит продавцу), опеки, банка-залогодержателя','Реквизиты счёта продавца'],'Все продавцы и покупатели или их представители по нотариальной доверенности.','Покупатель заранее пополняет СБР или открывает аккредитив; продавец получает деньги после регистрации перехода права.'],
+const SIGN={bank:['В банке · СБР или аккредитив','Подписание — в офисе банка, где открыты безопасные расчёты или аккредитив. Документы на регистрацию банк часто подаёт в Росреестр электронно, тогда в МФЦ идти не нужно ⚠ уточните в банке.',['Паспорта всех сторон','Договор купли-продажи — проект банк проверяет заранее','Согласия, если нужны: супруга (не нужно, если по брачному договору объект принадлежит продавцу), опеки, банка-залогодержателя и другие — в зависимости от вашей сделки','Реквизиты счёта продавца'],'Все продавцы и покупатели или их представители по нотариальной доверенности.','Покупатель заранее пополняет СБР или открывает аккредитив; продавец получает деньги после регистрации перехода права.'],
  mort:['В банке покупателя · ипотека','Сделка — в офисе банка, который выдаёт покупателю ипотеку. Банк назначает дату, заранее проверяет договор и часто сам подаёт документы на регистрацию электронно ⚠.',['Паспорта всех сторон','Договор купли-продажи по форме банка','Отчёт об оценке — его заказывает покупатель','Согласия, если нужны; справка о зарегистрированных — если просит банк'],'Продавцы, покупатели и сотрудник банка.','Кредит и первый взнос поступают продавцу через СБР или аккредитив после регистрации. Если продаваемый объект в ипотеке — заранее согласуйте с банком продавца погашение остатка долга.'],
  cell:['Банк или депозитарий · сейфовая ячейка','Ячейку арендуют в банке или частном депозитарии. Договор подписывают там же или заранее, затем подают документы в МФЦ.',['Паспорта всех сторон','Договор аренды ячейки с условиями доступа: продавцу — после регистрации, по выписке ЕГРН','Договор купли-продажи','Согласия, если нужны'],'Покупатель и продавец — при закладке денег; в МФЦ — все стороны.','Покупатель закладывает наличные при продавце; пересчёт и проверку купюр делает банк по своему тарифу ⚠. Доступ продавца — по условиям договора аренды ячейки.'],
- not:['У нотариуса · депозит или нотариальная сделка','Подписание у нотариуса. Нотариус сам подаёт документы в Росреестр электронно и может хранить деньги на депозите до регистрации.',['Паспорта всех сторон','Документы-основания и выписка ЕГРН','Согласия, если нужны: супруга (не нужно, если по брачному договору объект принадлежит продавцу), опеки','Полный список скажет нотариус при записи'],'Все собственники лично или по нотариальной доверенности.','Покупатель вносит деньги на депозит нотариуса; нотариус перечисляет их продавцу после регистрации. Услуги — по тарифу нотариуса.'],
+ not:['У нотариуса · депозит или нотариальная сделка','Подписание у нотариуса. Нотариус сам подаёт документы в Росреестр электронно и может хранить деньги на депозите до регистрации.',['Паспорта всех сторон','Документы-основания и выписка ЕГРН','Согласия, если нужны: супруга (не нужно, если по брачному договору объект принадлежит продавцу), опеки и другие — в зависимости от вашей сделки','Полный список скажет нотариус при записи'],'Все собственники лично или по нотариальной доверенности.','Покупатель вносит деньги на депозит нотариуса; нотариус перечисляет их продавцу после регистрации. Услуги — по тарифу нотариуса.'],
  mfc:['В МФЦ · без банка','Договор в простой письменной форме подписываете сами и подаёте в МФЦ по предварительной записи.',['Паспорта всех сторон','Договор купли-продажи в нужном числе экземпляров','Согласия, если нужны','Госпошлина — оплачивает покупатель, реквизиты дадут в МФЦ'],'Все продавцы и покупатели или их представители по нотариальной доверенности.','Если без банка — договоритесь письменно, когда и как передаются деньги, и оформите расписку. Безопаснее всё же СБР или аккредитив.'],
  ros:['Дистанционно · Госуслуги, два нотариуса или доверенность','','','','']};
 function signDef(){if(needNotaryDeal())return 'not';if(buys()&&A.mort)return 'mort';return {sbr:'bank',acc:'bank',esc:'bank',cell:'cell',dep:'not'}[A.pay2]||'mfc'}
@@ -1040,7 +1040,7 @@ const kW=n=>n%10>=2&&n%10<=4&&(n<10||n>20)?'комнаты':'комнат';
 function setKsell(n){A.so=A.so||[];let c=kN()-1;while(c<n-1){A.so.push({otype:'room',same:'y',acqs:[],ad:{},sh:{}});c++}
  while(c>n-1){let k=-1;A.so.forEach((o,x)=>{if(o.otype==='room'&&o.same==='y')k=x});if(k<0)break;A.so.splice(k,1);c--}
  if(+A.ktot&&+A.ktot<n)A.ktot=String(n);A.oi=0;show(cur,true)}
-function kSellHint(){const ot=sObjs().map((o,j)=>j&&o.same!=='y'&&['room','shr'].includes(o.otype)?vLab(j)+(o.otype==='shr'&&!/доля/.test(vLab(j))?' (доля)':'')+(o.ktot?' — квартира из '+o.ktot+' комнат':''):'').filter(Boolean);const tail=ot.length?' Отдельно: '+ot.join('; ')+' — соседей-собственников этих квартир нужно известить о продаже.':'';
+function kSellHint(){const ot=sObjs().map((o,j)=>j&&o.same!=='y'&&['room','shr'].includes(o.otype)?vLab(j)+(o.otype==='shr'&&!/доля/.test(vLab(j))?' (доля)':'')+(o.ktot?' — квартира из '+plg(+o.ktot,'комнаты','комнат'):''):'').filter(Boolean);const tail=ot.length?' Отдельно: '+ot.join('; ')+' — соседей-собственников этих квартир нужно известить о продаже.':'';
  if(!['room','shr'].includes(A.otype))return tail.trim();return kSellHint0()+tail}
 function kSellHint0(){if(A.otype==='shr')return 'Продаёте долю: других сособственников нужно известить о продаже.';const n=kN();
  if(kAll())return `Вы продаёте все комнаты квартиры (${n} из ${A.ktot}): других собственников нет, извещать соседей не нужно.`;
@@ -1324,7 +1324,7 @@ SCR.sum.b=()=>{const t=workTotals();const L=STAGES.filter(s=>s.show()&&!done.has
  <div class="big" style="margin-top:4px">${bud?rngT(lo,hi):'—'}</div>
  <div class="hint">${A.goal==='alt'&&!ready?'Бюджет посчитаем после оценки всех объектов продажи. ':''}${bud&&budgetFormula()?'Расчёт: '+budgetFormula()+'. ':''}${bud?(bud<BSMALL?`Бюджет небольшой — ${fmt(Math.round(bud/1e4)*1e4)}: проверьте суммы выше — оценку, остаток долга, свои деньги и ипотеку. Ищем от −20 % до +10 % от бюджета.`:'От бюджета −1 млн до +10% — запас на торг.'):(A.goal==='alt'&&ready&&sDebt()&&saleIn()&&saleIn()<=sDebt()?'Остаток долга не меньше суммы продажи — на покупку из продажи ничего не остаётся. Проверьте цифры или добавьте свои деньги и ипотеку.':'')}</div></div>`:''}
  ${buys()?`<div class="f"><div class="lbl">Объекты под ваш бюджет</div><div class="hint">Откроем поиск на площадках: ${bud?rngT(lo,hi):'сначала бюджет'}, ваши районы и комнаты. Диапазон можно изменить.</div><button class="btn ghost" style="width:100%;padding:7px;margin-top:4px" ${bud?'':'disabled'} onclick="A.pcenter='';A.pman=0;go('links')">Смотреть на Циане · Авито · Домклике</button></div>`:''}
- <div class="f"><div class="lbl">Что впереди · ${L.length} этапов · ${wk(t.dmin)}–${wk(t.dmax)} ⚠</div><div class="hint">${L.map(s=>dispNo(s.n)+'. '+s.t).join(' · ')}</div><div class="hint" style="margin-top:3px">Сами: ${t.st} шагов, ${t.dc} документов, ${t.vs} визитов. <a href="#" onclick="go('work');return false">Подробнее</a></div></div>
+ <div class="f"><div class="lbl">Что впереди · ${plw(L.length,'этап','этапа','этапов')} · ${wk(t.dmin)}–${wk(t.dmax)} ⚠</div><div class="hint">${L.map(s=>dispNo(s.n)+'. '+s.t).join(' · ')}</div><div class="hint" style="margin-top:3px">Сами: ${plw(t.st,'шаг','шага','шагов')}, ${plw(t.dc,'документ','документа','документов')}, ${plw(t.vs,'визит','визита','визитов')}. <a href="#" onclick="go('work');return false">Подробнее</a></div></div>
  <div class="row"><button class="btn primary" style="padding:8px;font-size:12.5px" onclick="go('path')">Продолжить самостоятельно</button><button class="btn ghost" style="padding:8px;font-size:12.5px" onclick="A.ctx='мой вариант';A.sent=0;go('agent')">Передать Ситиусу</button></div>`};
 function budget(){if(!buys())return 0;if(A.goal==='alt'&&!vReady())return 0;const sv=saleIn();return Math.max(0,(sv?sv-sDebt():0))+num(A.own)+num(A.mortsum)}
 
@@ -1377,7 +1377,8 @@ function objTotal(){return (sells()?sUnits().length:0)+(['buy','alt'].includes(A
 const objWord5=n=>n%10===1&&n%100!==11?'объект':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'объекта':'объектов';
 function rassCard(){const n=objTotal();if(n<5)return '';
  return `<div class="card rass"><b>Расселение — сложная сделка</b><br>У вас ${n} ${objWord5(n)}: это цепочка связанных сделок, которые обычно проходят в один день. Такие сделки, как правило, ведут со специалистом. Продолжить можно и самим — по шагам приложения.<button class="btn ghost" style="width:100%;padding:7px;margin-top:6px" onclick="A.osvc='rass';A.oback=cur;A.osent=0;go('order')">Заказать сопровождение</button></div>`}
-['s0a','s0b','s0c','s0d','sum'].forEach(id=>{const o=SCR[id].b;SCR[id].b=()=>o()+rassCard()});
+// №94 (20.11): карточка «Расселение — сложная сделка» — один раз на этапе 0 (первый экран) и в «Моём пути»
+['s0a'].forEach(id=>{const o=SCR[id].b;SCR[id].b=()=>o()+rassCard()});
 {const o=SCR.path.b;SCR.path.b=()=>rassCard()+o()}
 // ===== 16.11.2026 (5): объявления в приложении — по типу, месту, площади, соткам и бюджету именно этой покупки
 const LO_RAY=['Всеволожский р-н','Выборгский р-н','Приозерский р-н','Лужский р-н','Тосненский р-н','Гатчинский р-н','Ломоносовский р-н','Кировский р-н'];
@@ -1393,11 +1394,11 @@ function adPlaces(j){const reg=bReg(j),city=bCity(j),d=bDist(j)||[],hs=bLt(j)===
 function adSpec(j){const lt=bLt(j),reg=bReg(j),h=bGet(j,'hobj')||'house';
  if(lt==='house'){const land=h==='land',da=h==='dacha';const ar=n0(bGet(j,'adesired'))||(da?60:100),so=n0(bGet(j,'hsot'))||(da?6:10);
   const typical=(land?0:ppmOf('house',reg)*ar)+so*(SOTP[reg]||50000)*(land?1:.3);
-  const nm=land?'Участок':da?'Дача':'Дом с участком';return {typical,mk:(k)=>{const F=[[.85,1],[1.1,1.5],[.95,.8],[1.25,1.2]][k];const a=Math.round(ar*F[0]),s=Math.max(4,Math.round(so*F[1]));
+  const nm=land?'Участок':da?'Дача':'Дом с участком';return {typical,mk:(k)=>{const F=[[1,1],[1.1,1.5],[1.05,1],[1.25,1.2]][k];const a=Math.round(ar*F[0]),s=Math.max(4,Math.round(so*F[1]));
    return land?`${nm} ${s} сот.${lnTxt(bGet(j,'hland'),1)?', '+lnTxt(bGet(j,'hland'),1):''}`:`${nm} ${s} сот., дом ${a} м²`}}}
- if(lt==='room'){const ar=n0(bGet(j,'karea'))||(bGet(j,'kcnt')==='2'?30:16);const n2=bGet(j,'kcnt')==='2';return {typical:ppmOf('room',reg)*ar,mk:k=>`${n2?'Две комнаты в одной квартире':'Комната в коммунальной квартире'}, ${Math.round(ar*[1,1.15,.9,1.25][k])} м²`}}
+ if(lt==='room'){const ar=n0(bGet(j,'karea'))||(bGet(j,'kcnt')==='2'?30:16);const n2=bGet(j,'kcnt')==='2';return {typical:ppmOf('room',reg)*ar,mk:k=>`${n2?'Две комнаты в одной квартире':'Комната в коммунальной квартире'}, ${Math.round(ar*[1,1.15,1.05,1.25][k])} м²`}}
  const ar=n0(bGet(j,'adesired'))||44;const R=(bGet(j,'lrooms')||[]).filter(Boolean);const rw=r=>r==='st'?'Студия':r==='4'?'4-комнатная квартира':r+'-комнатная квартира';
- return {typical:ppmOf('flat',reg)*ar,mk:k=>`${R.length?rw(R[k%R.length]):(lt==='new'?'Квартира в новостройке':'Квартира')}${lt==='new'&&R.length?' в новостройке':''}, ${Math.round(ar*[1,1.1,.92,1.2][k])} м²`}}
+ return {typical:ppmOf('flat',reg)*ar,mk:k=>`${R.length?rw(R[k%R.length]):(lt==='new'?'Квартира в новостройке':'Квартира')}${lt==='new'&&R.length?' в новостройке':''}, ${Math.round(ar*[1,1.1,1.04,1.2][k])} м²`}}
 function demoAds(){const j=bAct();const S=adSpec(j),W=adPlaces(j);const own=num(A.bbud);const bud=budget();let mid;
  if(A.pman){const [lo,hi]=pRange();mid=(lo+hi)/2}else mid=own||(bN()>1?S.typical:(bud||S.typical));
  const L=[[.9,'Циан'],[.97,'Авито'],[1.02,'Домклик'],[1.07,'Циан']].map(([f,src],k)=>({src,nm:S.mk(k),p:Math.round(mid*f/10000)*10000,w:W[k%W.length]}));
@@ -1409,7 +1410,7 @@ function demoAds(){const j=bAct();const S=adSpec(j),W=adPlaces(j);const own=num(
  const blk=`<div class="f"><div class="lbl">Дом, дача или участок · покупка ${j+1}</div>${houseB(j)}</div>`;
  const k=h.indexOf('<div class="hint" style="margin-bottom:6px">Дома и дачи:');return k>=0?h.slice(0,k)+blk+h.slice(k):h+blk}}
 // старые сохранения: районы СПб не переносятся на покупку в другом регионе
-{const s0=syncO;syncO=function(){s0();const r=bReg(bAct());if(A.dist&&A.dist.length&&buys()){if(r==='Ленинградская область')A.dist=A.dist.filter(x=>LO.some(t=>t[0]===x));else if(r!=='Санкт-Петербург')A.dist=[]}}}
+{const s0=syncO;syncO=function(){s0();const r=bReg(bAct());if(A.dist&&A.dist.length&&buys()){if(r==='Ленинградская область')A.dist=A.dist.filter(x=>LO.some(t=>t[0]===x)||(typeof LOR!=='undefined'&&LOR.includes(x)));else if(r!=='Санкт-Петербург')A.dist=[]}}}
 
 // ===== 16.11.2026 (6): загородные параметры — везде, где задаются параметры покупки или продажи
 const kadW=r=>['Санкт-Петербург','Ленинградская область'].includes(r)?'от КАД':['Москва','Московская область'].includes(r)?'от МКАД':'от города';
@@ -1423,7 +1424,7 @@ function houseB(j){const L=bGet(j,'hobj')==='land';
   <div class="lbl" style="margin-top:6px">Земля · категория и ВРИ</div>${bChips(j,'hland',HLAND,1)}<div class="hint">Можно отметить несколько.</div>
   <div class="lbl" style="margin-top:6px">Межевание</div>${bChips(j,'hmezh',[['y','Только с межеванием'],['dk','Не важно']])}${MEZHW()}
   <div class="lbl" style="margin-top:6px">Коммуникации · что нужно</div>${bChips(j,'hneed',HNEED,1)}
-  <div class="lbl" style="margin-top:6px">Удалённость ${kadW(bReg(j))}</div>${bChips(j,'hkad',KADO)}${kadXB(j)}`}
+  <div class="lbl" style="margin-top:6px">Удалённость ${kadW(bReg(j))}</div>${kadChips(j)}${kadXB(j)}`}
 function bParams(j){const lt=bLt(j);
  if(lt==='house')return houseB(j);
  if(lt==='room')return `<div class="lbl" style="margin-top:6px">Сколько комнат покупаете</div>${bChips(j,'kcnt',KCNT)}${kDiffB(j)}
@@ -1435,7 +1436,7 @@ BF.push('hmezh','hkad');
 // строки демо-объявлений: сотки и удалённость
 {const o=adSpec;adSpec=function(j){const S=o(j);if(bLt(j)!=='house')return S;const km=KADM[bGet(j,'hkad')];const w=kadW(bReg(j));const mk=S.mk;
  const nd=bGet(j,'hneed')||[];const cm=nd.filter(x=>['gas','el','water','sew'].includes(x)).map(x=>({gas:'газ',el:'свет',water:'вода',sew:'канализация'}[x]));
- return {typical:S.typical*(km?[1.4,1.1,.85,.7,.55][['10','30','60','100','far'].indexOf(bGet(j,'hkad'))]:1),mk:k=>mk(k)+(km?', '+km[k]+' км '+w:'')+(cm.length?', '+cm.join(', '):'')}}}
+ return {typical:S.typical*(km?[1.4,1.1,.85,.7,.6,.5][['10','30','60','100','150','far'].indexOf(bGet(j,'hkad'))]:1),mk:k=>mk(k)+(km?', '+km[k]+' км '+w:'')+(cm.length?', '+cm.join(', '):'')}}}
 // продажа: удалённость у загородного объекта
 function okadO(i){return `<div class="lbl" style="margin-top:5px">Удалённость ${kadW(sReg(i))}</div>${chipsO(i,'okad',KADO)}${kadXO(i)}`}
 
@@ -1510,6 +1511,7 @@ function stageList(){const a=sells()?sObjs().map((o,j)=>vLab(j)+(locNeed()?' · 
 // короткие подписи в шапке экрана (мало места)
 {const sh=show;show=function(id,keep){const r=sh(id,keep);const s=SCR[id];if(s&&s.st===1&&A.goal==='alt'){const e=$('stepinfo');if(e&&/Оценка/.test(e.textContent)&&!/подбор/.test(e.textContent))e.textContent=e.textContent.replace('Оценка','Оценка и подбор')}return r}}
 // понятные счётчики: склонения, без нулей и сокращений
+const plg=(n,a,b)=>n+' '+(n%10===1&&n%100!==11?a:b); // родительный: «из 1 этапа», «из 5 этапов»
 const plw=(n,a,b,c)=>{const m=n%10,h=n%100;return n+' '+(m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c)};
 const dW=n=>plw(n,'день','дня','дней'),nW=n=>plw(n,'неделя','недели','недель');
 function spanW(a,b){const u=x=>x>=14||(x>=7&&x%7===0)?1:0;const v=x=>u(x)?Math.round(x/7):x;
@@ -1517,7 +1519,7 @@ function spanW(a,b){const u=x=>x>=14||(x>=7&&x%7===0)?1:0;const v=x=>u(x)?Math.r
 function leftLine(st,dc,vs,a,b,warn){const P=[];if(st)P.push(plw(st,'шаг','шага','шагов'));if(dc)P.push(plw(dc,'документ','документа','документов'));P.push(vs?plw(vs,'визит','визита','визитов'):'без визитов');P.push(spanW(a,b)+(warn?' ⚠':''));return P.join(' · ')}
 {const o=SCR.path.b;SCR.path.b=()=>{let h=o();
  h=h.replace(/осталось: (\d+) шаг\. · (\d+) док\. · (\d+) виз\. · ([^<]*?)(?=<\/div>)/g,(m,st,dc,vs,rest)=>{const w=/⚠/.test(rest);return 'осталось ' + leftLine(+st,+dc,+vs,...rngD(rest.replace(' ⚠','')),w)});
- const t=workTotals();h=h.replace(/Осталось сами: \d+ шагов · \d+ документов · \d+ визитов · [^<]*? ⚠/,'Осталось сделать самим: '+leftLine(t.st,t.dc,t.vs,t.dmin,t.dmax,1));
+ const t=workTotals();h=h.replace(/Осталось сами: \d+ шаг[а-я]* · \d+ документ[а-я]* · \d+ визит[а-я]* · [^<]*? ⚠/,'Осталось сделать самим: '+leftLine(t.st,t.dc,t.vs,t.dmin,t.dmax,1));
  const k=h.indexOf('>'+STAGES[1].t+'</div>');if(sells()&&k>0&&/ объект|покуп/.test(STAGES[1].t)&&objTotal()>1){const e=k+STAGES[1].t.length+7;h=h.slice(0,e)+`<div class="s">${stageList()}</div>`+h.slice(e)}
  return h}}
 // «2 дн.–7 дн.» / «3 нед.» → дни
@@ -1605,7 +1607,7 @@ function kSellBlock(j,many){const o=OB(j),sf=j?'_'+j:'';
  ${ck('k1'+sf,'Выписка ЕГРН: комната — отдельный объект или доля в праве на квартиру',T('t-any','от этого зависят правила ниже'))}
  ${ck('k2'+sf,'Соседи-собственники имеют право преимущественной покупки — письменное извещение с ценой и условиями',T('t-any','ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ'))}
  ${ck('k3'+sf,'Извещение: через нотариуса, заказным письмом с уведомлением или телеграммой; в мессенджере и по почте не считается',T('t-own','ст. 86 Основ о нотариате · платно'))}
- ${ck('k3n'+sf,'Или нотариальный отказ: сосед сам приходит к нотариусу и подписывает отказ от преимущественной покупки — тогда месяц ждать не нужно',T('t-not','нотариус · сосед лично'))}
+ ${ck('k3n'+sf,'Или нотариальный отказ: сосед сам приходит к нотариусу и подписывает отказ от преимущественного права покупки — тогда месяц ждать не нужно',T('t-not','нотариус · сосед лично'))}
  ${ck('k4'+sf,'Месяц считается со дня получения извещения (или возврата письма); раньше — если все соседи отказались письменно',T('t-any','п. 2 ст. 250 ГК РФ'))}
  ${ck('k5'+sf,'Одна из комнат принадлежит городу — извещение получает и город; куда направлять, подскажет нотариус',T('t-any','ч. 6 ст. 42 ЖК РФ'))}</div>`}
 SCR.km5.st=2;SCR.km5.t='Соседи: извещение о продаже';SCR.km5.i='Этап 2 · Подготовка · документы';
@@ -1733,7 +1735,7 @@ const FEE_RX=[
  ['<b>Циан</b> — собственнику бесплатно 1 объявление в категории',()=>'<b>Циан</b> — '+FEES.platforms.cian],
  ['<b>Авито</b> — обычно 1 бесплатное в год в подкатегории; дальше цена по региону',()=>'<b>Авито</b> — '+FEES.platforms.avito],
  ['<b>Яндекс Недвижимость</b> — СПб и ЛО: 1 бесплатное за 182 дня, срок 365 дней',()=>'<b>Яндекс Недвижимость</b> — '+FEES.platforms.ya],
- ['<b>Домклик</b> — 1 бесплатное в категории, далее от 99 ₽ за 30 дней',()=>{const d=FEES.platforms.dom;return `<b>Домклик</b> — ${d.text} ${rub(d.price)} за ${d.days} дней`}]];
+ ['<b>Домклик</b> — 1 бесплатное в категории, далее от 99 ₽ за 30 дней',()=>{const d=FEES.platforms.dom;return `<b>Домклик</b> — ${d.text} ${rub(d.price)} за ${plw(d.days,'день','дня','дней')}`}]];
 {const sh=show;show=function(id,keep){const r=sh(id,keep);const b=$('body');if(b){let h=b.innerHTML,c=h;FEE_RX.forEach(([a,f])=>{const a2=a.replace(/ ₽/g,'&nbsp;₽');h=h.split(a).join(f()).split(a2).join(f())});if(h!==c)b.innerHTML=h}return r}}
 
 // ===== (22) Коэффициент — одна строка; налог: «Справлюсь сам» / «Ситиус проверит»; цены — только на карточке заказа
@@ -1873,7 +1875,7 @@ function bBud(j){return num(bGet(j,'bbud'))}
 {const lv=SCR.live.b;SCR.live.b=()=>{const h=lv();return buys()&&bN()>1?h.replace('Сначала бюджет (этапы 0–1). ','Укажите бюджет этой покупки на первом экране. '):h}}
 function budMulti(){const n=bN(),bud=budget(),ready=vReady();let sum=0,miss=0;
  const rows=Array.from({length:n},(_,j)=>{const b=bBud(j);sum+=b;if(!b)miss++;const [lo,hi]=buyRange(b);
-  return `<div class="sl"><span class="nm">Покупка ${j+1} · ${BLTN[bLt(j)]||bLt(j)} · ${hq(bCity(j)||rgShort(bReg(j)))}<br><span class="hint">${b?'Бюджет '+(b<BSMALL?fmt(b):mln(b))+' · ищем '+rngT(lo,hi):'Бюджет не указан — <a href="#" onclick="go(\'s0a\');return false">указать</a>'}</span></span><button class="btn ghost" style="padding:6px 9px;font-size:12px" ${b?'':'disabled'} onclick="setBuyObj(${j},1);A.pcenter='';A.pman=0;go('links')">Смотреть</button></div>`}).join('');
+  return `<div class="sl"><span class="nm">Покупка ${j+1} · ${BLTN[bLt(j)]||bLt(j)} · ${hq(bCity(j)||rgShort(bReg(j)))}${bLt(j)==='house'&&kadTx(j)?' · '+kadTx(j):''}<br><span class="hint">${b?'Бюджет '+(b<BSMALL?fmt(b):mln(b))+' · ищем '+rngT(lo,hi):'Бюджет не указан — <a href="#" onclick="go(\'s0a\');return false">указать</a>'}</span></span><button class="btn ghost" style="padding:6px 9px;font-size:12px" ${b?'':'disabled'} onclick="setBuyObj(${j},1);A.pcenter='';A.pman=0;go('links')">Смотреть</button></div>`}).join('');
  const over=bud&&sum>bud?`<div class="note risk" style="margin-top:6px">Бюджеты покупок вместе — ${mln(sum)}, а денег на покупки — ${mln(bud)}. Проверьте суммы.</div>`:'';
  return `<div class="f"><div class="lbl">Деньги на покупки</div><div class="row mut" style="font-size:10.5px"><span>Свои деньги, ₽</span><span>Одобренная ипотека, ₽</span></div><div class="row">${inp('own','0')}${inp('mortsum','0')}</div>
  <div class="big" style="margin-top:4px">${bud?(bud<BSMALL?fmt(bud):mln(bud)):'—'}</div><div class="hint">${A.goal==='alt'&&!ready?'Деньги от продажи посчитаем после оценки всех объектов продажи. ':''}${A.goal==='alt'?'От продажи (минус остаток долга), свои деньги и ипотека вместе.':'Свои деньги и ипотека вместе.'}</div></div>
@@ -2050,15 +2052,15 @@ SCR.s1c.b=()=>{const j=vCur(),e=vEst(j),mu=vN()>1;const V=vAll();const base=mu?(
 const KCNT=[['1','1'],['2','2 в одной квартире'],['3','3 и больше'],['2d','В разных квартирах']];
 function kDiffB(j){return bGet(j,'kcnt')==='2d'?`<div class="hint">Каждую комнату в другой квартире ищем отдельной покупкой — со своим местом и бюджетом.</div><button class="btn ghost" style="width:100%;padding:7px;margin-top:4px;font-size:12.5px" onclick="bSet(${j},'kcnt','1');A.bo=[...(A.bo||[]),{lt:'room',kcnt:'1'}];show(cur,true)">+ Комната в другой квартире</button>`:''}
 // удалённость: своё значение
-function kadXB(j){const x=num(bGet(j,'hkadx')),w=kadW(bReg(j));const inp=`<input style="${x?'flex:1;min-width:0':'margin-top:5px'}" inputmode="numeric" aria-label="Удалённость ${w} · не дальше, км · свой вариант" placeholder="или своё: до … км" value="${hq(bGet(j,'hkadx')||'')}" oninput="bSet(${j},'hkadx',this.value)" onchange="if(this.value)bSet(${j},'hkad','');show(cur,true)">`;
- return x?`<div class="row" style="align-items:center;gap:8px;margin-top:5px"><span style="font-weight:600;flex:0 0 auto">до</span>${inp}<span style="font-weight:600;flex:0 0 auto">км ${w}</span></div><div class="hint">Ищем от 0 до ${x} км ${w}.</div>`:inp}
+function kadXB(j){const [f,t]=kadR(j),w=kadW(bReg(j));const I=(key,v,al)=>`<input style="flex:1;min-width:0" inputmode="numeric" aria-label="Удалённость ${w} · ${al}, км" placeholder="${al} … км" value="${v||''}" oninput="bSet(${j},'${key}',this.value)" onchange="bSet(${j},'hkad','');show(cur,true)">`;
+ return `<div class="row" style="align-items:center;gap:8px;margin-top:5px"><span style="font-weight:600;flex:0 0 auto">от</span>${I('hkadf',f,'от')}<span style="font-weight:600;flex:0 0 auto">до</span>${I('hkadx',t,'до')}<span style="font-weight:600;flex:0 0 auto">км</span></div>${f||t?`<div class="hint">Ищем ${kadTxL(j)}.</div>`:''}`}
 function kadXO(i){const o=OB(i);return `<input style="margin-top:5px" inputmode="numeric" aria-label="Удалённость, км · свой вариант" placeholder="или своё значение, км" value="${hq(o.okadx||'')}" oninput="OB(${i}).okadx=this.value" onchange="if(this.value)OB(${i}).okad='';show(cur,true)">`}
-BF.push('hkadx');
+BF.push('hkadx','hkadf');
 // покупка: своё значение — верхняя граница «до N км»; демо-объявления — разная удалённость от 0 до N
-const kadUp=(x,k)=>Math.max(1,Math.round(x*[.35,.6,.85,1][k%4]));
-{const o=adSpec;adSpec=function(j){const S=o(j);const x=num(bGet(j,'hkadx'));if(bLt(j)!=='house'||!x)return S;const mk=S.mk,m=x*.6;
- return {typical:S.typical*(m<=10?1.4:m<=30?1.1:m<=60?.85:m<=100?.7:.55),mk:k=>mk(k)+', '+kadUp(x,k)+' км '+kadW(bReg(j))}}}
-{const l0=bLocLine;bLocLine=function(j){const t=l0(j),x=num(bGet(j,'hkadx'));return bLt(j)==='house'&&x?locLine([t,'до '+x+' км '+kadW(bReg(j))]):t}}
+const kadIn=(lo,hi,k)=>Math.max(1,Math.round(lo+(hi-lo)*[.2,.5,.8,1][k%4]));
+{const o=adSpec;adSpec=function(j){const S=o(j);if(bLt(j)!=='house')return S;const [f,t]=kadR(j);if(!f&&!t)return S;const mk=S.mk,lo=f||0,hi=t||f+50,m=(lo+hi)/2;
+ return {typical:S.typical*(m<=10?1.4:m<=30?1.1:m<=60?.85:m<=100?.7:m<=150?.6:.5),mk:k=>mk(k)+', '+kadIn(lo,hi,k)+' км '+kadW(bReg(j))}}}
+{const l0=bLocLine;bLocLine=function(j){const t=l0(j),x=bLt(j)==='house'?kadTx(j):'';return x?locLine([t,x]):t}}
 {const t0=uTitle;uTitle=function(u){let t=t0(u);const g=sUnits()[u]||[0],o=OB(g[0]);if(o.otype==='house'&&!o.okad&&num(o.okadx))t+=', ~'+num(o.okadx)+' км '+kadW(sReg(g[0]));return t}}
 // межевание: предупреждение покупателю ⚠ до согласования формулировки
 const MEZHW=()=>`<div class="note risk" style="margin-top:5px"><b>Участок без межевания</b><br>Без межевания участком можно владеть и пользоваться, но почти ничего нельзя с ним сделать. С 1 марта 2025 года, если границ нет в ЕГРН, Росреестр приостанавливает регистрацию продажи, дарения, обмена, залога и аренды такого участка; новый дом на нём не поставят на учёт и не зарегистрируют${law('пп. 21.1, 21.2 ч. 1 ст. 26 218-ФЗ')}. Многие владельцы об этом не знают. Проверить: по кадастровому номеру на ${lnk('https://nspd.gov.ru','nspd.gov.ru')} — «Без координат границ» или «площадь декларированная» значит, межевания нет. Не платите, пока границы не внесены в ЕГРН.</div>`;
@@ -2079,7 +2081,7 @@ function bChar(j){const lt=bLt(j),n=bN();return `<div class="f bchar" data-b="${
  if(a<0)return h;if(bLt(j)==='house'&&c>a)return h.slice(0,a)+bChar(j)+h.slice(c);return h.slice(0,a)+bChar(j)+h.slice(a)}}
 {const o=SCR.live.b;SCR.live.b=()=>{let h=o();if(!buys()||A.ltype!=='room')return h;const j=bAct();
  const a=h.indexOf('<div class="f"><div class="lbl">Коммуналка</div>'),e=h.indexOf('Параметры коммуналки</button></div>',a);if(a<0||e<0)return h;
- return h.slice(0,a)+`<div class="f bchar" data-b="${j}"><div class="lbl">Комнаты${bN()>1?' · покупка '+(j+1):''}</div>${bParams(j)}<button class="btn ghost" style="width:100%;padding:7px;margin-top:6px" onclick="go('kom')">Ещё: всего комнат в квартире, соседи, слова для поиска</button></div>`+h.slice(e+'Параметры коммуналки</button></div>'.length)}}
+ return h.slice(0,a)+`<div class="f bchar" data-b="${j}"><div class="lbl">Комнаты${bN()>1?' · покупка '+(j+1):''}</div>${bParams(j)}<button class="btn ghost" style="width:100%;padding:7px;margin-top:6px" onclick="go('kom')">Ещё: соседи, слова для поиска</button></div>`+h.slice(e+'Параметры коммуналки</button></div>'.length)}}
 // ===== (31) 18.11: «Город или адрес» с подсказками вместо выбора региона; регион — по городу; работает без интернета
 const CITY=CITY_RAW.split(';').map(x=>{const [n,r,p]=x.split('|');return {n,r:RG_ALL[+r],p:+p,k:n.toLowerCase().replace(/ё/g,'е')}});
 const lnorm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/^\s*(г\.|город|пос\.|посёлок|поселок|п\.|пгт)\s*/,'').trim();
@@ -2166,10 +2168,10 @@ function locPick(d){const box=d.parentNode,w=d.closest('.loc'),el=w.querySelecto
  if(was!==!!p.whole&&k[0]==='b')locRerender();return r}}
 function locWholeT(k){const L=locGet(k);if(!locWhole(k)||!L.reg)return '';const s=k[0]==='s';
  if(s)return `Регион: ${hq(L.reg)}. Город или посёлок можно дописать.`;
- let t='Ищем '+rgAll(L.reg);if(k[0]==='b'){const j=+k.slice(1)||0,x=num(bGet(j,'hkadx'));if(bLt(j)==='house'&&x)t+=', до '+x+' км '+kadW(L.reg)}return hq(t)+'.'}
+ let t='Ищем '+rgAll(L.reg);if(k[0]==='b'){const j=+k.slice(1)||0,x=bLt(j)==='house'?kadTxL(j):'';if(x)t+=', '+x}return hq(t)+'.'}
 function locHintT(k){const L=locGet(k);if(locAsk(k))return '';if(locWhole(k)&&L.reg)return k[0]==='s'?locWholeT(k):hq('Ищем '+rgAll(L.reg))+'.';return L.reg?`Регион: ${hq(L.reg)}`:''}
 {const li=locIn;locIn=function(k,lab,ph){let h=li(k,lab,ph);const L=locGet(k);if(locWhole(k)&&!L.city&&L.reg)h=h.replace('value=""',`value="${hq(L.reg)}"`);return h}}
-{const kx=kadXB;kadXB=function(j){let h=kx(j);if(locWhole('b'+j)){const x=num(bGet(j,'hkadx'));if(x)h=h.replace(/<div class="hint">Ищем от 0 до \d+ км [^<]*<\/div>/,`<div class="hint">${locWholeT('b'+j)}</div>`)}return h}}
+{const kx=kadXB;kadXB=function(j){let h=kx(j);if(locWhole('b'+j)){const [f,t]=kadR(j);if(f||t)h=h.replace(/<div class="hint">Ищем [^<]* км [^<]*<\/div>/,`<div class="hint">${locWholeT('b'+j)}</div>`)}return h}}
 
 // ===== (34) 18.11: при переходе на другой экран («Дальше», «Назад», меню, ссылки) — сразу к началу экрана
 function scrTop(){const b=document.getElementById('body');if(b)b.scrollTop=0;const ph=document.getElementById('phone');if(ph)ph.scrollTop=0;try{window.scrollTo(0,0)}catch(e){}if(document.scrollingElement)document.scrollingElement.scrollTop=0}
@@ -2182,7 +2184,7 @@ function spMig(){if(A.sprice&&!A.spmig){if(!num(A.myp))A.myp=A.sprice;A.sprice='
 vOwnP=function(j){return num(OB(j).myp)};
 sellPrice=function(){const n=sells()?vN():1;let t=0;for(let j=0;j<n;j++)t+=num(OB(j).myp);return t||n0(A.price)};
 function spTotal(){const n=vN();if(n<2)return '';const P=Array.from({length:n},(_,j)=>num(OB(j).myp));const k=P.filter(Boolean).length;if(!k)return '';
- return `<div class="card sptot"><b>Всего: ${fmt(P.reduce((t,x)=>t+x,0))}</b>${k<n?`<br><span class="hint">Цена указана у ${k} из ${n} объектов — остальные оценим по похожим на этапе 1.</span>`:''}</div>`}
+ return `<div class="card sptot"><b>Всего: ${fmt(P.reduce((t,x)=>t+x,0))}</b>${k<n?`<br><span class="hint">Цена указана у ${k} из ${plg(n,'объекта','объектов')} — остальные оценим по похожим на этапе 1.</span>`:''}</div>`}
 function spField(j,lab){return `<div class="f spf"><div class="lbl">${lab}</div><input inputmode="numeric" aria-label="${hq(lab)}" placeholder="например, 3 500 000" value="${hq(OB(j).myp||'')}" oninput="OB(${j}).myp=this.value;saveSt()" onchange="show(cur,true)"><div class="hint">Проверим по похожим объявлениям на этапе 1.</div></div>`}
 {const b0=SCR.s0b.b;SCR.s0b.b=function(){let h=b0.apply(this,arguments);
  h=h.replace(/<div class="f"><div class="lbl">За сколько хотите продать, ₽ · [^<]*<\/div><input[^>]*><div class="hint">Проверим по похожим объявлениям на этапе 1\.<\/div><\/div>/,'');
@@ -2394,7 +2396,7 @@ function logErr(id,e){try{const L=JSON.parse(localStorage.getItem('sitius-err')|
 function stT(s){try{return s.t}catch(e){return 'Этап '+s.n}}
 function sF(s){try{return s.first||'path'}catch(e){return 'path'}}
 function pathSafe(){let L=[];try{L=STAGES.filter(s=>{try{return s.show()}catch(e){return true}})}catch(e){L=STAGES}const d=L.filter(s=>done.has(s.n)).length;
- return `<div class="f"><div class="lbl">Пройдено ${d} из ${L.length} этапов</div><div class="bar"><div style="width:${L.length?d/L.length*100:0}%"></div></div></div><div class="f">${L.map((s,k)=>`<div class="st"><div class="dot ${done.has(s.n)?'done':''}" onclick="go('${sF(s)}')">${done.has(s.n)?'✓':k}</div><div style="flex:1"><div class="t" onclick="go('${sF(s)}')">${stT(s)}</div><div class="s">${done.has(s.n)?'готово · ':''}<a href="#" class="gld" onclick="go('${sF(s)}');return false">открыть</a></div></div></div>`).join('')}</div>`}
+ return `<div class="f"><div class="lbl">Пройдено ${d} из ${plg(L.length,'этапа','этапов')}</div><div class="bar"><div style="width:${L.length?d/L.length*100:0}%"></div></div></div><div class="f">${L.map((s,k)=>`<div class="st"><div class="dot ${done.has(s.n)?'done':''}" onclick="go('${sF(s)}')">${done.has(s.n)?'✓':k}</div><div style="flex:1"><div class="t" onclick="go('${sF(s)}')">${stT(s)}</div><div class="s">${done.has(s.n)?'готово · ':''}<a href="#" class="gld" onclick="go('${sF(s)}');return false">открыть</a></div></div></div>`).join('')}</div>`}
 Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescriptor(s,'b');if(!d||typeof d.value!=='function')return;const b0=d.value;
  s.b=function(){try{return b0.apply(this,arguments)}catch(e){logErr(id,e);if(id==='path')return errLine(e)+pathSafe();return `<div class="card risk"><b>Этот экран не открылся</b><br>Ваши ответы сохранены. Вернитесь назад или откройте «Мой путь».${errLine(e)}<button class="btn ghost" style="width:100%;padding:7px;margin-top:6px" onclick="go('path')">Мой путь</button></div>`}};
  if(typeof s.next==='function'){const n0=s.next;s.next=function(){try{return n0.apply(this,arguments)}catch(e){logErr(id+'.next',e);return 'path'}}}});
@@ -2402,7 +2404,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='20.11.2026 18:11';
+var APPV='21.11.2026 22:47';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2456,9 +2458,9 @@ objTotal=function(){return (sells()?sObjs().filter((o,j)=>!j||kFilled(o)).length
 #body{padding-left:max(14px,calc((100% - 680px) / 2))!important;padding-right:max(14px,calc((100% - 680px) / 2))!important}}`;document.head.appendChild(st)}
 
 // ===== (46) 18.11 №29: широкий экран — без процентных отступов внутри увеличенного (zoom) блока; самопроверка: если содержимое вылезает, увеличение снимается
-{const st=document.createElement('style');st.textContent=`@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){#phone>#body{padding-left:16px!important;padding-right:16px!important}#phone>#body>*{max-width:640px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}}
-@media (orientation:landscape) and (min-width:700px) and (max-height:500px){#phone>#body{padding-left:14px!important;padding-right:14px!important}#phone>#body>*{max-width:680px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}}
-@media (min-width:700px) and (min-height:821px){#body{padding-left:16px!important;padding-right:16px!important}#body>*{max-width:680px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}}
+{const st=document.createElement('style');st.textContent=`@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){#phone>#body{padding-left:16px!important;padding-right:16px!important}#phone>#body>*{max-width:640px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}#body>button,#body>a.btn{display:block}}
+@media (orientation:landscape) and (min-width:700px) and (max-height:500px){#phone>#body{padding-left:14px!important;padding-right:14px!important}#phone>#body>*{max-width:680px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}#body>button,#body>a.btn{display:block}}
+@media (min-width:700px) and (min-height:821px){#body{padding-left:16px!important;padding-right:16px!important}#body>*{max-width:680px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}#body>button,#body>a.btn{display:block}}
 html.nz #phone>*:not(#splash){zoom:1!important}`;document.head.appendChild(st)}
 function zoomFix(){try{const b=document.getElementById('body');if(!b||document.documentElement.classList.contains('nz'))return;const r=b.getBoundingClientRect();if(!r.width)return;
  const W=document.documentElement.clientWidth;let bad=r.right>W+2||r.left<-2;if(!bad){const nav=document.getElementById('nav'),q=nav&&nav.getBoundingClientRect();if(q&&q.width&&q.left>r.left+50&&r.right>q.left+2)bad=true}
@@ -2607,6 +2609,264 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('dealsheet')&&$('
 // 20.11 №68: в окне «Продолжить на другом устройстве» — «Сохранить сделку» и текст 1 рядом
 {const _dr=devRender;devRender=function(){_dr();const sh=$('devsheet');if(!sh)return;const cl=[...sh.querySelectorAll('button')].pop();if(!cl)return;
  cl.insertAdjacentHTML('beforebegin',`<div class="devdealbox" style="border-top:1px solid #3d5578;margin:12px 0 0;padding-top:10px"><div class="dv-h">${DEAL_T.warn}</div><button class="btn ghost devdeal" style="width:100%;margin-top:6px" onclick="dealSave()">Сохранить сделку</button></div>`)}}
+
+// ---------- 20.11 расселение: баги и расчёты №69–76 (тексты не меняются)
+// №69: «Единственное жильё» — по каждому объекту; в «Как получили» для способов со сроком 5 лет
+function soleOf(o){return o&&o!==A?o.sole:A.sole}
+function minYrs(b,o){return ['inh','gift','priv','rent'].includes(b)||soleOf(o||A)==='y'?3:5}
+{const br=bRows;bRows=function(o){const s=A.sole;A.sole=soleOf(o);try{return br(o)}finally{A.sole=s}}}
+{const ab=acqBlock;acqBlock=function(i,opts,full){const h=ab(i,opts,full);const o=OB(i);if(!(o.acqs||[]).some(b=>!['inh','gift','priv','rent'].includes(b)))return h;
+ return h+`<div class="f"><div class="lbl">Единственное жильё${(A.so||[]).length?' · '+oRef(i):''}</div>${chipsO(i,'sole',[['y','Да'],['n','Нет']])}</div>`}}
+{const sb=SCR.s10b.b;SCR.s10b.b=function(){return sb.apply(this,arguments).replace(/\s*<div class="f"><div class="lbl">Единственное жильё<\/div><div class="chips">(?:<span[^>]*>[^<]*<\/span>)*<\/div><\/div>/,'')}}
+// №70: «N комнат: договор и деньги» — комнаты всех покупок, а не только первой
+kDeal=function(){let r=0,s=0;if(sells())sObjs().forEach(o=>{if(o.otype==='room')r++;else if(o.otype==='shr')s++});
+ if(buys())for(let j=0;j<bN();j++){if(bLt(j)!=='room')continue;if(bGet(j,'kform')==='shr')s++;else{const c=bGet(j,'kcnt');r+=c==='2'||c==='2d'?2:c==='3'?3:1}}
+ const P=[];if(r)P.push(r===1?'комната':plw(r,'комната','комнаты','комнат'));if(s)P.push(s===1?'доля':plw(s,'доля','доли','долей'));return {r,s,t:P.join(' и ')||'комната'}};
+// №71: город не дублируется, если адрес уже начинается с него
+objLineV=function(j){const o=OB(j);const ad=o.same==='y'?A.addr:o.addr;let c=sCity(j)||sReg(j);if(c&&ad&&String(ad).toLowerCase().startsWith(String(c).toLowerCase()))c='';return [c,ad||'',vRoomNo(j)?'комната '+arS(o.area||'')+' м²':(o.area?arS(o.area)+' м²':'')].filter(x=>x&&x!=='комната  м²').join(', ')};
+// №72: в поле «Город или адрес» показываем введённый адрес целиком; правка адреса сохраняется
+{const li=locIn;locIn=function(k,lab,ph){let h=li(k,lab,ph);if(k[0]==='s'){const i=+k.slice(1)||0;const o=i?OB(i):A;const L=locGet(k);if(o.addr&&L.city&&String(o.addr).toLowerCase().startsWith(String(L.city).toLowerCase()))h=h.replace('value="'+hq(L.city)+'"','value="'+hq(o.addr)+'"')}return h}}
+{const la=locApply;locApply=function(k,txt,pick){if(k[0]==='s'&&!pick){const p=locParse(txt);if(p.rest){const i=+k.slice(1)||0;const o=i?OB(i):A;o.addr=String(txt).trim()}}return la(k,txt,pick)}}
+// №73: выбранное число комнат помним — пустые комнаты при перезагрузке не удаляются
+{const sk=setKsell;setKsell=function(n){A.ksn=n;return sk.apply(this,arguments)}}
+migEmpty=function(){if(!(A.so||[]).length)return;const keep=Math.max(0,(+A.ksn||1)-1);let c=0;const n0=A.so.length;A.so=A.so.filter(o=>{if(!(o.otype==='room'&&o.same==='y'))return true;c++;return kFilled(o)||c<=keep});if(A.so.length!==n0){A.oi=0;A.ui=0;try{saveSt()}catch(e){}}};
+// №74: «+ Комната в другой квартире» — новая покупка сразу после исходной
+function bInsAfter(j,o){A.bo=A.bo||[];A.bo.splice(j,0,o);['locq','locw'].forEach(m=>{const M=A[m];if(!M)return;const N={};Object.keys(M).forEach(k=>{const x=/^b(\d+)$/.exec(k);N[x&&+x[1]>j?'b'+(+x[1]+1):k]=M[k]});A[m]=N});if((A.bi||0)>j)A.bi=(A.bi||0)+1}
+kDiffB=function(j){return bGet(j,'kcnt')==='2d'?`<div class="hint">Каждую комнату в другой квартире ищем отдельной покупкой — со своим местом и бюджетом.</div><button class="btn ghost" style="width:100%;padding:7px;margin-top:4px;font-size:12.5px" onclick="bSet(${j},'kcnt','1');bInsAfter(${j},{lt:'room',kcnt:'1'});show(cur,true)">+ Комната в другой квартире</button>`:''};
+// №75: «Далее» на экране районов возвращает туда, откуда пришли
+SCR.dist.next=()=>{const p=hist[hist.length-1];if(p&&SCR[p]&&!['live','links','fav','kom','favq','dist'].includes(p)){setTimeout(()=>{if(hist[hist.length-1]==='dist')hist.pop();const i=hist.lastIndexOf(p);if(i===hist.length-1)hist.pop()},0);return p}return 'live'};
+// №76: документы растут с числом сделок (этапы 8–10 — на каждую сделку; опека и визиты — не умножаем: сделки цепочки в один день)
+{const wt=workTotals;workTotals=function(){const t=wt();const L=STAGES.filter(s=>s.show()&&!done.has(s.n)).map(s=>s.n);const nb=buys()?bN():0,ns=sells()?sObjs().length:0;const deals=nb+ns,base=(nb?1:0)+(ns?1:0);
+ const X={8:Math.max(0,nb-1),9:Math.max(0,deals-base),10:Math.max(0,deals-base)};L.forEach(n=>{const x=X[n];if(!x)return;const w=WK(n);t.dc+=w.docs.filter(d=>d!=='Разрешение опеки').length*x;t.st+=(n===8?w.st:0)*x});return t}}
+// №85: покупка привязывается к одному или нескольким объектам продажи (одна семья — несколько комнат); в «Сводке» — сравнение по каждой семье
+function bForOn(){return A.goal==='alt'&&bN()>1&&sObjs().length>1}
+function bForL(j){const v=bGet(j,'bfor');return (Array.isArray(v)?v:v!=null&&v!==''?[v]:[]).map(String)}
+function bForT(j,k){const L=bForL(j),x=String(k);bSet(j,'bfor',L.includes(x)?L.filter(y=>y!==x):[...L,x]);saveSt();show(cur,true)}
+BF.push('bfor');
+{const bp=bParams;bParams=function(j){const h=bp(j);if(!bForOn())return h;const L=bForL(j);
+ return h+`<div class="lbl" style="margin-top:6px">Взамен какого объекта</div><div class="chips">${sObjs().map((o,k)=>`<span class="${L.includes(String(k))?'on':''}" onclick="bForT(${j},${k})">${hq(vLab(k).split(' · ')[0])}</span>`).join('')}</div>`}}
+function bForGroups(){const P={},f=x=>P[x]===undefined||P[x]===x?(P[x]=x):(P[x]=f(P[x]));const B=[];
+ for(let j=0;j<bN();j++){const L=bForL(j).map(Number).filter(k=>k<sObjs().length);if(!L.length)continue;B.push([j,L]);L.forEach(k=>f(k));L.slice(1).forEach(k=>{P[f(k)]=f(L[0])})}
+ const G={};B.forEach(([j,L])=>{const r=f(L[0]);const g=G[r]=G[r]||{o:new Set(),b:[]};L.forEach(k=>g.o.add(k));g.b.push(j)});
+ return Object.values(G).map(g=>({o:[...g.o].sort((a,c)=>a-c),b:g.b})).sort((a,c)=>a.o[0]-c.o[0])}
+{const bm=budMulti;budMulti=function(){const h=bm();if(!bForOn())return h;const G=bForGroups();if(!G.length)return h;
+ const rows=G.map(g=>{let p=0,db=0,pk=1;g.o.forEach(k=>{const o=sObjs()[k]||{};const e=vEst(k).price;if(!e)pk=0;p+=e;db+=o.omort==='y'?num(o.odebt):0});if(!pk)p=0;
+  const s=g.b.reduce((t,j)=>t+bBud(j),0);const d=p&&s?s-(p-db):0;const one=g.o.length===1;
+  const lab=one?hq(vLab(g.o[0])):'Объекты '+andL(g.o.map(k=>String(k+1)));
+  return `<div class="hint" style="margin:3px 0">${lab} — покупки ${g.b.map(j=>j+1).join(', ')}: ${s?mln(s):'бюджет не указан'}${p?' · '+(one?'объект':'объекты')+' ~'+mln(p)+(db?' минус долг '+mln(db):''):''}${d>0?' · <b>не хватает '+mln(d)+'</b>':p&&s?' · хватает':''}</div>`}).join('');
+ return h+`<div class="f"><div class="lbl">По каждому объекту: цена и покупки взамен</div>${rows}</div>`}}
+
+// ---------- 20.11 fix2 (ответы пользователя на вопросы по расселению)
+// №80: строка «Одна из комнат принадлежит городу» — только после ответа «Да» на вопрос о комнате города
+{const ks=kSellBlock;kSellBlock=function(j,many){let h=ks(j,many);if(A.kcity!=='y')h=h.replace(/<div class="ck[^"]*" onclick="A\.ck\['k5[^']*'\][^"]*"><i><\/i><div>Одна из комнат принадлежит городу[\s\S]*?<\/div><\/div>/,'');return h}}
+{const kb=SCR.km5.b;SCR.km5.b=function(){return `<div class="f"><div class="lbl">Есть комната, которая принадлежит городу?</div>${chips('kcity',[['y','Да'],['n','Нет']])}</div>`+kb.apply(this,arguments)}}
+// №83: в покупке ищем «от N м²» — без верхней границы (квартира: Циан mintarea, Домклик area__gte; комната: Циан min_room_area)
+aRange=function(){if(A.aman)return [n0(A.amin),n0(A.amax)];const d=n0(A.adesired);return d?[Math.round(d),0]:[0,0]};
+{const dp=domParams;domParams=function(){const p=dp();if(!A.aman){const d=n0(A.adesired);if(d&&!p.some(x=>x[0]==='area__gte'))p.push(['area__gte',Math.round(d)])}return p}}
+// №87: «Не первый этаж» — тот же пункт, что в «Что важно» (need: nf1), продублирован на карточке покупки на первом экране; в ссылке Циана is_first_floor=0 (Авито и Домклик — без изменений: точного параметра Домклика нет)
+function nfOn(j){return (bGet(j,'need')||[]).includes('nf1')}
+{const cu=cianURL;cianURL=function(town){let u=cu(town);if(!buys())return u;const j=bAct();
+ if(bLt(j)==='room'&&!/min_room_area=/.test(u)){const ka=n0(bGet(j,'karea')),c=bGet(j,'kcnt');if(ka&&(!c||c==='1'))u+='&min_room_area='+Math.round(ka)}
+ if(bLt(j)!=='house'&&nfOn(j)&&!/is_first_floor=/.test(u))u+='&is_first_floor=0';return u}}
+{const bp=bParams;bParams=function(j){let h=bp(j);if(bLt(j)==='house')return h;
+ if(cur!=='s0a')return h.replace('<div class="lbl" style="margin-top:6px">Общая площадь, м² · примерно</div>','<div class="lbl" style="margin-top:6px">Общая площадь от, м²</div>');
+ h=h.replace('<div class="lbl" style="margin-top:6px">Общая площадь, м² · примерно</div>','<div class="lbl" style="margin-top:6px">Общая площадь от, м²</div>');
+ const i=h.indexOf('<div class="lbl" style="margin-top:6px">Взамен какого объекта</div>');const nf=`<div class="chips" style="margin-top:6px">${`<span class="${nfOn(j)?'on':''}" onclick="bPick(${j},'need','nf1',true)">Не первый этаж</span>`}</div>`;
+ return i>=0?h.slice(0,i)+nf+h.slice(i):h+nf}}
+{const hb=houseB;houseB=function(j){return hb(j).replace('<div class="lbl">Дом, м² · примерно</div>','<div class="lbl">Дом от, м²</div>')}}
+// №89: районы Ленобласти (в т. ч. Приозерский) и удалённость 100–150 км и больше 150 км от КАД
+KADO.splice(4,1,['150','100–150 км'],['far','больше 150 км']);KADM['150']=[105,120,140,115];KADM.far=[160,175,195,170];
+const LOR=['Бокситогорский','Волосовский','Волховский','Всеволожский','Выборгский','Гатчинский','Кингисеппский','Киришский','Кировский','Лодейнопольский','Ломоносовский','Лужский','Подпорожский','Приозерский','Сланцевский','Тихвинский','Тосненский'].map(x=>x+' район');
+{const db=SCR.dist.b;SCR.dist.b=function(){const h=db.apply(this,arguments);const sec=`<div class="f"><div class="lbl">Районы Ленобласти</div><div class="chips">${LOR.map(d=>`<span data-n="${d}" class="${A.dist.includes(d)?'on':''}" onclick="dpick('${d}')">${d}</span>`).join('')}</div><div class="hint">Район Ленобласти в ссылки не передаётся — выберите его на сайте.</div></div>`;
+ const m='районы).</div></div></div>';return h.includes(m)?h.replace(m,'районы).</div></div>'+sec+'</div>'):h}}
+// №84/92: маткапитал и доли детей — по каждому объекту продажи (при 2+ объектах); общий пункт этапа 0 считается из ответов
+function okOf(k){const o=sObjs()[k];return o?o.okids:undefined}
+{const ab=acqBlock;acqBlock=function(i,opts,full){const h=ab(i,opts,full);if(sObjs().length<2||cur==='s10b')return h;
+ return h+`<div class="f"><div class="lbl">Маткапитал или доли детей${' · '+oRef(i)}</div>${chipsO(i,'okids',[['y','Да'],['n','Нет']])}<div class="hint">Да — если в покупку вкладывали маткапитал или у детей есть доли. Тогда нужна опека и нотариус.</div></div>`}}
+{const s0=syncO;syncO=function(){s0.apply(this,arguments);try{const S=sObjs();if(S.length>1){const v=S.map((o,k)=>okOf(k));if(v.every(x=>x==='n'))A.ck.r3=true;else if(v.some(x=>x==='y'))A.ck.r3=false}
+ if(buys()&&bN()>1){const U=new Set();let any=0;for(let j=0;j<bN();j++){const p=bGet(j,'bpay')||[];if(p.length)any=1;p.forEach(x=>U.add(x))}if(any){A.pay=[...U];A.mort=U.has('mort');A.msk=U.has('msk')}}}catch(e){}}}
+{const sc=SCR.s0c.b;SCR.s0c.b=function(){let h=sc.apply(this,arguments);if(sObjs().length>1)h=h.replace(/<div class="ck[^"]*" onclick="A\.ck\['r3'\][^"]*"><i><\/i><div>Детям не выделялись доли, маткапитал не вкладывался<\/div><\/div>/,'');return h}}
+// №90: способ оплаты — по каждой покупке (при 2+ покупках); общий выбор собирается из покупок
+BF.push('bpay');
+{const bp=bParams;bParams=function(j){const h=bp(j);if(!(buys()&&bN()>1))return h;
+ return h+`<div class="lbl" style="margin-top:6px">Как будете платить за эту покупку</div>${bChips(j,'bpay',[['own','Свои'],['sale','От продажи'],['mort','Ипотека'],['msk','Маткапитал'],['subs','Субсидия']],1)}`}}
+{const sa=SCR.s0a.b;SCR.s0a.b=function(){let h=sa.apply(this,arguments);if(buys()&&bN()>1)h=h.replace(/<div class="lbl">Как будете платить за покупку<\/div><div class="chips">(?:<span[^>]*>[^<]*<\/span>)*<\/div>/,'');return h}}
+{const cr=cianRoomURL;cianRoomURL=function(town){let u=cr(town);if(!buys())return u;const j=bAct();if(A.kform!=='shr'){const ka=n0(bGet(j,'karea')),c=bGet(j,'kcnt');if(ka&&(!c||c==='1')&&!/min_room_area=/.test(u))u+='&min_room_area='+Math.round(ka)}
+ if(nfOn(j)&&!/is_first_floor=/.test(u))u+='&is_first_floor=0';return u}}
+
+// №82: при одной комнате — «Площадь комнаты, м²»; №88: «Всего комнат в квартире» — на основном экране покупки-комнаты, как верхняя граница «до N»
+const KBT=[['2','до 2'],['3','до 3'],['4','до 4'],['5','до 5'],['any','Не важно']];
+{const bp=bParams;bParams=function(j){let h=bp(j);if(bLt(j)!=='room')return h;const c=bGet(j,'kcnt');
+ if(!['2','3','2d'].includes(c))h=h.replace('<div class="lbl" style="margin-top:6px">Площадь комнат вместе, м²</div>','<div class="lbl" style="margin-top:6px">Площадь комнаты, м²</div>');
+ const m='<div class="lbl" style="margin-top:6px">Как оформлено</div>';const kb=`<div class="lbl" style="margin-top:6px">Всего комнат в квартире</div>${bChips(j,'kbtot',KBT)}`;
+ return h.includes(m)?h.replace(m,kb+m):h+kb}}
+{const kb=SCR.kom.b;SCR.kom.b=function(){let h=kb.apply(this,arguments);if(!buys())return h;
+ h=h.replace(/<div class="f"><div class="lbl">Всего комнат в квартире<\/div><div class="chips">(?:<span[^>]*>[^<]*<\/span>)*<\/div><\/div>/,'');
+ h=h.replace(/<div class="lbl">Площадь комнат вместе, м² · ±10%<\/div>/,'<div class="lbl">Площадь комнат вместе от, м²</div>').replace(/(<div class="hint">)\d+–\d+ м²\. /,'$1');return h}}
+{const cr=cianRoomURL;cianRoomURL=function(town){return cr(town).replace(/&roomany=1/,'')}}
+// №79 (20.11): продаются все комнаты квартиры — блок извещения соседей один раз на квартиру (текст — на утверждение); 1–2 комнаты — как раньше
+function kAllSold(){const t=+A.ktot;return A.otype==='room'&&t>0&&kN()>=t&&kN()>2}
+function kGrpJ(){return sObjs().map((o,j)=>j).filter(j=>j===0||(OB(j).otype==='room'&&OB(j).same==='y'))}
+{const ks=kSellBlock;kSellBlock=function(j,many){if(!kAllSold())return ks(j,many);const G=kGrpJ();if(!G.includes(j))return ks(j,many);if(j!==G[0])return '';
+ return `<div class="f"><div class="lbl">Вся квартира · ${plw(G.length,'комната','комнаты','комнат')}</div>
+ ${ck('k1','Выписка ЕГРН: комната — отдельный объект или доля в праве на квартиру',T('t-any','от этого зависят правила ниже'))}
+ ${ck('kall','Продаются все комнаты квартиры. Если комнаты продают разными договорами (разным покупателям или в разное время), каждый продавец извещает остальных собственников о цене и условиях, и они вправе купить первыми в течение месяца. Ждать месяц не нужно, если остальные собственники подпишут у нотариуса отказ от преимущественного права покупки. Извещение не нужно, только если все комнаты продаются одним договором. Иногда комнаты продают разными сделками специально, например чтобы уменьшить налог, — Ситиус подскажет, как это сделать в вашем случае.',T('t-not','ст. 250 ГК РФ · нотариус'))}
+ ${A.kcity==='y'?ck('k5','Одна из комнат принадлежит городу — извещение получает и город; куда направлять, подскажет нотариус',T('t-any','ч. 6 ст. 42 ЖК РФ')):''}</div>`}}
+
+// ---------- 21.11 (ответы пользователя на fix2)
+// 7а: при продаже всех комнат убрать строки «В извещении указывают цену…» и «Вы продаёте все комнаты квартиры (… из …)…»
+{const kb=SCR.km5.b;SCR.km5.b=function(){let h=kb.apply(this,arguments);if(!kAllSold())return h;h=h.replace(kNote,'');const sh='<div class="hint">'+kSellHint()+'</div>';return h.replace(sh,'')}}
+// 5: поле «Площадь комнат вместе» убрано (покупка 2+ комнат вместе): на карточке покупки и на экране «Комнаты в коммуналке»
+{const bp=bParams;bParams=function(j){const h=bp(j);if(bLt(j)!=='room')return h;return h.replace(/<div class="lbl" style="margin-top:6px">Площадь комнат вместе, м²<\/div><input[^>]*>/,'')}}
+{const kb=SCR.kom.b;SCR.kom.b=function(){const h=kb.apply(this,arguments);if(!buys())return h;return h.replace(/<div class="f"><div class="lbl">Площадь комнат вместе от, м²<\/div>[\s\S]*?<\/div><\/div>/,'')}}
+// 9а: при «Да» (маткапитал или доли детей) — короткий список у объекта
+{const ab=acqBlock;acqBlock=function(i,opts,full){let h=ab(i,opts,full);if(okOf(i)!=='y')return h;
+ const m='Тогда нужна опека и нотариус.</div>';return h.replace(m,m+`<div class="hint" style="margin-top:4px">• Опека — разрешение на сделку с долей ребёнка.<br>• Нотариус — удостоверяет договор.<br>• Разрешение опеки — по закону до 15 календарных дней, на практике бывает дольше.</div>`)}}
+// 8: покупка доли — «Что ищете»: «Комнату» (без объявлений о продаже долей, «Всего комнат в квартире» — до N) или «Долю без отдельной комнаты» (только доли, без числа комнат)
+// Циан: flat_share=1 — только доли, flat_share=2 — без долей (документация cianparser, lenarsaitov). Авито: открытого параметра нет — ссылки не меняем. Домклик — параметр не найден.
+function xGetX(i,k){return i?((A.xo||[])[i-1]||{})[k]:A['x0'+k]}
+function xSetX(i,k,v){if(!i)A['x0'+k]=v;else{A.xo=A.xo||[];A.xo[i-1]=A.xo[i-1]||{};A.xo[i-1][k]=v}saveSt();show(cur,true)}
+{const xb=xBlock;xBlock=function(){let h=xb();if(A.goal!=='share')return h;const B=[];for(let i=0;i<xN();i++)if(xBuys(i))B.push(i);let n=0;const m='<div class="lbl" style="margin-top:6px">Где ищете</div>';
+ return h.split(m).map((part,k)=>{if(!k)return part;const i=B[n++];if(i===undefined)return m+part;const xk=xGetX(i,'xk'),kt=xGetX(i,'kt');
+  const q=`<div class="lbl" style="margin-top:6px">Что ищете</div><div class="chips">${[['room','Комнату'],['shr','Долю без отдельной комнаты']].map(([v,t])=>`<span class="${xk===v?'on':''}" onclick="xSetX(${i},'xk','${v}')">${t}</span>`).join('')}</div>${xk==='room'?`<div class="lbl" style="margin-top:6px">Всего комнат в квартире</div><div class="chips">${KBT.map(([v,t])=>`<span class="${kt===v?'on':''}" onclick="xSetX(${i},'kt','${v}')">${t}</span>`).join('')}</div>`:''}`;
+  return q+m+part}).join('')}}
+{const cu=cianURL;cianURL=function(town){let u=cu(town);if(A.goal!=='share')return u;let i=-1;for(let k=0;k<xN();k++)if(xBuys(k)){i=k;break}if(i<0)return u;const xk=xGetX(i,'xk');
+ u=u.replace(/&flat_share=\d/,'');if(xk==='room'){u=u.replace(/&room\d=1/g,'')+'&room0=1&flat_share=2'}else if(xk==='shr'){u=u.replace(/&room\d=1/g,'')+'&flat_share=1'}return u}}
+// покупка-комната: «Комнаты» — без долей (flat_share=2); «Доли в квартире» — только доли, без числа комнат
+{const cr=cianRoomURL;cianRoomURL=function(town){let u=cr(town);if(!buys())return u;if(A.kform==='shr')return u.replace(/&room[1-9]=1/g,'');if(A.kform==='room'&&!/flat_share=/.test(u))u+='&flat_share=2';return u}}
+// 21.11 (вопрос 3, вариант а): «Всего комнат в квартире» при поиске комнаты в ссылки не передаётся — подсказка рядом с выбором
+const KBT_H='<div class="hint">Число комнат в квартире задайте на сайте.</div>';
+{const bp=bParams;bParams=function(j){const h=bp(j);if(bLt(j)!=='room'||bGet(j,'kform')==='shr')return h;const m=`${bChips(j,'kbtot',KBT)}`;return h.includes(m)?h.replace(m,m+KBT_H):h}}
+{const xb=xBlock;xBlock=function(){const h=xb();if(A.goal!=='share')return h;return h.replace(/(<div class="lbl" style="margin-top:6px">Всего комнат в квартире<\/div><div class="chips">(?:<span[^>]*>[^<]*<\/span>)*<\/div>)/g,'$1'+KBT_H)}}
+
+// 21.11 (п.1): удалённость покупки — диапазон «от … до … км»; готовые варианты ставят от/до; одно значение на карточке покупки и на этапе поиска
+const KADR={'10':[0,10],'30':[10,30],'60':[30,60],'100':[60,100],'150':[100,150],'far':[150,0]};
+function kadR(j){let f=num(bGet(j,'hkadf')),t=num(bGet(j,'hkadx'));const p=bGet(j,'hkad');if(!f&&!t&&p&&KADR[p])[f,t]=KADR[p];return [f,t]}
+function kadTx(j){const [f,t]=kadR(j),w=kadW(bReg(j));return f&&t?f+'–'+t+' км '+w:t?'до '+t+' км '+w:f?'от '+f+' км '+w:''}
+function kadTxL(j){const [f,t]=kadR(j),w=kadW(bReg(j));return f&&t?'от '+f+' до '+t+' км '+w:t?'до '+t+' км '+w:f?'от '+f+' км '+w:''}
+function kadOn(j,p){const [f,t]=kadR(j),R=KADR[p];return !!(f||t)&&R&&R[0]===f&&R[1]===t}
+function kadPick(j,p){const on=kadOn(j,p),R=KADR[p];bSet(j,'hkad','');bSet(j,'hkadf',on||!R[0]?'':String(R[0]));bSet(j,'hkadx',on||!R[1]?'':String(R[1]));saveSt();show(cur,true)}
+function kadChips(j){return `<div class="chips">${KADO.map(([p,l])=>`<span class="${kadOn(j,p)?'on':''}" onclick="kadPick(${j},'${p}')">${l}</span>`).join('')}</div>`}
+function migKad(){try{for(let j=0;j<bN();j++){const p=bGet(j,'hkad');if(!p)continue;const R=KADR[p];if(R&&!num(bGet(j,'hkadf'))&&!num(bGet(j,'hkadx'))){bSet(j,'hkadf',R[0]?String(R[0]):'');bSet(j,'hkadx',R[1]?String(R[1]):'')}bSet(j,'hkad','')}}catch(e){}}
+{const s0=syncO;syncO=function(){s0.apply(this,arguments);migKad()}}
+{const b6=SCR.s6.b;SCR.s6.b=function(){const h=b6.apply(this,arguments);if(!hBuy()||h.includes('onclick="kadPick('))return h;const j=bAct();
+ return h.replace(/(<div class="lbl" style="margin-top:6px">Удалённость [^<]*<\/div>)<div class="chips">(?:<span[^>]*>[^<]*<\/span>)*<\/div>/,(m,l)=>l+kadChips(j)+kadXB(j))}}
+
+// ===== 21.11 19:00: цена покупки — по ценам найденных объявлений (среднее); «Свой бюджет» (bbud) — по желанию и важнее среднего;
+// доплаты по каждой покупке (свои, ипотека, маткапитал, субсидия — как отмечено в «Как будете платить»); Сводка сравнивает деньги с ценой
+BF.push('blst','bown','bmort','bmsk','bsubs');
+function bL(j){const L=bGet(j,'blst');return Array.isArray(L)?L:[]}
+function bLSet(j,r,k,v){const L=bL(j).map(x=>({...x}));while(L.length<=r)L.push({p:'',a:''});L[r][k]=v;bSet(j,'blst',L);saveSt()}
+function bAvg(j){const P=bL(j).map(x=>num(x.p)).filter(x=>x>0);return P.length?{v:Math.round(P.reduce((t,x)=>t+x,0)/P.length/1e4)*1e4,n:P.length}:{v:0,n:0}}
+bBud=function(j){return num(bGet(j,'bbud'))||bAvg(j).v};
+const BPX=[['own','bown','Свои'],['mort','bmort','Ипотека'],['msk','bmsk','Маткапитал'],['subs','bsubs','Субсидия']];
+function bPayL(j){const p=bGet(j,'bpay');return Array.isArray(p)?p:[]}
+function bExtra(j){const P=bPayL(j);return BPX.reduce((t,[c,k])=>t+(P.includes(c)?num(bGet(j,k)):0),0)}
+function bSaleOn(j){const P=bPayL(j);return !P.length||P.includes('sale')}
+const M2=v=>mln(v);
+// карточка покупки: без поля бюджета; суммы доплат — у отмеченных способов оплаты
+{const bo=boBlock;boBlock=function(){return bo().replace(/\s*<div class="lbl" style="margin-top:6px">Бюджет на эту покупку, ₽<\/div><input[^>]*><div class="hint">У каждой покупки свой бюджет — по нему ищем объявления\.<\/div>/g,'')}}
+{const bp=bParams;bParams=function(j){const h=bp(j);if(!(buys()&&bN()>1))return h;const P=bPayL(j);const X=BPX.filter(([c])=>P.includes(c));if(!X.length)return h;
+ return h+`<div class="row" style="gap:8px;margin-top:5px;flex-wrap:wrap">${X.map(([c,k,t])=>`<div style="flex:1;min-width:120px"><div class="lbl">${t}, ₽</div><input inputmode="numeric" aria-label="${t}, ₽ · покупка ${j+1}" placeholder="сумма, ₽" value="${hq(bGet(j,k)||'')}" oninput="bSet(${j},'${k}',this.value);saveSt()"></div>`).join('')}</div><div class="hint">Сколько добавите к деньгам от продажи. Можно вписать позже.</div>`}}
+// бюджет при нескольких покупках — деньги от продажи и все доплаты
+{const b0=budget;budget=function(){const b=b0();if(!(buys()&&bN()>1))return b;if(A.goal==='alt'&&!vReady())return 0;let x=0;for(let j=0;j<bN();j++)x+=bExtra(j);return b+x}}
+// поиск по площадкам: цена — по «Своему бюджету» или средней цене объявлений
+{const pr=pRange;pRange=function(){if(!A.pman&&buys()&&bN()>1){const b=bBud(bAct());return b?buyRange(b):[0,0]}return pr()}}
+// шаг «Смотреть на площадках»: цены найденных объявлений и «Свой бюджет»
+function bPriceBlock(){const j=bAct(),L=bL(j),n=Math.max(3,L.length),a=bAvg(j),own=num(bGet(j,'bbud'));const nb=bN()>1?' · покупка '+(j+1):'';
+ const rows=Array.from({length:n},(_,r)=>{const x=L[r]||{};return `<div class="row" style="gap:6px;margin-top:4px"><input inputmode="numeric" aria-label="Цена найденного объявления ${r+1}, ₽${nb}" placeholder="цена ${r+1}, ₽" value="${hq(x.p||'')}" oninput="bLSet(${j},${r},'p',this.value)" onchange="show(cur,true)"><input style="flex:0 0 76px" inputmode="decimal" aria-label="Площадь найденного объявления ${r+1}, м²${nb}" placeholder="м²" value="${hq(x.a||'')}" oninput="bLSet(${j},${r},'a',this.value)" onchange="show(cur,true)"></div>`}).join('');
+ return `<div class="f bprice"><div class="lbl">Цены найденных объявлений${nb}</div><div class="hint">Откройте поиск выше, найдите 2–3 подходящих объявления и вставьте их цены. Площадь — если знаете.</div>${rows}
+ ${L.length>=3?`<button class="btn ghost" style="width:100%;padding:7px;margin-top:4px;font-size:12.5px" onclick="bLSet(${j},${L.length},'p','');show(cur,true)">+ Ещё строка</button>`:''}
+ <div class="hint" style="margin-top:4px">${a.n?`Средняя цена: <b>${fmt(a.v)}</b> (из ${a.n})`:'Цен пока нет.'}</div>
+ <div class="lbl" style="margin-top:8px">Свой бюджет, ₽ · если знаете сумму</div><input inputmode="numeric" aria-label="Свой бюджет, ₽${nb}" placeholder="например, 6 000 000" value="${hq(bGet(j,'bbud')||'')}" oninput="bSet(${j},'bbud',this.value);saveSt()" onchange="show(cur,true)">
+ <div class="hint">Если заполнено — считаем по нему, а не по средней цене.</div>
+ ${own||a.n?`<div class="hint" style="margin-top:4px"><b>Цена этой покупки: ${fmt(own||a.v)}</b> — ${own?'по своему бюджету':'по средней цене объявлений'}.</div>`:''}</div>`}
+{const lk=SCR.links.b;SCR.links.b=function(){const h=lk.apply(this,arguments);if(!buys()||(A.lsale!=null&&sells()))return h;const B=bPriceBlock();
+ const m='<button class="btn ghost" style="width:100%;padding:8px" onclick="go(\'fav\')">';let i=h.indexOf(m);if(i<0)i=h.indexOf('<div class="f"><div class="lbl">Подходящие объявления');return i>=0?h.slice(0,i)+B+h.slice(i):h+B}}
+// экран фильтров: без бюджета — подсказка про цены объявлений
+{const lv=SCR.live.b;SCR.live.b=function(){return lv.apply(this,arguments).replace('Укажите бюджет этой покупки на первом экране. ','Цену этой покупки посчитаем по объявлениям — вставьте их цены на следующем экране. ')}}
+// старые сохранения: «Свои деньги» и «Одобренная ипотека» при нескольких покупках — переносим в доплаты покупки
+function migBudMulti(){try{if(!(buys()&&bN()>1))return;const o=num(A.own),m=num(A.mortsum);if(!o&&!m)return;for(let j=0;j<bN();j++)if(num(bGet(j,'bown'))||num(bGet(j,'bmort')))return;
+ const put=(c,k,v)=>{if(!v)return;let j=0;for(let i=0;i<bN();i++)if(bPayL(i).includes(c)){j=i;break}const P=bPayL(j);if(!P.includes(c))bSet(j,'bpay',[...P,c]);bSet(j,k,String(v))};
+ put('own','bown',o);put('mort','bmort',m);A.own='';A.mortsum=''}catch(e){}}
+{const s0=syncO;syncO=function(){s0.apply(this,arguments);migBudMulti()}}
+// Сводка, несколько покупок
+function bGroupsAll(){const n=bN(),S=sells()?sObjs().length:0,all=[...Array(n).keys()];
+ if(bForOn()){const G=bForGroups().map(g=>({o:g.o,b:g.b}));const used=new Set(G.flatMap(g=>g.b));const rest=all.filter(j=>!used.has(j));if(rest.length)G.push({o:[],b:rest,free:1});return G}
+ return [{o:S&&A.goal==='alt'?[...Array(S).keys()]:[],b:all}]}
+function gCalc(g){const so=A.goal==='alt'&&g.o.length&&g.b.some(j=>bSaleOn(j));let sale=0,db=0,pk=1;
+ if(so)g.o.forEach(k=>{const o=sObjs()[k]||{};const e=vEst(k).price;if(!e)pk=0;sale+=e||0;db+=o.omort==='y'?num(o.odebt):0});
+ const net=so&&pk?Math.max(0,sale-db):0,ex=g.b.reduce((t,j)=>t+bExtra(j),0),need=g.b.reduce((t,j)=>t+bBud(j),0),miss=g.b.filter(j=>!bBud(j));return {so,pk,sale,db,net,ex,need,miss,have:net+ex}}
+budMulti=function(){const n=bN(),bud=budget(),ready=vReady();let sum=0;
+ const rows=Array.from({length:n},(_,j)=>{const own=num(bGet(j,'bbud')),a=bAvg(j),b=bBud(j);sum+=b;const P=bPayL(j);const X=BPX.filter(([c,k])=>P.includes(c)&&num(bGet(j,k))).map(([c,k,t])=>t.toLowerCase()+' '+M2(num(bGet(j,k))));
+  return `<div class="sl"><span class="nm">Покупка ${j+1} · ${BLTN[bLt(j)]||bLt(j)} · ${hq(bCity(j)||rgShort(bReg(j)))}${bLt(j)==='house'&&kadTx(j)?' · '+kadTx(j):''}<br><span class="hint">${own?'Свой бюджет '+M2(own):a.n?'Средняя цена объявлений ~'+M2(a.v)+' (из '+a.n+')':'Цены объявлений не вставлены'}${X.length?' · доплата: '+X.join(', '):''}</span></span><button class="btn ghost" style="padding:6px 9px;font-size:12px" onclick="setBuyObj(${j},1);A.pcenter='';A.pman=0;go('links')">Смотреть</button></div>`}).join('');
+ const G=bGroupsAll();const gl=G.map(g=>{const c=gCalc(g);const one=g.o.length===1;
+  const lab=g.free?'Не привязаны к объекту продажи':!g.o.length?'Все покупки':one?hq(vLab(g.o[0])):'Объекты '+andL(g.o.map(k=>String(k+1)));
+  const pl=(g.b.length>1?'покупки ':'покупка ')+g.b.map(j=>j+1).join(', ');
+  const src=[c.so?(c.pk?(one?'объект':'объекты')+' ~'+mln(c.sale)+(c.db?' минус долг '+mln(c.db):''):'объект ещё не оценён'):'',c.ex?'доплата '+M2(c.ex):''].filter(Boolean).join(' + ');
+  const v=c.miss.length?' · вставьте цены объявлений: '+(c.miss.length>1?'покупки ':'покупка ')+c.miss.map(j=>j+1).join(', '):c.so&&!c.pk?'':c.need>c.have?' · <b>не хватает '+M2(c.need-c.have)+'</b>':' · хватает';
+  return `<div class="hint" style="margin:3px 0">${lab} — ${pl}: ${c.need?'~'+M2(c.need):'цена неизвестна'}${src?' · '+src:' · денег не указано'}${v}</div>`}).join('');
+ const over=bud&&sum>bud?`<div class="note risk" style="margin-top:6px">Цены покупок вместе — ${mln(sum)}, а денег на покупки — ${mln(bud)}. Не хватает ${mln(sum-bud)}.</div>`:'';
+ return `<div class="f"><div class="lbl">Деньги на покупки</div><div class="big" style="margin-top:4px">${bud?M2(bud):'—'}</div><div class="hint">${A.goal==='alt'&&!ready?'Деньги от продажи посчитаем после оценки всех объектов продажи. ':''}${A.goal==='alt'?'От продажи (минус остаток долга) и доплаты по покупкам: свои, ипотека, маткапитал, субсидия.':'Доплаты по покупкам: свои, ипотека, маткапитал, субсидия.'}</div></div>
+ <div class="f"><div class="lbl">Цена каждой покупки</div>${rows}${over}<div class="hint" style="margin-top:4px">Цену покупки считаем по средней цене объявлений, которые вы вставили на шаге «Смотреть на площадках», или по своему бюджету.</div></div>
+ <div class="f"><div class="lbl">${G.length===1&&!G[0].o.length?'Хватает ли денег':'По каждому объекту: цена и покупки взамен'}</div>${gl}</div>`};
+// Сводка, одна покупка: цена по объявлениям или свой бюджет против денег
+{const sm=SCR.sum.b;SCR.sum.b=function(){const h=sm.apply(this,arguments);if(!(buys()&&bN()===1))return h;const own=num(A.bbud),a=bAvg(0),p=own||a.v,bud=budget();
+ const ln=`<div class="f"><div class="lbl">Цена покупки и деньги</div><div class="hint">${p?(own?'Свой бюджет ':'Средняя цена объявлений ')+'~'+M2(p)+(own?'':' (из '+a.n+')')+' · денег ~'+(bud?M2(bud):'0')+(p>bud?' · <b>не хватает '+M2(p-bud)+'</b>':' · хватает'):'Цену покупки посчитаем, когда вы вставите цены найденных объявлений на шаге «Смотреть на площадках».'}</div></div>`;
+ const k=h.indexOf('<div class="f"><div class="lbl">Что впереди');return k>=0?h.slice(0,k)+ln+h.slice(k):h+ln}}
+// ---------- правки 21.11 22:10 (n24)
+// п.1: районы поиска — у каждой покупки свои; старые сохранения: общий список копируется в каждую покупку (районы СПб — в покупки в СПб, районы Ленобласти — в покупки в Ленобласти)
+function migDist(){try{if(!buys()||A.mdist)return;const n=bN();if(n<2){A.mdist=1;return}const src=(bAct()===0?A.dist:bSlot(0).dist)||A.dist||[];
+ for(let j=0;j<n;j++){if(j===bAct())continue;const s=bSlot(j);if(s.dist!==undefined&&s.dist.length)continue;const r=bReg(j)||'';const L=/Ленинград/.test(r)?src.filter(d=>LOR.includes(d)):/Петербург/.test(r)?src.filter(d=>!LOR.includes(d)):[];s.dist=L}A.mdist=1}catch(e){}}
+{const s0=syncO;syncO=function(){s0.apply(this,arguments);migDist()}}
+// п.3: «желаемая ±10%» — от/до считаются автоматически (80 → 72–88), пока от/до не изменены вручную
+aRange=function(){if(A.aman)return [n0(A.amin),n0(A.amax)];const d=n0(A.adesired);return d?[Math.round(d*0.9),Math.round(d*1.1)]:[0,0]};
+// п.5: «Сведения об объектах»; из самопроверки убраны r3 (доли детей / маткапитал — на экране объектов) и r6
+Object.defineProperty(SCR.s0b,'t',{get(){const U=sUnits();if(U.length>1)return 'Сведения об объектах · '+U.length;return isHouse()?'Ваш дом и участок':A.otype==='room'&&kN()>1?'Ваши комнаты':isRoomS()?'Ваша комната':'Ваша квартира'},configurable:true});
+Object.defineProperty(SCR.s0c,'t',{get(){return sells()?'Сведения об объектах · 2 из 2 · что уже готово':'Самопроверка готовности'},configurable:true});
+{const sc=SCR.s0c.b;SCR.s0c.b=function(){return sc.apply(this,arguments).replace(/<div class="ck[^"]*" onclick="A\.ck\['r[36]'\][^"]*"><i><\/i><div>[^<]*<\/div><\/div>/g,'')}}
+{const ab=acqBlock;acqBlock=function(i,opts,full){const h=ab(i,opts,full);if(sObjs().length!==1||cur==='s10b'||!sells())return h;
+ return h+`<div class="f"><div class="lbl">Маткапитал или доли детей</div>${chipsO(i,'okids',[['y','Да'],['n','Нет']])}<div class="hint">Да — если в покупку вкладывали маткапитал или у детей есть доли. Тогда нужна опека и нотариус.</div></div>`}}
+{const s0=syncO;syncO=function(){s0.apply(this,arguments);try{const S=sObjs();if(S.length===1){const v=okOf(0);if(v==='n')A.ck.r3=true;else if(v==='y')A.ck.r3=false}}catch(e){}}}
+// п.6: в тёмной полосе сверху — крупно «Этап N из M · название»
+function stgTot(){try{return STAGES.filter(x=>{try{return x.show()}catch(e){return true}}).filter(x=>x.n!==0).length}catch(e){return 0}}
+{const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);try{const e=$('stepinfo'),s=SCR[cur];if(e&&s&&s.st>=0){const m=e.textContent.match(/^Этап (\d+) · ([^·]+?)(?: · (.*))?$/);
+ if(m){const T=stgTot();e.innerHTML=`<b class="stg">Этап ${m[1]}${T?' из '+T:''} · ${m[2]}</b>${m[3]?`<span class="stg2"> · ${m[3]}</span>`:''}`}}}catch(x){}return r}}
+{const st=document.createElement('style');st.textContent=`.top .step .stg{font-size:14px;font-weight:600;color:#e8cf9f;letter-spacing:.2px}.top .step .stg2{font-size:11px;opacity:.85}
+@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){.top .step{display:block!important;margin-top:4px}.top .step .stg{font-size:14px}}
+@media (orientation:landscape) and (max-height:500px){.top .step{display:block!important;margin-top:2px}.top .step .stg{font-size:12.5px}}
+/* п.7: широкий экран — шапка и кнопки не выходят за край окна; без масштабирования шапки и боковой колонки; выравнивание по колонке текста */
+#phone{max-width:100vw;box-sizing:border-box}.top{box-sizing:border-box;max-width:100%;min-width:0}.top h1{min-width:0;max-width:100%;overflow-wrap:anywhere}#nav{box-sizing:border-box;max-width:100%;min-width:0}#nav .btn{min-width:0}
+@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){#phone>.top,#phone>#nav,#phone>#helpbtn,#phone>.tab{zoom:1!important}#phone>#nav,#phone>#helpbtn,#phone>.tab{min-width:0;max-width:250px;box-sizing:border-box}}
+@media (min-width:700px) and (min-height:821px){#phone>.top{padding-left:max(16px,calc((100% - 680px)/2))!important;padding-right:max(56px,calc((100% - 680px)/2))!important}#phone>#nav{padding-left:max(16px,calc((100% - 680px)/2))!important;padding-right:max(16px,calc((100% - 680px)/2))!important}#phone>#helpbtn{max-width:680px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}}`;document.head.appendChild(st)}
+{const zf=zoomFix;zoomFix=function(){zf();try{if(document.documentElement.classList.contains('nz'))return;const W=document.documentElement.clientWidth;for(const id of ['title','next','back']){const e=$(id);if(!e||!e.offsetParent)continue;const q=e.getBoundingClientRect();if(q.width&&(q.right>W+2||q.left<-2)){document.documentElement.classList.add('nz');try{logErr('zoom',{message:id+' '+Math.round(q.left)+'..'+Math.round(q.right)+' / '+W})}catch(x){}break}}}catch(e){}}}
+// п.9: городские (неприватизированные) комнаты — вопрос, преимущественное право в СПб и в других регионах, варианты при покупке или расселении всей квартиры
+function kSpb(r){return /Петербург/.test(r||'')}
+function kCityTx(r,shr){const a=kSpb(r)?'Собственник одной из комнат — город. В Санкт-Петербурге город заранее отказался от преимущественного права покупки в коммунальных квартирах, поэтому извещать его не нужно. Исключение — адреса из приложения к распоряжению, в основном мемориальные квартиры. Извещение получают только соседи-собственники, жильцов по соцнайму не извещают. Перед сделкой уточните у нотариуса.':'Собственник одной из комнат — город или муниципалитет. У него тоже есть преимущественное право. Куда направить извещение, узнайте у нотариуса или в администрации.';
+ return shr?a.replace('Собственник одной из комнат — город или муниципалитет.','Одна из долей принадлежит городу или муниципалитету.').replace('Собственник одной из комнат — город.','Одна из долей принадлежит городу.'):a}
+function kCityRef(r){return kSpb(r)?'ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ, распоряжение КУГИ СПб от 16.04.1999 № 595-р':'ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ'}
+function kCityAll(){return `<div class="f"><div class="lbl">Городская комната: как купить или расселить квартиру целиком</div><div class="hint">Городскую комнату не могут продать ни жильцы, ни соседи. Варианты:<br>1. Жильцы приватизируют комнату и продают её вам как собственники. Приватизация бесплатная, решение принимает Жилищный комитет, срок до 2 месяцев. Нужно согласие всех членов семьи, а если есть дети — разрешение опеки.<br>2. Если комната освободится, город продаёт её по заявлению собственнику остальных комнат, когда квартира становится отдельной. Цена рыночная.<br>3. Если кто-то из жильцов стоит на жилищном учёте, город может дать им социальную выплату на расселение. Квартиру включают в перечень с согласия всех жильцов.<br>Закон РФ № 1541-1 (ст. 2, 8), ст. 59 ЖК РФ, Закон СПб № 169-27 (ст. 3 п. 2 пп. 7), пост. Правительства СПб № 522.</div></div>`}
+function kCityQ(){return `<div class="f"><div class="lbl">Есть ли в квартире неприватизированные комнаты (собственник — город)?</div>${chips('kcity',[['y','Да'],['n','Нет']])}<div class="hint">Это видно в выписке ЕГРН на квартиру, собственник — Санкт-Петербург. Жильцы таких комнат живут по договору социального найма.</div></div>`}
+function kCityFix(h,r,shr){return h.replace(/(?:Одна из комнат|Одна из долей) принадлежит городу[^<]*<br>(<span class="tag[^>]*>)ч\. 6 ст\. 42 ЖК РФ<\/span>/g,(m,t)=>kCityTx(r,shr)+'<br>'+t+kCityRef(r)+'</span>')}
+{const ks=kSellBlock;kSellBlock=function(j,many){return kCityFix(ks(j,many),sReg(j),OB(j).otype==='shr')}}
+{const kb=SCR.km5.b;SCR.km5.b=function(){let h=kb.apply(this,arguments);h=h.replace(/^<div class="f"><div class="lbl">Есть комната, которая принадлежит городу\?<\/div>[\s\S]*?<\/div><\/div>/,kCityQ());
+ h=kCityFix(h,sReg(0),false);if(A.kcity==='y'&&kAllSold())h+=kCityAll();return h}}
+{const kb=SCR.km6.b;SCR.km6.b=function(){let h=kb.apply(this,arguments);let r='Санкт-Петербург';try{for(let j=0;j<bN();j++)if(bLt(j)==='room'){r=bReg(j);break}}catch(e){}
+ h=h.replace(/<div class="ck[^"]*" onclick="A\.ck\['kq5'\][^"]*"><i><\/i><div>[^<]*<br><span[^>]*>[^<]*<\/span><\/div><\/div>/,A.kcity==='y'?ck('kq5',kCityTx(r),T('t-any',kCityRef(r))):'');
+ return kCityQ()+h+(A.kcity==='y'?kCityAll():'')}}
+// п.11: одинаковые тексты по объектам — один раз; разные — группами («Объекты 1–4, 6:»)
+function nRng(a){const r=[];a=[...a].sort((x,y)=>x-y);for(let i=0;i<a.length;){let k=i;while(k+1<a.length&&a[k+1]===a[k]+1)k++;r.push(k>i?a[i]+(k>i+1?'–':', ')+a[k]:String(a[i]));i=k+1}return r.join(', ')}
+function uGrp(n,f){const G=[];for(let u=0;u<n;u++){const t=f(u);const g=G.find(x=>x.t===t);if(g)g.us.push(u);else G.push({t,us:[u]})}return G}
+function uGrpLab(us){if(us.length===1)return uLab(us[0]);const k=[...new Set(us.map(uKind))];return 'Объекты '+nRng(us.map(u=>u+1))+(k.length===1?' · '+k[0]:'')}
+function ckG(ids,text){const on=ids.every(i=>A.ck[i]);return `<div class="ck ${on?'on':''}" onclick="{const v=!${on};${JSON.stringify(ids).replace(/"/g,"'")}.forEach(i=>A.ck[i]=v)};show(cur,true)"><i></i><div>${text}</div></div>`}
+{const o0=SCR.s4a.b;SCR.s4a.b=function(){let h=o0.apply(this,arguments);const U=sUnits();if(U.length<2)return h;const G=uGrp(U.length,u=>priceWhy(U[u]));
+ const pr=G.length===1?`«Цена — ${G[0].t}. Обсудить цену можно после просмотра, особенно если вы готовы быстро оформить покупку».`:G.map(g=>`<br><b>${uGrpLab(g.us)}:</b> «Цена — ${g.t}. Обсудить цену можно после просмотра, особенно если вы готовы быстро оформить покупку».`).join('');
+ return h.replace(/(<div class="card"><b>5\. Про цену:<\/b> )[\s\S]*?(<\/div>)/,(m,a,b)=>a+pr+b)}}
+{const o0=SCR.s2a.b;SCR.s2a.b=function(){let h=o0.apply(this,arguments);const U=sUnits();if(U.length<2)return h;
+ const ids=U.map((g,u)=>u?'d7_'+u:'d7');const re=/<div class="ck[^"]*" onclick="A\.ck\['d7(?:_\d+)?'\][^"]*"><i><\/i><div><b>Объект \d+[^<]*\.<\/b> [^<]*<\/div><\/div>/g;const k=h.search(re);if(k<0)return h;h=h.replace(re,'');
+ const G=uGrp(U.length,showDayT);const add=G.map(g=>ckG(g.us.map(u=>ids[u]),(G.length>1?'<b>'+uGrpLab(g.us)+'.</b> ':'')+g.t)).join('');return h.slice(0,k)+add+h.slice(k)}}
+// подсказки с одинаковым текстом в карточках объектов и покупок — только первая
+{const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);try{let m=0;try{m=sUnits().length>1||(buys()&&bN()>1)}catch(e){}if(m){const seen=new Set();document.querySelectorAll('#body .hint:not(.lochint)').forEach(e=>{const t=e.textContent.trim();if(!t)return;if(seen.has(t))e.style.display='none';else seen.add(t)})}}catch(e){}return r}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
