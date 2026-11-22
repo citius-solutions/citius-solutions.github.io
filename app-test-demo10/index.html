@@ -2392,7 +2392,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='21.11.2026 22:47';
+var APPV='22.11.2026 10:48';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2833,7 +2833,7 @@ function kSpb(r){return /Петербург/.test(r||'')}
 function kCityTx(r,shr){const a=kSpb(r)?'Собственник одной из комнат — город. В Санкт-Петербурге город заранее отказался от преимущественного права покупки в коммунальных квартирах, поэтому извещать его не нужно. Исключение — адреса из приложения к распоряжению, в основном мемориальные квартиры. Извещение получают только соседи-собственники, жильцов по соцнайму не извещают. Перед сделкой уточните у нотариуса.':'Собственник одной из комнат — город или муниципалитет. У него тоже есть преимущественное право. Куда направить извещение, узнайте у нотариуса или в администрации.';
  return shr?a.replace('Собственник одной из комнат — город или муниципалитет.','Одна из долей принадлежит городу или муниципалитету.').replace('Собственник одной из комнат — город.','Одна из долей принадлежит городу.'):a}
 function kCityRef(r){return kSpb(r)?'ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ, распоряжение КУГИ СПб от 16.04.1999 № 595-р':'ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ'}
-function kCityAll(){return `<div class="f"><div class="lbl">Городская комната: как купить или расселить квартиру целиком</div><div class="hint">Городскую комнату не могут продать ни жильцы, ни соседи. Варианты:<br>1. Жильцы приватизируют комнату и продают её вам как собственники. Приватизация бесплатная, решение принимает Жилищный комитет, срок до 2 месяцев. Нужно согласие всех членов семьи, а если есть дети — разрешение опеки.<br>2. Если комната освободится, город продаёт её по заявлению собственнику остальных комнат, когда квартира становится отдельной. Цена рыночная.<br>3. Если кто-то из жильцов стоит на жилищном учёте, город может дать им социальную выплату на расселение. Квартиру включают в перечень с согласия всех жильцов.<br>Закон РФ № 1541-1 (ст. 2, 8), ст. 59 ЖК РФ, Закон СПб № 169-27 (ст. 3 п. 2 пп. 7), пост. Правительства СПб № 522.</div></div>`}
+function kCityAll(){return `<div class="f"><div class="lbl">Если комната принадлежит городу</div><div class="hint">Городскую комнату не могут продать ни жильцы, ни соседи. Варианты:<br>1. Жильцы приватизируют комнату и продают её вам как собственники. Приватизация бесплатная, решение принимает Жилищный комитет, срок до 2 месяцев. Нужно согласие всех членов семьи, а если есть дети — разрешение опеки.<br>2. Если комната освободится, город продаёт её по заявлению собственнику остальных комнат, когда квартира становится отдельной. Цена рыночная.<br>3. Если кто-то из жильцов стоит на жилищном учёте, город может дать им социальную выплату на расселение. Квартиру включают в перечень с согласия всех жильцов.<br>Закон РФ № 1541-1 (ст. 2, 8), ст. 59 ЖК РФ, Закон СПб № 169-27 (ст. 3 п. 2 пп. 7), пост. Правительства СПб № 522.</div></div>`}
 function kCityQ(){return `<div class="f"><div class="lbl">Есть ли в квартире неприватизированные комнаты (собственник — город)?</div>${chips('kcity',[['y','Да'],['n','Нет']])}<div class="hint">Это видно в выписке ЕГРН на квартиру, собственник — Санкт-Петербург. Жильцы таких комнат живут по договору социального найма.</div></div>`}
 function kCityFix(h,r,shr){return h.replace(/(?:Одна из комнат|Одна из долей) принадлежит городу[^<]*<br>(<span class="tag[^>]*>)ч\. 6 ст\. 42 ЖК РФ<\/span>/g,(m,t)=>kCityTx(r,shr)+'<br>'+t+kCityRef(r)+'</span>')}
 {const ks=kSellBlock;kSellBlock=function(j,many){return kCityFix(ks(j,many),sReg(j),OB(j).otype==='shr')}}
@@ -2855,6 +2855,26 @@ function ckG(ids,text){const on=ids.every(i=>A.ck[i]);return `<div class="ck ${o
  const G=uGrp(U.length,showDayT);const add=G.map(g=>ckG(g.us.map(u=>ids[u]),(G.length>1?'<b>'+uGrpLab(g.us)+'.</b> ':'')+g.t)).join('');return h.slice(0,k)+add+h.slice(k)}}
 // подсказки с одинаковым текстом в карточках объектов и покупок — только первая
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);try{let m=0;try{m=sUnits().length>1||(buys()&&bN()>1)}catch(e){}if(m){const seen=new Set();document.querySelectorAll('#body .hint:not(.lochint)').forEach(e=>{const t=e.textContent.trim();if(!t)return;if(seen.has(t))e.style.display='none';else seen.add(t)})}}catch(e){}return r}}
+// ---------- 22.11 (n25): s2c — один общий чек-лист документов для всех объектов: одинаковые пункты — одной строкой (отметка ставится всем объектам), разные — с подписью «Объекты 2–4:»; вопросы и пояснения по отдельным объектам остаются под списком
+{const o0=SCR.s2c.b;SCR.s2c.b=function(){let h=o0.apply(this,arguments);try{const O=sObjs();if(O.length<2)return h;
+ const lb='<div class="lbl" style="margin-top:4px">Другие объекты — документы по их типу</div>';if(!h.includes(lb))return h;
+ const HS=t=>t==='house';const t0=O[0].otype;const RE=/<div class="ck[^"]*" onclick="A\.ck\['d(\d+)(\w+)'\][^"]*"><i><\/i><div>([\s\S]*?)<\/div><\/div>/g;
+ const base={egrn:'g2',reg:'g3',debt:'g4',sp:'g5'};const merge={},rows=[],hints=[],QB=[];
+ h=h.replace(RE,(x,j,k,inner)=>{if(j!=='0')return x;let r=rows.find(y=>y.k===k&&y.inner===inner);if(!r)rows.push(r={k,inner,ids:[],js:[]});r.ids.push('d0'+k);r.js.push(0);return ''});
+ for(let j=1;j<O.length;j++){const d=docsObj(j);let m;RE.lastIndex=0;
+  while((m=RE.exec(d))){const k=m[2],id='d'+j+k,inner=m[3];
+   if(base[k]&&HS(O[j].otype)===HS(t0)&&h.includes(`onclick="A.ck['${base[k]}']`)){(merge[k]=merge[k]||[base[k]]).push(id);continue}
+   let r=rows.find(x=>x.k===k&&x.inner===inner);if(!r)rows.push(r={k,inner,ids:[],js:[]});r.ids.push(id);r.js.push(j)}
+  const lm=d.match(/^<div class="f"><div class="lbl">([\s\S]*?)<\/div>([\s\S]*)<\/div>$/);let rest=(lm?lm[2]:'').replace(RE,'').trim();
+  rest=rest.replace(/<div class="hint">(Наследство и подарок[^<]*)<\/div>/g,(x,t)=>{let g=hints.find(y=>y.t===t);if(!g)hints.push(g={t,js:[]});g.js.push(j);return ''}).trim();
+  if(rest)QB.push(`<div class="f"><div class="lbl">${lm[1]}</div>${rest}</div>`);h=h.replace(d,'')}
+ h=h.replace(lb,'');
+ for(const k in merge){const g=base[k];h=h.replace(new RegExp(`<div class="ck[^"]*" onclick="A\\.ck\\['${g}'\\][^"]*"><i><\\/i><div>([\\s\\S]*?)<\\/div><\\/div>`),(m,inner)=>ckG(merge[k],inner))}
+ const lab=js=>js.length===1?'Объект '+(js[0]+1):'Объекты '+nRng(js.map(j=>j+1));
+ const all=r=>r.js.length===O.length||(!r.js.includes(0)&&r.js.length===O.length-1&&O.every(x=>x.otype===O[1].otype));
+ const add=rows.map(r=>ckG(r.ids,(all(r)?'':'<b>'+lab(r.js)+':</b> ')+r.inner)).join('')+hints.map(g=>`<div class="hint"><b>${lab(g.js)}:</b> ${g.t}</div>`).join('')+QB.join('');
+ const lastG=[...h.matchAll(/<div class="ck[^"]*" onclick="\{const v=![^"]*'g\d+'[^"]*"><i><\/i><div>[\s\S]*?<\/div><\/div>|<div class="ck[^"]*" onclick="A\.ck\['g\d+'\][^"]*"><i><\/i><div>[\s\S]*?<\/div><\/div>/g)].pop();
+ if(lastG){const k=lastG.index+lastG[0].length;h=h.slice(0,k)+add+h.slice(k)}else h+=`<div class="f">${add}</div>`}catch(e){}return h}}
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
