@@ -2395,7 +2395,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 14:42';
+var APPV='23.11.2026 14:53';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2889,10 +2889,11 @@ const REGA_T='Архивная справка о зарегистрирован�
 {const o=SCR.theme.b;SCR.theme.b=function(){return o.apply(this,arguments)+`<div class="f" style="margin-top:14px"><div class="lbl">Документы</div><div class="hint" style="margin:0 0 6px">${LEGALNOTE}</div><div class="about-c"><div><span>Условия</span>${lgA(TERMSURL,'Пользовательское соглашение')}</div><div><span>Данные</span>${lgA(PDURL,'Политика обработки персональных данных')}</div><div><span>Согласие</span>${lgA(CONSURL,'Согласие на обработку персональных данных')}</div></div></div>`}}
 
 // ===== n29 23.11.2026 BEGIN: правки по прогону продажи квартиры (адрес, звонок, ник, перенос, оценка, нотариус, площадки, итог, SMS)
-// >>> leads_client.js (из app_spec/leads_backend/client/, исполнитель доставки задаёт LEADS_URL здесь)
+// >>> leads_client.js (генерируется insert.py из app_spec/leads_backend/client/; URL — из secrets/leads_url.txt)
 // ===== Ситиус · реальная отправка заявок (звонок / заказ услуги) → Apps Script → Telegram-бот + почта владельца
 // LEADS_URL — адрес веб-приложения Apps Script (…/macros/s/…/exec). Пока пустой — честный режим «не отправлено».
-const LEADS_URL='';
+(function(){try{if(/[#&]realsend/.test(location.hash))sessionStorage.setItem('sitius-realsend','1')}catch(e){}})();
+const LEADS_URL=(navigator.webdriver&&!(function(){try{return sessionStorage.getItem('sitius-realsend')}catch(e){return null}})())?'':'https://script.google.com/macros/s/AKfycbzA8ot_zMJwTqcMp8YwNQ7MOIRmHcXO5e39qAmmSduxfCwik9ikWuVX_DCyd6JNljEj/exec';
 const LEADS_Q='sitius-leadq';
 // Возвращает Promise<{ok:boolean,id?:string}>. Запрос — text/plain, чтобы не было CORS preflight.
 function sendLead(lead){
@@ -3278,6 +3279,62 @@ function chartTerm(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).fil
  <div class="hint">Это схема, а не расчёт: данных о сроке продажи похожих объявлений у Аппа нет. Принцип — цена ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений (видно на странице объявления) — график построим по ним.</div></div>`}
 {const b1=SCR.s1a.b;SCR.s1a.b=function(){const h=b1.apply(this,arguments);const j=vCur();const c=chartPrices(j);if(!c)return h;const k='<div class="f"><div class="lbl">Похожие объявления</div>';return h.includes(k)?h.replace(k,c+k):h+c}}
 {const b2=SCR.s1b.b;SCR.s1b.b=function(){const h=b2.apply(this,arguments);const j=vCur();return h+chartPrices(j)+chartTerm(j)}}
+// ---------- n29 v2 (23.11 14:51): две отдельные линии «Рыночная» и «Ваша желаемая», разные цвета, легенда с суммами; похожие — бледным фоном
+document.head.insertAdjacentHTML('beforeend',`<style>
+.chart .bg{fill:none;stroke:currentColor;stroke-opacity:.28;stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;animation:chdraw 1s ease-out forwards;animation-delay:calc(0s - var(--el,0s))}
+.chart .bgp{fill:currentColor;fill-opacity:.35;opacity:0;animation:chfade .3s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
+.chart .hl{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:chdraw 1s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
+.chart .hl.m{stroke:#c9a46a}.chart .hl.o{stroke:#d9735b}.chart .hl.o.out{stroke-dasharray:.03 .02;stroke-dashoffset:0;opacity:0;animation:chfade .5s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
+.chart .lb{opacity:0;animation:chfade .4s ease-out forwards;animation-delay:calc(var(--d,0s) + .7s - var(--el,0s));font:600 10.5px Montserrat,sans-serif}
+.chart .lb.m{fill:#b08a4e}.chart .lb.o{fill:#d9735b}[data-theme=dark] .chart .lb.m{fill:#e0c48f}
+.chart .dt{opacity:0;animation:chfade .4s ease-out forwards;animation-delay:calc(var(--d,0s) + .8s - var(--el,0s))}.chart .dt.m{fill:#c9a46a}.chart .dt.o{fill:#d9735b}.chart .dt{stroke:#fff;stroke-width:1.5}
+.chleg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:4px 0 2px;font-size:12.5px;line-height:1.35}.chleg span{display:inline-flex;align-items:center;gap:6px}
+.chleg i{display:inline-block;width:18px;height:3px;border-radius:2px}.chleg i.m{background:#c9a46a}.chleg i.o{background:#d9735b}.chleg i.a{height:7px;width:7px;border-radius:50%;background:currentColor;opacity:.35}
+.chart.chno .bg,.chart.chno .hl{animation:none;stroke-dashoffset:0}.chart.chno .bgp,.chart.chno .lb,.chart.chno .dt,.chart.chno .hl.o.out{animation:none;opacity:1}
+@media (prefers-reduced-motion:reduce){.chart .bg,.chart .hl{animation:none;stroke-dashoffset:0}.chart .bgp,.chart .lb,.chart .dt,.chart .hl.o.out{animation:none;opacity:1}}
+</style>`);
+// горизонтальная линия уровня цены + подпись над/под ней
+function chH(cls,x1,x2,y,lab,d,up,out){return `<path class="hl ${cls}${out?' out':''}" pathLength="1" style="--d:${d}s" d="M${x1.toFixed(1)} ${y.toFixed(1)} L${x2.toFixed(1)} ${y.toFixed(1)}"/><text class="lb ${cls}" style="--d:${d}s" x="${x2.toFixed(1)}" y="${(up?y-6:y+14).toFixed(1)}" text-anchor="end">${hq(lab)}</text>`}
+function chLeg(e,nA,extra){const pc=e.own&&e.mkt?Math.round((e.own/e.mkt-1)*100):null;
+ return `<div class="chleg">${e.mkt?`<span><i class="m"></i>Рыночная ~${chM(e.mkt)}${extra&&extra.m?' · '+extra.m:''}</span>`:''}${e.own?`<span><i class="o"></i>Ваша желаемая ${chM(e.own)}${pc!==null&&pc!==0?' ('+(pc>0?'+':'')+pc+' %)':''}${extra&&extra.o?' · '+extra.o:''}</span>`:''}${nA?`<span><i class="a"></i>Похожие объявления (${nA})</span>`:''}</div>`}
+// шкала: включает рыночную и желаемую; если желаемая слишком далеко — линия у края с подписью «выше шкалы»
+function chScale(vals,e){const lo0=Math.min(...vals),hi0=Math.max(...vals);const sp=(hi0-lo0)||hi0*.1;let mn=Math.min(lo0,e.mkt||lo0),mx=Math.max(hi0,e.mkt||hi0);let out='';
+ if(e.own){if(e.own>mx+sp*2.5)out='hi';else if(e.own<mn-sp*2.5)out='lo';else{mn=Math.min(mn,e.own);mx=Math.max(mx,e.own)}}const pd=(mx-mn)*.12||mx*.05;return {mn:mn-pd,mx:mx+pd,out}}
+chartPrices=function(j){const e=vEst(j),V=anaVals(j);if(V.length<2)return V.length?`<div class="hint" style="margin:6px 0">График цен появится, когда будет 2 и больше похожих объявлений.</div>`:'';
+ const W=320,H=170,L=8,R=8,T=22,B=24;const vals=V.map(x=>x.v),n=V.length;const S=chScale(vals,e);
+ const X=i=>L+i*(W-L-R)/(n-1),Y=v=>T+(H-T-B)*(1-(v-S.mn)/(S.mx-S.mn));
+ const d=V.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
+ const yM=e.mkt?Y(e.mkt):0,yO=e.own?(S.out==='hi'?T-6:S.out==='lo'?H-B+2:Y(e.own)):0;const near=e.mkt&&e.own&&Math.abs(yM-yO)<16;
+ let g=`<path class="bg" pathLength="1" d="${d}"/>${V.map((p,i)=>`<circle class="bgp" r="3" cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" style="--d:${(.8*i/(n-1)).toFixed(2)}s"/>`).join('')}`;
+ if(e.mkt)g+=chH('m',L,W-R,yM,'Рыночная ~'+chM(e.mkt),.6,!(near&&yM>yO));
+ if(e.own)g+=chH('o',L,W-R,yO,(S.out==='hi'?'↑ выше шкалы · ':S.out==='lo'?'↓ ниже шкалы · ':'')+'Ваша желаемая '+chM(e.own),1,S.out==='lo'?true:near?yO<yM:S.out==='hi'?false:yO<yM,S.out);
+ const ar=arN(OB(j).area),norm=ar&&V.some(x=>x.v!==x.raw);
+ return `<div class="f"><div class="lbl">Цены похожих и ваша цена</div><div class="${chCls('p'+j,d+e.own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График: ${n} цен похожих от ${chM(vals[0])} до ${chM(vals[n-1])}${e.mkt?', рыночная '+chM(e.mkt):''}${e.own?', ваша желаемая '+chM(e.own):''}">
+ <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-4}">дешевле</text><text class="tx" x="${W/2}" y="${H-4}" text-anchor="middle">похожие по цене →</text><text class="tx" x="${W-R}" y="${H-4}" text-anchor="end">дороже</text>${g}</svg></div>
+ ${chLeg(e,n)}<div class="hint">Похожие — от ${chM(vals[0])} до ${chM(vals[n-1])}${norm?', пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}. Рыночная — середина этих цен.${S.out==='hi'?' Ваша цена намного выше всех похожих — линия у верхнего края, шкала не растянута.':S.out==='lo'?' Ваша цена намного ниже всех похожих — линия у нижнего края.':''}</div></div>`};
+chartTerm=function(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).filter(x=>x.d>0);const W=320,H=170,L=8,R=8,T=22,B=28;
+ if(V.length>=3){const P=V.map(x=>({x:x.d,y:x.v})),f=linFit(P),ok=f.b>0;const S=chScale(P.map(p=>p.y),e);const pmx=Math.max(...P.map(p=>p.x)),x0=Math.min(...P.map(p=>p.x));
+  const dOf=v=>ok?Math.max(0,(v-f.a)/f.b):0;const dm=dOf(e.mkt),dw=e.own?dOf(e.own):0;const far=ok&&e.own&&(S.out==='hi'||dw>pmx*1.5);const xmx=Math.max(pmx,ok?dm:0,ok&&!far?dw:0)*1.08||1;
+  const X=dd=>L+(W-L-R)*Math.min(dd,xmx)/xmx,Y=v=>T+(H-T-B)*(1-(v-S.mn)/(S.mx-S.mn));
+  const d=ok?`M${X(x0).toFixed(1)} ${Y(f.a+f.b*x0).toFixed(1)} L${X(xmx).toFixed(1)} ${Y(f.a+f.b*xmx).toFixed(1)}`:'M'+P.slice().sort((a,b)=>a.x-b.x).map(p=>X(p.x).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' L');
+  const yM=Y(e.mkt),yO=e.own?(S.out==='hi'?T-6:S.out==='lo'?H-B+2:Y(e.own)):0;const near=e.own&&Math.abs(yM-yO)<16;
+  let g=`<path class="bg" pathLength="1" d="${d}"/>${P.map((p,i)=>`<circle class="bgp" r="3" cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" style="--d:${(.7*i/P.length).toFixed(2)}s"/>`).join('')}`;
+  const tm=ok?'~'+Math.round(dm)+' дн.':'',to=!e.own?'':!ok?'':far?'дольше всех похожих':'~'+Math.round(dw)+' дн.';
+  g+=chH('m',L,W-R,yM,'Рыночная'+(tm?' · '+tm:''),.6,!(near&&yM>yO));if(ok)g+=`<circle class="dt m" r="5" style="--d:.6s" cx="${X(dm).toFixed(1)}" cy="${yM.toFixed(1)}"/>`;
+  if(e.own){g+=chH('o',L,W-R,yO,(S.out==='hi'?'↑ выше шкалы · ':'')+'Ваша желаемая'+(to?' · '+to:''),1,S.out==='lo'?true:near?yO<yM:S.out==='hi'?false:yO<yM,S.out);if(ok)g+=`<circle class="dt o" r="5" style="--d:1s" cx="${X(far?xmx:dw).toFixed(1)}" cy="${yO.toFixed(1)}"/>`}
+  return `<div class="f"><div class="lbl">Цена и срок продажи · по вашим объявлениям</div><div class="${chCls('t'+j,d+dm+dw+e.own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График цены и срока по ${P.length} объявлениям">
+  <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">0 дн.</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">дней в продаже →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">${Math.round(xmx)} дн.</text>${g}</svg></div>
+  ${chLeg(e,P.length,{m:tm,o:to})}<div class="hint">Точки — ${P.length} объявлений: цена и сколько дней объявление уже висит (вы указали). Это нижняя граница срока: объявление ещё не продано. ${ok?'Бледная линия — прямая по точкам; точка на цветной линии — где ваша цена пересекает её. Дни — ориентир, не обещание.':'По этим объявлениям связи цены и срока не видно — срок не считаем.'}</div></div>`}
+ // схема без данных о сроке
+ const own=e.own||0,o=e.over||0;const S=chScale([e.mkt*.9,e.mkt*1.1],e);const X=t=>L+(W-L-R)*t,Y=v=>T+(H-T-B)*(1-(v-S.mn)/(S.mx-S.mn));
+ const cv=t=>S.mn+(S.mx-S.mn)*(t*t*.35+t*.65),tInv=v=>{const y=Math.max(0,Math.min(1,(v-S.mn)/(S.mx-S.mn)));return (-.65+Math.sqrt(.4225+1.4*y))/.7};
+ const pts=[];for(let i=0;i<=20;i++){const t=i/20;pts.push((i?'L':'M')+X(t).toFixed(1)+' '+Y(cv(t)).toFixed(1))}const d=pts.join(' ');
+ const yM=Y(e.mkt),yO=own?(S.out==='hi'?T-6:S.out==='lo'?H-B+2:Y(own)):0;const near=own&&Math.abs(yM-yO)<16;const to=!own?'':o>=5?'дольше':o<=-5?'быстрее':'примерно так же';
+ let g=`<path class="bg" pathLength="1" d="${d}"/>`+chH('m',L,W-R,yM,'Рыночная · показы 4–12 нед. ⚠',.6,!(near&&yM>yO))+`<circle class="dt m" r="5" style="--d:.6s" cx="${X(tInv(e.mkt)).toFixed(1)}" cy="${yM.toFixed(1)}"/>`;
+ if(own)g+=chH('o',L,W-R,yO,(S.out==='hi'?'↑ выше шкалы · ':'')+'Ваша желаемая · '+to,1,S.out==='lo'?true:near?yO<yM:S.out==='hi'?false:yO<yM,S.out)+`<circle class="dt o" r="5" style="--d:1s" cx="${X(S.out==='hi'?1:S.out==='lo'?0:tInv(own)).toFixed(1)}" cy="${yO.toFixed(1)}"/>`;
+ return `<div class="f"><div class="lbl">Цена и срок продажи · ориентировочная оценка</div><div class="${chCls('t'+j,d+own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Схема: чем выше цена относительно рынка, тем дольше продажа">
+ <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">быстрее</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">срок продажи →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">дольше</text>${g}</svg></div>
+ ${chLeg(e,0,{m:'показы 4–12 нед. ⚠',o:to})}<div class="hint">Это схема, а не расчёт: данных о сроке продажи похожих объявлений у Аппа нет. Бледная кривая — принцип: ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений — график построим по ним.</div></div>`};
 // ===== n29 END
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
