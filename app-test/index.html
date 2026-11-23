@@ -2395,7 +2395,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 14:59';
+var APPV='23.11.2026 15:20';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3367,6 +3367,64 @@ chartTerm=function(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).fil
  return `<div class="f"><div class="lbl">Цена и срок продажи · ориентировочная оценка</div><div class="${chCls('t'+j,d+own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Схема: чем выше цена относительно рынка, тем дольше продажа">
  <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">быстрее</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">срок продажи →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">дольше</text>${g}</svg></div>
  ${chLeg(e,0,{m:'показы 4–12 нед. ⚠',o:to})}<div class="hint">Это схема, а не расчёт: данных о сроке продажи похожих объявлений у Аппа нет. Бледная кривая — принцип: ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений — график построим по ним.</div></div>`};
+// ---------- n29 (23.11 15:10) · итоговый план по цели: продажа, покупка, новостройка, обмен (продать и купить), доля, расселение
+function planKind(){const g=A.goal;if(objTotal&&objTotal()>=5)return 'rass';return g==='sell'?'sell':g==='buy'?'buy':g==='new'?'new':g==='alt'?'alt':g==='share'?'share':''}
+const PLAN_TT={sell:'План продажи',buy:'План покупки',new:'План покупки новостройки',alt:'План обмена: продать и купить',share:'План сделки с долей',rass:'План расселения'};
+function planTitle(){return PLAN_TT[planKind()]||'Ваш план'}
+const PLAN_PAYB='Безопасные расчёты банка (СБР) или аккредитив: ваши деньги лежат в банке, пока Росреестр не зарегистрирует переход права, затем банк переводит их продавцу. Коды из SMS, «Госключа» и банка не называйте никому.';
+const PLAN_PAYN='Бронь, ДДУ и эскроу — этап 9: условия брони (срок, стоимость, возврат), договор долевого участия и счёт эскроу в банке. Приёмка — этап 10: перечень недостатков письменно; при существенных — не подписывать акт до устранения. Коды из SMS, «Госключа» и банка не называйте никому.';
+const PLAN_PAYA='Продаёте и сразу покупаете (альтернативная сделка): задаток по своей продаже — только после выбора и экспресс-проверки покупки; общий день сделки. Расчёты по обеим сделкам — через СБР или аккредитив банка: деньги лежат в банке до регистрации перехода права.';
+const PLAN_PAYS='Сделка с долей: соседи-собственники имеют право преимущественной покупки — письменное извещение с ценой и условиями (ч. 6 ст. 42 ЖК РФ, ст. 250 ГК РФ); месяц считается со дня получения извещения, раньше — если все откажутся нотариально. Деньги — через СБР или аккредитив банка.';
+const PL_BLT={sec:'Квартира, вторичка',flat:'Квартира, вторичка',room:'Комната',house:'Дом, дача, участок',new:'Квартира в новостройке'};
+function planBuyObjs(){if(!(buys()||A.goal==='new'))return [];const n=A.goal==='new'?1:bN();const R=[];
+ for(let j=0;j<n;j++){let lt='sec',loc='';try{lt=A.goal==='new'?'new':bLt(j);loc=bLocLine(j)}catch(e){}R.push({t:PL_BLT[lt]||'Объект',loc})}return R}
+function planBudget(){if(!buys())return [];const R=[];try{const b=budget();if(b){const [lo,hi]=buyRange(b);R.push(['Бюджет покупки','~'+fmt(b)]);if(lo&&hi)R.push(['Ищем в диапазоне',fmt(lo)+' – '+fmt(hi)]);const f=strip(budgetFormula());if(f)R.push(['Как посчитан',f])}else R.push(['Бюджет покупки','ещё не указан — этап 0'])}catch(e){}return R}
+function planCosts(){const R=[],d=FEES.duty,n=FEES.notarySPb;R.push(['Госпошлина за регистрацию',fmt(d.amount)+' · '+d.cond+' · '+d.src]);
+ let nt=false;try{nt=needNotaryDeal()}catch(e){}
+ if(nt){const spb=(sells()?sReg(0):'')==='Санкт-Петербург'||A.reg==='Санкт-Петербург';R.push(['Нотариус',spb?'обязателен: тариф '+n.pct+' % от цены, мин. '+fmt(n.min)+', макс. '+fmt(n.max)+' + правовая и техническая работа ≈'+fmt(n.upth)+' ⚠':'обязателен: тариф и стоимость работы уточняйте у нотариуса ⚠'])}
+ if(sells()){R.push(['Налог с продажи',num(A.taxsum)?'по вашему расчёту: '+fmt(num(A.taxsum)):'нужен ли и сколько — посчитаем на этапе «Налог» (бесплатно)'])}
+ return R}
+function planPayText(){const k=planKind();return k==='sell'?PLAN_PAY:k==='buy'?PLAN_PAYB:k==='new'?PLAN_PAYN:k==='alt'||k==='rass'?PLAN_PAYA:k==='share'?PLAN_PAYS:PLAN_PAY}
+// разделы плана: общие для экрана, PDF и текста «Поделиться»
+function planSections(){const D=planData();const P=sells()?planPrice(D):null;const S=[];const k=planKind();
+ const objs=[];if(sells())D.O.forEach((o,i)=>objs.push({t:(D.multi?'Объект '+(i+1)+'. ':'')+o.t,loc:o.loc}));
+ const B=planBuyObjs();
+ if(objs.length)S.push({h:k==='share'?'Доля, которую продаёте':'Что продаёте',items:objs});
+ if(B.length)S.push({h:k==='new'?'Что покупаете · новостройка':'Что покупаете',items:B.map((o,i)=>({t:(B.length>1?'Покупка '+(i+1)+'. ':'')+o.t,loc:o.loc}))});
+ if(!objs.length&&!B.length){let loc='';try{loc=locLine([A.city||'',A.reg||''])}catch(e){}S.push({h:k==='share'?'Доля':'Объект',items:[{t:k==='share'?'Доля в квартире':'Объект',loc}]})}
+ if(P)S.push({h:'Цена',rows:P.R,note:P.src+' Цена сделки обычно ниже цены объявления.',warn:D.O.length===1&&D.O[0].e.over>=5?'Ваша цена выше рыночной на '+D.O[0].e.over+' %. При такой цене звонков и показов обычно меньше, продажа идёт дольше или заканчивается торгом.':''});
+ const bb=planBudget();if(bb.length)S.push({h:'Бюджет',rows:bb,note:'Поиск от бюджета −1 млн до +10%.'});
+ if(k==='rass'){const r=strip(rassCard());if(r)S.push({h:'Расселение',text:r})}
+ S.push({h:'Какие документы понадобятся',list:D.docs});
+ S.push({h:'Как пройдут расчёты',text:planPayText()});
+ S.push({h:'Расходы',rows:planCosts(),note:'Суммы — из справочника Аппа на '+FEES.year+' год.'});
+ S.push({h:'Этапы и сроки',rows:STAGES.filter(s=>s.show()).map(s=>[dispNo(s.n)+'. '+s.t+(s.s?' — '+s.s:''),s.w+(done.has(s.n)?' · готово':'')]),note:'Сроки — ориентир; ⚠ требует проверки на реальных сделках.'});
+ return S}
+function planSecHtml(x,pdf){const e=hq;let b='';
+ if(x.items)b+=x.items.map(o=>pdf?`<p style="margin:3px 0">${e(o.t)}${o.loc?'<br><span class="note">'+e(o.loc)+'</span>':''}</p>`:`<div class="card" style="margin-bottom:6px">${e(o.t)}${o.loc?'<br><span class="hint">'+e(o.loc)+'</span>':''}</div>`).join('');
+ if(x.rows)b+=pdf?`<table>${x.rows.map(([a,c])=>`<tr><td>${e(a)}</td><td><b>${e(c)}</b></td></tr>`).join('')}</table>`:`<div class="ord-sum">${x.rows.map(([a,c])=>`<div><span>${e(a)}</span><b>${e(c)}</b></div>`).join('')}</div>`;
+ if(x.list)b+=pdf?`<ul>${x.list.map(t=>`<li>${e(t)}</li>`).join('')}</ul>`:`<div class="card">${x.list.map(t=>'• '+e(t)).join('<br>')||'—'}</div>`;
+ if(x.text)b+=pdf?`<p style="margin:3px 0">${e(x.text)}</p>`:`<div class="card">${e(x.text)}</div>`;
+ if(x.note)b+=pdf?`<p class="note">${e(x.note)}</p>`:`<div class="hint" style="margin-top:4px">${e(x.note)}</div>`;
+ if(x.warn)b+=pdf?`<div class="warn">${e(x.warn)}</div>`:`<div class="note risk" style="margin-top:6px">${e(x.warn)}</div>`;
+ return pdf?`<h2>${e(x.h)}</h2>${b}`:`<div class="f"><div class="lbl">${e(x.h)}</div>${b}</div>`}
+const PLAN_CONT=`<div class="f"><div class="lbl">Ситиус</div><div class="about-c"><div><span>Телефон</span><a href="tel:${TEL}">${TELH}</a></div><div><span>Сайт</span><a href="https://www.citius-solution.ru" target="_blank" rel="noopener">www.citius-solution.ru</a></div><div><span>Telegram</span><a href="https://t.me/citiusrealty" target="_blank" rel="noopener">t.me/citiusrealty</a></div><div><span>MAX</span><a href="https://max.ru/channel_citiusrealty" target="_blank" rel="noopener">max.ru/channel_citiusrealty</a></div></div></div>`;
+planHtml=function(){return planSections().map(x=>planSecHtml(x,0)).join('')+PLAN_CONT};
+{const pd0=planDoc;planDoc=function(){const h=pd0.apply(this,arguments);const i=h.indexOf('<h1>'),j=h.indexOf('<h2>Ситиус</h2>');if(i<0||j<0)return h;
+ const d=new Date(),ds=p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear();
+ return h.slice(0,i).replace(/<title>[^<]*<\/title>/,'<title>'+planTitle()+' · Ситиус · '+ds+'<\/title>')+`<h1>Ваш ${planTitle().charAt(0).toLowerCase()+planTitle().slice(1)}</h1><div class="sub">Ситиус · Сделка без агента · составлен ${ds}</div>`+planSections().map(x=>planSecHtml(x,1)).join('')+h.slice(j)}}
+planText=function(){const L=['Ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1)+' · Ситиус',''];planSections().forEach(x=>{L.push(x.h+':');(x.items||[]).forEach(o=>L.push(o.t+(o.loc?' — '+o.loc:'')));(x.rows||[]).forEach(([a,b])=>L.push(a+': '+b));(x.list||[]).forEach(t=>L.push('• '+t));if(x.text)L.push(x.text);L.push('')});L.push('Ситиус: '+TELH+' · www.citius-solution.ru');return L.join('\n')};
+SCR.plan.b=()=>{if(!A.goal)return `<div class="hint">План появится, когда вы выберете цель на первом экране.</div><button class="btn primary" style="width:100%;margin-top:8px" onclick="go('s0a')">Выбрать цель</button>`;
+ return `${planHtml()}<div class="row" style="margin-top:4px"><button class="btn primary planpdf" style="padding:9px" onclick="planPdf()">Сохранить PDF</button><button class="btn ghost planshare" style="padding:9px" onclick="planShare(this)">Поделиться</button></div>
+ <div class="hint" style="margin-top:5px">Откроется окно печати — выберите «Сохранить как PDF».</div>${cBtns('итог: '+planTitle().toLowerCase())}`};
+Object.defineProperty(SCR.plan,'t',{get:()=>'Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1),configurable:true});
+// кнопка «Итог» — на «Моём пути» и в конце этапа 10 для любой цели
+{const pb=SCR.path.b;SCR.path.b=function(){let h=pb.apply(this,arguments);if(!A.goal||h.includes('planbtn'))return h;const b=`<button class="btn primary planbtn" style="width:100%;padding:8px;margin-bottom:8px" onclick="go('plan')">Итог: ваш ${planTitle().charAt(0).toLowerCase()+planTitle().slice(1)}</button>`;const k=h.indexOf('<div class="row" style="margin-bottom:7px">');return k>=0?h.slice(0,k)+b+h.slice(k):b+h}}
+{const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);return h.replace(/>Итог: ваш план продажи<\/button>/g,'>Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1)+'</button>')}}
+['s10c','nb4'].forEach(id=>{if(!SCR[id])return;const b0=SCR[id].b;SCR[id].b=function(){const h=b0.apply(this,arguments);return h.includes('planbtn')?h:h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:8px" onclick="go('plan')">Итог: ваш ${planTitle().charAt(0).toLowerCase()+planTitle().slice(1)}</button>`}});
+{const sb=SCR.sum&&SCR.sum.b;if(sb)SCR.sum.b=function(){const h=sb.apply(this,arguments);const L='Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1);
+ if(!A.goal)return h;if(h.includes('>Итог: ваш план продажи</button>'))return h.replace(/>Итог: ваш план продажи<\/button>/g,'>'+L+'</button>');
+ return h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:6px" onclick="go('plan')">${L}</button>`}}
 // ===== n29 END
 
 // ===== opros 23.11.2026 BEGIN
