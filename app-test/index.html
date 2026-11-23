@@ -2396,7 +2396,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:32';
+var APPV='23.11.2026 16:33';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -4132,6 +4132,7 @@ hiDropSplash();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hiBoot,0));
 else setTimeout(hiBoot,0);
 })();
+const SUP_SHOT=0;  // скриншот в заявку поддержки — только после деплоя Code.gs v2.2 (N29_V22=1)
 // ---------- n29 (23.11) · «Сообщить о проблеме»: пункт в меню 📲 (хук SUP_ON / supView в p11_compact.js), заявка kind «🛠 Поддержка» через существующий sendLead, без редеплоя
 const SUP_ON=1;
 const SUP={txt:'',contact:'',fileName:'',shot:null,busy:0,ok:0,err:'',hadContact:0,id:''};
@@ -4181,9 +4182,11 @@ function supCtx(){
 function supLead(txt,contact){
  const c=supCtx(),ph=(typeof phOk==='function'&&contact&&phOk(contact))?('+7'+phDig(contact)):'';
  const summary=[['Что не работает',txt],['Цель',c.goal],['Экран',c.scr],['Версия',c.ver],['Окно',c.sz]];
- if(SUP.shot)summary.push(['Скриншот','выбран, не передан (лимит сервера)']);
+ if(SUP.shot)summary.push(['Скриншот',SUP_SHOT?'приложен (ссылка ниже)':'выбран, не передан (лимит сервера)']);
  // контакт обязателен на текущем бэкенде: если человек его не указал, передаём «не указан»
- return {kind:'🛠 Поддержка',svc:'Поддержка',contact:contact||'не указан',phone:ph,ctx:txt.slice(0,180),summary}}
+ const L={kind:'🛠 Поддержка',svc:'Поддержка',contact:contact||'не указан',phone:ph,ctx:txt.slice(0,180),summary};
+ if(SUP_SHOT&&SUP.shot)L.shot=SUP.shot;   // v2.2: сервер кладёт скриншот в Google Drive и ставит ссылку в заявку
+ return L}
 function supSend(){
  const ta=document.getElementById('suptxt');if(ta)SUP.txt=ta.value;const ct=document.getElementById('supct');if(ct)SUP.contact=ct.value.trim();
  const txt=(SUP.txt||'').replace(/^\s+|\s+$/g,'');
@@ -4239,6 +4242,8 @@ function supOwnPaint(){const o=document.getElementById('supsheet');if(!o||o.styl
    r[1]+=(typeof csBtn==='function'?csBtn('🛠 Сообщить о проблеме',"csGo('sup')",'','если что-то не работает'):'')}
   }catch(e){}return r};
  csView._supHook=1})();
+// v2.2: заявку со скриншотом не держим в очереди на устройстве целиком (лимит localStorage) — в очередь без картинки
+if(SUP_SHOT&&typeof leadQueue==='function'){const lq=leadQueue;leadQueue=function(b){if(b&&b.shot){b=Object.assign({},b);delete b.shot;b.summary=(b.summary||[]).concat([['Скриншот','не передан: заявка ушла повторно без картинки']])}return lq(b)}}
 // ---------- n29 (23.11 17:30 МСК) · окно «Нужна помощь человека»: компактная карточка как «Войти», минимум текста
 (function(){
  if(document.getElementById('help-mini-css'))return;
