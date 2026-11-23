@@ -2395,7 +2395,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:17';
+var APPV='23.11.2026 16:20';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3643,6 +3643,18 @@ document.head.insertAdjacentHTML('beforeend',`<style>#loginbtn{position:absolute
 // на чистом устройстве после входа — сразу загружаем сохранённое из облака (страница перезагрузится с ответами)
 {const aa=auAfter;auAfter=function(r){const em=auEmpty();const x=aa.apply(this,arguments);try{auBtnSync();if(r&&r.ok&&r.hasProgress&&em){AU.has=0;AU.msg='Загружаем ваши сохранённые ответы…';AU.busy=1;auR();cloudLoad().then(z=>{if(!z||!z.ok){AU.busy=0;AU.err=authErr(z||{});auR()}else if(z.empty){AU.busy=0;AU.msg='В облаке пока ничего нет.';auR()}})}else if(cur==='path')show('path')}catch(e){}return x}}
 {const ao=auOut;auOut=function(){const x=ao.apply(this,arguments);setTimeout(()=>{try{auBtnSync();if(cur==='path')show('path')}catch(e){}},400);return x}}
+// «Войти» в шапке: ставим слева от самой левой круглой кнопки шапки (📲, тема), по её центру — не перекрывает ни на одном экране
+function auBtnPlace(){const t=document.querySelector('.top'),b=document.getElementById('loginbtn');if(!t||!b||b.style.display==='none')return;
+ const tr=t.getBoundingClientRect();let L=null;
+ t.querySelectorAll('button,a').forEach(e=>{if(e===b||!e.offsetParent)return;const r=e.getBoundingClientRect();if(r.width<20||r.width>70||r.top-tr.top>90)return;if(!L||r.left<L.left)L=r});
+ if(!L)return;const bh=b.offsetHeight||28;
+ b.style.right=Math.round(tr.right-L.left+8)+'px';b.style.top=Math.round(L.top-tr.top+(L.height-bh)/2)+'px';
+ const h=t.querySelector('h1');if(h){const br=b.getBoundingClientRect(),hr=h.getBoundingClientRect();h.style.paddingRight='';const need=Math.round(hr.right-br.left+6);if(need>0&&hr.top<br.bottom&&hr.bottom>br.top)h.style.paddingRight=need+'px'}}
+{const bs=auBtnSync;auBtnSync=function(){const x=bs.apply(this,arguments);try{auBtnPlace()}catch(e){}return x}}
+addEventListener('resize',()=>{try{auBtnPlace()}catch(e){}});addEventListener('orientationchange',()=>setTimeout(()=>{try{auBtnPlace()}catch(e){}},300));
+setTimeout(()=>{try{auBtnPlace()}catch(e){}},50);setTimeout(()=>{try{auBtnPlace()}catch(e){}},1500);
+{const sh=show;show=function(){const x=sh.apply(this,arguments);try{auBtnPlace()}catch(e){}return x}}
+document.head.insertAdjacentHTML('beforeend','<style>#loginbtn{height:28px;line-height:25px}@media (min-width:700px){#loginbtn{height:34px;line-height:31px}}</style>');
 const TGQ=1;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
 // ---------- n29 (23.11 15:35) · верхняя кнопка — меню: «Связаться с Ситиусом» (те же кнопки cBtns) + «Продолжить на другом устройстве» (вход, ссылка, файл)
 const TGQ_URL='https://t.me/citius_zayavki_bot?start=q';
@@ -4106,7 +4118,7 @@ function supRedraw(){if(typeof csR==='function'&&typeof csE==='function'&&csE('c
 function supOpen(){SUP.ok=0;SUP.err='';SUP.busy=0;if(typeof csOpen==='function'){csOpen('sup');return}supOwnOpen()}
 function supClose(){try{const o=typeof csE==='function'&&csE('cmpsheet');if(o&&o.style.display==='flex'&&typeof csClose==='function'){csClose();supReset();return}}catch(e){}supOwnClose();supReset()}
 function supView(){
- if(SUP.ok){return ['Сообщить о проблеме',`<div class="cs-ok" role="status">Спасибо, мы получили сообщение и ответим.</div>`+(typeof csBtn==='function'?csBtn('Закрыть','supClose()','pri'):`<button type="button" class="cs-b pri" onclick="supClose()">Закрыть</button>`)]}
+ if(SUP.ok){const ok=SUP.hadContact?'Спасибо, мы получили сообщение и ответим':'Спасибо, мы получили сообщение';return ['Сообщить о проблеме',`<div class="cs-ok" role="status">${ok}</div>`+(typeof csBtn==='function'?csBtn('Закрыть','supClose()','pri'):`<button type="button" class="cs-b pri" onclick="supClose()">Закрыть</button>`)]}
  const err=SUP.err?`<div class="cs-err" role="alert">${supEsc(SUP.err)}</div>`:'';
  const btn=SUP.busy?'Отправляем…':(SUP.err?'Отправить ещё раз':'Отправить');
  const file=SUP.fileName?`<div class="cs-h" id="supfn">Файл: ${supEsc(SUP.fileName)}</div>`:'';
@@ -4114,10 +4126,10 @@ function supView(){
  return ['Сообщить о проблеме',
   `<label class="cs-h" for="suptxt" style="display:block;margin:0 0 4px">Что не работает</label>`+
   `<textarea id="suptxt" class="cs-in cs-ta" rows="4" maxlength="1200" placeholder="Коротко опишите, что произошло" aria-required="true" ${SUP.busy?'disabled':''} oninput="SUP.txt=this.value">${supEsc(SUP.txt)}</textarea>`+
-  `<label class="cs-h" for="supshot" style="display:block;margin:0 0 4px">Скриншот, по желанию</label>`+
-  `<input id="supshot" class="cs-in cs-file" type="file" accept="image/*" aria-label="Скриншот, по желанию" ${SUP.busy?'disabled':''} onchange="supPick(this)">`+file+
+  `<label class="cs-h" style="display:block;margin:0 0 4px">Скриншот, по желанию</label>`+
+  `<label class="cs-filebtn">${SUP.fileName?supEsc(SUP.fileName):'Выбрать файл'}<input id="supshot" type="file" accept="image/*" aria-label="Скриншот, по желанию" ${SUP.busy?'disabled':''} onchange="supPick(this)"></label>`+
   `<label class="cs-h" for="supct" style="display:block;margin:0 0 4px">Телефон или Telegram, по желанию</label>`+
-  `<input id="supct" class="cs-in" type="text" maxlength="80" placeholder="+7… или @ник" autocomplete="tel" aria-label="Телефон или Telegram, по желанию" value="${supEsc(SUP.contact)}" ${SUP.busy?'disabled':''} oninput="SUP.contact=this.value.trim()">`+
+  `<input id="supct" class="cs-in" type="text" maxlength="80" placeholder="+7… или @ник" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Телефон или Telegram, по желанию" value="${supEsc(SUP.contact)}" ${SUP.busy?'disabled':''} oninput="SUP.contact=this.value.trim()">`+
   err+`<button type="button" class="cs-b pri" onclick="supSend()"${dis}><span>${btn}</span></button>`]}
 function supPick(inp){
  SUP.fileName='';SUP.shot=null;
@@ -4148,7 +4160,7 @@ function supLead(txt,contact){
  const summary=[['Что не работает',txt],['Цель',c.goal],['Экран',c.scr],['Версия',c.ver],['Окно',c.sz]];
  if(SUP.shot)summary.push(['Скриншот','выбран, не передан (лимит сервера)']);
  // контакт обязателен на текущем бэкенде: если человек его не указал, передаём «не указан»
- return {kind:'contact',svc:'🛠 Поддержка',contact:contact||'не указан',phone:ph,ctx:'🛠 Поддержка',summary}}
+ return {kind:'🛠 Поддержка',svc:'Поддержка',contact:contact||'не указан',phone:ph,ctx:txt.slice(0,180),summary}}
 function supSend(){
  const ta=document.getElementById('suptxt');if(ta)SUP.txt=ta.value;const ct=document.getElementById('supct');if(ct)SUP.contact=ct.value.trim();
  const txt=(SUP.txt||'').replace(/^\s+|\s+$/g,'');
@@ -4156,7 +4168,7 @@ function supSend(){
  if(txt.length>1200){SUP.err='Текст слишком длинный, сократите описание';supRedraw();return}
  SUP.busy=1;SUP.err='';supRedraw();
  const L=supLead(txt,SUP.contact);
- const done=res=>{SUP.busy=0;if(res&&res.ok){SUP.ok=1;SUP.hadContact=!!SUP.contact;SUP.id=res.id||'';SUP.shot=null;supRedraw()}
+ const done=res=>{SUP.busy=0;if(res&&res.ok){SUP.ok=1;SUP.hadContact=!!(SUP.contact&&SUP.contact!=='не указан');SUP.id=res.id||'';SUP.shot=null;supRedraw()}
   else{const e=res&&res.err;SUP.err=e==='rate'?'Слишком много заявок за час, попробуйте позже':e==='too_big'?'Сообщение слишком большое, сократите текст':'Не получилось отправить. Проверьте интернет и нажмите «Отправить ещё раз»';supRedraw()}};
  if(typeof sendLead!=='function'){done({ok:false,err:'no_send'});return}
  sendLead(L).then(done,()=>done({ok:false,err:'net'}))}
@@ -4170,7 +4182,9 @@ function supOwnPaint(){const o=document.getElementById('supsheet');if(!o||o.styl
 (function(){if(document.getElementById('sup-css'))return;
  document.head.insertAdjacentHTML('beforeend',`<style id="sup-css">
 #cmpsheet textarea.cs-ta,#supsheet textarea.cs-ta{min-height:96px;resize:vertical;line-height:1.4;font-family:inherit}
-#cmpsheet input.cs-file,#supsheet input.cs-file{padding:10px 12px;font-size:14px}
+#cmpsheet label.cs-filebtn,#supsheet label.cs-filebtn{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin:0 0 9px;padding:8px 14px;box-sizing:border-box;border-radius:12px;border:1.5px dashed #c9a46a;background:#fff;color:#5a6e8a;font:600 14px/1.3 Montserrat,system-ui,sans-serif;cursor:pointer;text-align:center}
+#cmpsheet label.cs-filebtn input,#supsheet label.cs-filebtn input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+[data-theme=dark] #supsheet label.cs-filebtn{background:#1a2a40;color:#c5d0de}
 #supsheet{position:fixed;inset:0;z-index:150;display:none;align-items:flex-end;justify-content:center;background:rgba(18,28,45,.55);font-family:Montserrat,system-ui,-apple-system,'Segoe UI',sans-serif}
 #supsheet .cs-card{background:#fbf8f1;color:#1e2f4a;width:100%;max-height:70vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:18px 18px 0 0;padding:6px 16px calc(14px + env(safe-area-inset-bottom));box-sizing:border-box;box-shadow:0 -6px 30px rgba(0,0,0,.25)}
 @media (min-width:600px){#supsheet{align-items:center}#supsheet .cs-card{width:420px;max-height:80vh;border-radius:18px;padding-bottom:16px}}
