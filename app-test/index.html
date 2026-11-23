@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 18:09';
+var APPV='23.11.2026 18:19';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -4805,6 +4805,360 @@ locKey=function(e,el){
 if(!document.getElementById('n29-addr-css')){
   document.head.insertAdjacentHTML('beforeend','<style id="n29-addr-css">#addrbox.locs{display:none;position:fixed;z-index:120;margin:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:min(260px,42vh)}#addrbox .locsug{min-height:44px;box-sizing:border-box}</style>')
 }
+})();
+// ---------- n29 (23.11) · компактная подача шагов: на телефоне меньше текста и последовательные блоки,
+// на планшете и ПК — аккуратная карточка. Функции и поля не удаляются. Не правит p12–p18 / auth / p14_phone.
+(function(){
+if(document.getElementById('n29-c19-css'))return;
+
+const PH_SHORT='Город, улица, дом';
+const TAB_MAP=[
+  ['tb-path','Путь','M4 18h16M6 14l4-8 3 5 2-3 3 6'],
+  ['tb-live','Объекты','M4 20V9l8-5 8 5v11H4zm8-3h.01'],
+  ['tb-work','Работа','M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M4 7h16v12H4z'],
+  ['tb-notary','Нотариус','M7 3h10v3H7zM8 6v15l4-2 4 2V6'],
+  ['tb-sec','Безопасность','M12 3l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z'],
+  ['tb-about','О нас','M12 12a4 4 0 1 0-0.01-8A4 4 0 0 0 12 12zm-7 9c1.5-3 4-4.5 7-4.5S17.5 18 19 21']
+];
+
+function ico(d){
+  return '<svg class="c19-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="'+d+'"/></svg>';
+}
+
+document.head.insertAdjacentHTML('beforeend',`<style id="n29-c19-css">
+/* ----- общие: больше воздуха, подсказки под «?» ----- */
+#phone:not(:has(#helloov)):not(:has(#hellocover))>.top{padding:7px 14px 6px}
+#phone:not(:has(#helloov)):not(:has(#hellocover))>.top .brand{font-size:10px;letter-spacing:.18em;margin:0}
+#phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:20px;margin:4px 0 2px;line-height:1.22;overflow-wrap:anywhere}
+#phone:not(:has(#helloov)):not(:has(#hellocover))>.top .step{font-size:10px;margin-top:2px;opacity:.8}
+#phone:not(:has(#helloov)):not(:has(#hellocover))>.top .prog{margin-top:5px;height:3px}
+#body{padding-top:12px;padding-bottom:14px}
+#body .lbl{font-size:15px;margin-bottom:8px;line-height:1.3}
+#body .f{padding:12px 12px 11px;margin-bottom:10px}
+#body .chips{gap:8px}
+#body .chips span{padding:8px 11px}
+#body .c19-more{margin-top:6px;font-size:12.5px;color:inherit;opacity:.85}
+#body .c19-more summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;color:#e2c48e;font-weight:600;padding:2px 0}
+[data-theme=light] #body .c19-more summary{color:#7a5a24}
+#body .c19-more summary::-webkit-details-marker{display:none}
+#body .c19-more summary:before{content:"?";display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid #c9a46a;border-radius:50%;font-size:11px;font-weight:700;line-height:1}
+#body .c19-more div,#body .c19-more .c19-mb{margin-top:4px;line-height:1.45;opacity:.95;font-weight:400;color:inherit}
+#body .c19-add{display:inline-block;margin:2px 0 4px;padding:0;border:0;background:none;color:#8a6a2f;font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+#body .c19-add:hover{color:#a8844a}
+#body .lochint:empty{display:none}
+#c19-side{display:none}
+#body .card.agx.c19-agxsum summary{cursor:pointer;color:#a8844a;font-weight:650;padding:2px 0}
+#body .card.agx.c19-agxsum{padding:10px 12px}
+.c19-hide{display:none!important}
+
+/* помощь — небольшая кнопка, не полоса на всю ширину */
+#phone:not(:has(#helloov))>#helpbtn{width:auto;max-width:none;align-self:center;margin:0 auto 6px!important;padding:6px 12px;font-size:12px;font-weight:650;line-height:1.2;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:16px}
+#phone>#helpbtn .c19-hico{font-size:14px;line-height:1}
+#phone>#helpbtn .c19-htx{white-space:nowrap}
+
+/* таббар: иконка + подпись в одну строку, «Безопасность» не переносится */
+#phone>.tab{height:52px;padding:0 2px;align-items:stretch}
+#phone>.tab>span,#phone>.tab>span.c19t{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 1px 3px;text-align:center;line-height:1.05;font-size:9px;white-space:nowrap!important;overflow:hidden;hyphens:none!important;-webkit-hyphens:none!important;overflow-wrap:normal!important;word-break:keep-all!important}
+#phone>.tab>span .c19-ico{width:16px;height:16px;flex:none;display:block}
+#phone>.tab>span .c19-tl{display:block;max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap!important;font-size:inherit;hyphens:none!important}
+
+/* телефон в горизонтали (высота ≤ 500): не ломаем боковую колонку и однострочную шапку */
+@media (orientation:landscape) and (max-height:500px){
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top{padding:6px 96px 6px 14px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:16px;margin:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #phone>#helpbtn,#phone:not(:has(#helloov))>#helpbtn{margin:0 10px 8px!important;padding:7px 8px;align-self:stretch;width:auto;max-width:100%;box-sizing:border-box}
+  #phone>.tab{height:auto;padding:4px 10px 6px}
+  #phone>.tab>span{flex-direction:row;justify-content:flex-start;gap:6px;padding:5px 8px;font-size:12.5px;text-align:left;white-space:nowrap}
+  #phone>.tab>span .c19-ico{width:15px;height:15px}
+}
+
+/* планшет в горизонтали (501–820): та же колонка справа, шапка в одну строку */
+@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top{padding:6px 96px 6px 16px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:17px;margin:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #phone>#helpbtn,#phone:not(:has(#helloov))>#helpbtn{margin:0 12px 8px!important;padding:8px;align-self:stretch;width:auto;max-width:100%;box-sizing:border-box}
+  #phone>.tab{height:auto;padding:4px 12px 8px}
+  #phone>.tab>span{flex-direction:row;justify-content:flex-start;gap:7px;padding:6px 9px;font-size:13px;text-align:left;white-space:nowrap}
+  #phone>.tab>span .c19-ico{width:16px;height:16px}
+  #phone.c19-s0 #body>.f,#phone.c19-s0 #body>.c19-card{max-width:640px}
+}
+
+/* планшет/ПК высокие: карточка по центру, кнопки не на всю ширину */
+@media (min-width:700px) and (min-height:821px){
+  #phone:not(:has(#helloov)) #body{display:flex;flex-direction:column;align-items:center}
+  #phone:not(:has(#helloov)) #body>.f,
+  #phone:not(:has(#helloov)) #body>.c19-add,
+  #phone:not(:has(#helloov)) #body>.card,
+  #phone:not(:has(#helloov)) #body>.c19-side{width:100%;max-width:560px;box-sizing:border-box}
+  #phone.c19-s0:not(:has(#helloov)) #body>.f{max-width:560px}
+  #phone:not(:has(#helloov))>#nav{justify-content:center;gap:12px}
+  #phone:not(:has(#helloov))>#nav .btn{flex:0 1 220px;min-width:128px;max-width:220px;width:auto}
+  #phone:not(:has(#helloov))>#helpbtn{margin:0 auto 8px!important}
+  #phone>.tab{max-width:720px;width:100%;margin-left:auto;margin-right:auto}
+  #phone>.tab>span{font-size:10px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:24px;margin:6px 0 4px}
+}
+@media (min-width:1100px) and (min-height:821px){
+  #phone.c19-s0:not(:has(#helloov)) #body{display:grid;grid-template-columns:minmax(0,560px) 260px;justify-content:center;align-items:start;gap:28px 32px;padding-left:24px;padding-right:24px}
+  #phone.c19-s0:not(:has(#helloov)) #body>.f,
+  #phone.c19-s0:not(:has(#helloov)) #body>.c19-add,
+  #phone.c19-s0:not(:has(#helloov)) #body>.card{max-width:none;width:100%;grid-column:1}
+  #phone.c19-s0 #c19-side{display:block;grid-column:2;grid-row:1 / span 30;position:sticky;top:8px;width:100%;max-width:280px;background:rgba(201,164,106,.08);border:1px solid rgba(201,164,106,.35);border-radius:12px;padding:14px 14px 12px;box-sizing:border-box}
+  #phone.c19-s0 #c19-side .c19-sh{font-family:"Playfair Display",Georgia,serif;font-size:16px;color:#d4b57e;margin:0 0 8px;font-weight:600}
+  #phone.c19-s0 #c19-side p{margin:0 0 8px;font-size:13px;line-height:1.45;opacity:.9}
+  #phone.c19-s0 #c19-side ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55}
+  [data-theme=light] #phone.c19-s0 #c19-side{background:#fff;border-color:#e6dccb}
+  [data-theme=light] #phone.c19-s0 #c19-side .c19-sh{color:#2a3f5f}
+}
+</style>`);
+
+function wrapHint(el){
+  if(!el||el.closest('.c19-more'))return;
+  const html=el.innerHTML.trim();
+  if(!html)return;
+  const isLoc=el.classList.contains('lochint');
+  const det=document.createElement('details');
+  det.className='c19-more';
+  const inner=document.createElement('div');
+  inner.className='c19-mb'+(isLoc?' hint lochint':'');
+  inner.innerHTML=html;
+  const sm=document.createElement('summary');
+  sm.textContent='Подробнее';
+  det.appendChild(sm);det.appendChild(inner);
+  el.replaceWith(det);
+}
+function shortPh(root){
+  (root.querySelectorAll?root.querySelectorAll('input.locin'):[]).forEach(inp=>{
+    inp.setAttribute('placeholder',PH_SHORT);
+  });
+}
+function asAddLink(btn){
+  const a=document.createElement('a');
+  a.href='#';
+  a.className='c19-add';
+  a.textContent=(btn.textContent||'').replace(/^\+\s*/,'').trim();
+  const oc=btn.getAttribute('onclick')||'';
+  a.setAttribute('onclick', oc+(oc&&!/return false/.test(oc)?';return false':'return false'));
+  btn.replaceWith(a);
+  return a;
+}
+function kindOf(f){
+  const lbl=(f.querySelector('.lbl')||{}).textContent||'';
+  if(/Ваша цель/.test(lbl))return 'goal';
+  if(/Что продаёте|Что ищете|Что покупаете|Объект \d+ · что|Покупка \d+ · что/.test(lbl))return 'type';
+  if(/Где |Город и адрес/.test(lbl))return 'addr';
+  if(/Когда хотите/.test(lbl))return 'when';
+  if(/Как будете платить/.test(lbl))return 'pay';
+  if(/Как будете действовать/.test(lbl))return 'mode';
+  return '';
+}
+function splitTypeAddr(f){
+  const first=(f.querySelector('.lbl')||{}).textContent||'';
+  if(!/Что продаёте|Что ищете|Что покупаете|Объект \d+ · что|Покупка \d+ · что/.test(first))return;
+  const loc=f.querySelector('.loc');
+  if(!loc)return;
+  const move=[];
+  let after=false;
+  [...f.childNodes].forEach(n=>{
+    if(!after){
+      if(n.nodeType===1 && n.matches && n.matches('.lbl') && /Где |Город и адрес/.test(n.textContent||''))after=true;
+      else if(n===loc)after=true;
+    }
+    if(after)move.push(n);
+  });
+  if(!move.length)return;
+  const nf=document.createElement('div');
+  nf.className='f c19-step';
+  nf.dataset.c19='addr';
+  move.forEach(n=>nf.appendChild(n));
+  f.after(nf);
+}
+function markSteps(root){
+  [...root.children].forEach(el=>{
+    if(!el.classList||!el.classList.contains('f'))return;
+    splitTypeAddr(el);
+  });
+  [...root.querySelectorAll(':scope > .f')].forEach(f=>{
+    const k=kindOf(f);
+    if(!k)return;
+    f.classList.add('c19-step');
+    f.dataset.c19=k;
+  });
+  const addr=[...root.querySelectorAll('.c19-step[data-c19="addr"]')].pop();
+  [...root.children].forEach(el=>{
+    if(el.classList&&(el.classList.contains('c19-add')||el.classList.contains('c19-more'))&&addr)addr.appendChild(el);
+  });
+  mergeMores(root);
+}
+function mergeMores(root){
+  (root.querySelectorAll?root.querySelectorAll('.c19-step, .f'):[]).forEach(f=>{
+    const ms=[...f.querySelectorAll('.c19-more')];
+    if(!ms.length)return;
+    const first=ms[0], box=first.querySelector('.c19-mb')||first;
+    ms.slice(1).forEach(x=>{
+      const b=x.querySelector('.c19-mb');
+      if(b){
+        if(b.classList.contains('lochint')&&!box.classList.contains('lochint'))box.classList.add('hint','lochint');
+        if(b.innerHTML){const p=document.createElement('div');p.innerHTML=b.innerHTML;box.appendChild(p)}
+      }
+      x.remove();
+    });
+    const add=f.querySelector('.c19-add');
+    if(add)add.after(first);else f.appendChild(first);
+  });
+}
+function tuneBox(html){
+  const d=document.createElement('div');
+  d.innerHTML=html;
+  d.querySelectorAll('.hint').forEach(wrapHint);
+  d.querySelectorAll('button').forEach(btn=>{
+    if(/Добавить ещё объект/.test(btn.textContent||''))asAddLink(btn);
+  });
+  shortPh(d);
+  markSteps(d);
+  return d.innerHTML;
+}
+function answered(step){
+  const k=step.dataset.c19;
+  if(k==='goal')return !!A.goal;
+  if(k==='type')return !!step.querySelector('.chips span.on, .chips .on');
+  if(k==='addr'){
+    const inp=step.querySelector('.locin, input:not([type=hidden]):not(select)');
+    return !!(inp&&String(inp.value||'').trim());
+  }
+  if(k==='when')return !!A.when;
+  if(k==='pay')return true;
+  if(k==='mode')return true;
+  return true;
+}
+function reveal(){
+  if(typeof cur!=='string'||cur!=='s0a')return;
+  const steps=[...document.querySelectorAll('#body > .c19-step')];
+  if(!steps.length)return;
+  let open=true;
+  steps.forEach((st,i)=>{
+    if(i===0){st.classList.remove('c19-hide');open=answered(st);return}
+    if(open)st.classList.remove('c19-hide');
+    else st.classList.add('c19-hide');
+    if(open && !answered(st) && st.dataset.c19!=='pay')open=false;
+  });
+}
+function sideBox(){
+  if(typeof cur!=='string'||cur!=='s0a')return;
+  if(document.getElementById('c19-side'))return;
+  const body=document.getElementById('body');
+  if(!body)return;
+  const s=document.createElement('aside');
+  s.id='c19-side';
+  const st=(document.getElementById('stepinfo')||{}).textContent||'';
+  s.innerHTML='<div class="c19-sh">Ваш старт</div><p>'+(st?st+'. ':'')+'Ответьте по очереди — следующий вопрос появится после ответа на предыдущий.</p><ol><li>Цель</li><li>Что продаёте или ищете</li><li>Адрес</li><li>Срок</li><li>Как будете действовать</li></ol>';
+  body.appendChild(s);
+}
+function compactHelp(){
+  const b=document.getElementById('helpbtn');
+  if(!b)return;
+  if(b.dataset.c19==='1')return;
+  b.dataset.c19='1';
+  b.setAttribute('aria-label','Нужна помощь человека');
+  b.innerHTML='<span class="c19-hico" aria-hidden="true">🙋</span><span class="c19-htx">Помощь</span>';
+}
+function compactTabs(){
+  TAB_MAP.forEach(([id,label,d])=>{
+    try{
+      const el=document.getElementById(id);
+      if(!el)return;
+      if(el.getAttribute('data-c19ok')==='1'&&el.querySelector('.c19-tl'))return;
+      el.innerHTML=ico(d)+'<span class="c19-tl">'+label+'</span>';
+      el.setAttribute('data-c19ok','1');
+      el.classList.add('c19t');
+    }catch(e){}
+  });
+}
+function collapseBodyHints(){
+  const body=document.getElementById('body');
+  if(!body)return;
+  body.querySelectorAll('.hint').forEach(wrapHint);
+  body.querySelectorAll('button').forEach(btn=>{
+    if(/Добавить ещё объект/.test(btn.textContent||''))asAddLink(btn);
+  });
+  shortPh(body);
+}
+function foldAgx(){
+  const body=document.getElementById('body');
+  if(!body)return;
+  body.querySelectorAll('.card.agx').forEach(c=>{
+    if(c.classList.contains('c19-agxsum')||c.querySelector('details'))return;
+    const title=(c.querySelector('b')||{}).textContent||'Опыт агента';
+    const rest=[...c.childNodes].filter(n=>!(n.nodeType===1&&n.tagName==='B'));
+    const det=document.createElement('details');
+    det.className='c19-more';
+    const sm=document.createElement('summary');sm.textContent=title;
+    const box=document.createElement('div');box.className='c19-mb';
+    rest.forEach(n=>box.appendChild(n));
+    det.appendChild(sm);det.appendChild(box);
+    c.innerHTML='';c.classList.add('c19-agxsum');c.appendChild(det);
+  });
+}
+function afterShow(){
+  const ph=document.getElementById('phone');
+  if(ph){
+    const on=typeof cur==='string'&&/^s0/.test(cur);
+    ph.classList.toggle('c19-s0',on);
+  }
+  compactHelp();
+  compactTabs();
+  setTimeout(compactTabs,0);
+  const body=document.getElementById('body');
+  if(body)shortPh(body);
+  foldAgx();
+  if(typeof cur==='string'&&cur==='s0a'){
+    reveal();
+    sideBox();
+  }else{
+    collapseBodyHints();
+  }
+}
+
+if(typeof locIn==='function'&&!locIn.__c19){
+  const li=locIn;
+  locIn=function(k,lab,ph){return li.call(this,k,lab,PH_SHORT)};
+  locIn.__c19=1;
+}
+if(typeof SCR==='object'&&SCR.s0a&&typeof SCR.s0a.b==='function'){
+  const b0=SCR.s0a.b;
+  SCR.s0a.b=function(){
+    let h=b0.apply(this,arguments);
+    try{h=tuneBox(h)}catch(e){}
+    return h;
+  };
+}
+if(typeof show==='function'&&!show.__c19){
+  const sh=show;
+  show=function(){
+    const r=sh.apply(this,arguments);
+    try{afterShow()}catch(e){}
+    return r;
+  };
+  show.__c19=1;
+}
+function onBodyEv(e){
+  const t=e.target;
+  if(!t||typeof cur!=='string'||cur!=='s0a')return;
+  if(t.classList&&(t.classList.contains('locin')||t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA'))
+    reveal();
+}
+const boot=function(){
+  compactHelp();compactTabs();
+  const body=document.getElementById('body');
+  if(body&&!body.__c19ev){
+    body.addEventListener('input',onBodyEv);
+    body.addEventListener('change',onBodyEv);
+    body.__c19ev=1;
+  }
+  try{afterShow()}catch(e){}
+};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+else boot();
 })();
 // ===== n29 END
 
