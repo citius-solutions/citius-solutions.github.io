@@ -2395,7 +2395,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 14:55';
+var APPV='23.11.2026 14:59';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2921,7 +2921,7 @@ function leadFallbackHtml(text){const m='mailto:citius.solutions@yandex.ru?subje
 .sx-card{max-width:360px;width:100%;background:#1e2f4a;color:#f7f3ea;border:1px solid #c9a46a;border-radius:16px;padding:22px 20px 18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35);font-family:Montserrat,system-ui,sans-serif}
 [data-theme=light] .sx-card{background:#fbf8f1;color:#243248}
 .sx-card svg{width:92px;height:92px;display:block;margin:0 auto 10px}
-.sx-c{fill:none;stroke:#c9a46a;stroke-width:3.5;stroke-dasharray:1;stroke-dashoffset:1;animation:sxdraw .6s ease-out forwards}
+.sx-c{fill:none;stroke:#c9a46a;stroke-width:3.5;stroke-linecap:round;stroke-dasharray:1.05;stroke-dashoffset:1.05;animation:sxdraw .6s ease-out forwards}
 .sx-k{fill:none;stroke:#c9a46a;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:sxdraw .45s ease-out .55s forwards}
 .sx-t{font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:700;margin:2px 0 6px}
 .sx-x{font-size:14.5px;line-height:1.45;margin:0 0 14px}
@@ -3368,6 +3368,57 @@ chartTerm=function(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).fil
  <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">быстрее</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">срок продажи →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">дольше</text>${g}</svg></div>
  ${chLeg(e,0,{m:'показы 4–12 нед. ⚠',o:to})}<div class="hint">Это схема, а не расчёт: данных о сроке продажи похожих объявлений у Аппа нет. Бледная кривая — принцип: ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений — график построим по ним.</div></div>`};
 // ===== n29 END
+
+// ===== opros 23.11.2026 BEGIN
+(function(){
+  function oprosBase(){
+    try{
+      if(/\/app-test\/?$/.test(location.pathname) || /\/app-test\/index\.html$/.test(location.pathname)) return './';
+      if(/\/app-test\//.test(location.pathname)) return '/app-test/';
+    }catch(e){}
+    return '/app-test/';
+  }
+  function loadOpros(cb){
+    if(window.CitiusOpros){cb();return}
+    const base=oprosBase();
+    if(!document.getElementById('citius-opros-css')){
+      const l=document.createElement('link');l.id='citius-opros-css';l.rel='stylesheet';l.href=base+'citius_opros.css';document.head.appendChild(l);
+    }
+    let left=1;
+    const done=()=>{if(--left<=0)cb()};
+    if(!window.sitiusSuccess){
+      left++;
+      const sc=document.createElement('script');sc.src=base+'success_check.js';sc.onload=done;sc.onerror=done;document.head.appendChild(sc);
+    }
+    if(typeof LEADS_URL==='undefined'){
+      left++;
+      const c=document.createElement('script');c.src=base+'leads_client.js';c.onload=done;c.onerror=done;document.head.appendChild(c);
+    }
+    const s=document.createElement('script');s.src=base+'citius_opros.js';s.onload=done;
+    s.onerror=function(){window.location.href=base+'opros.html'};
+    document.head.appendChild(s);
+  }
+  window.openCitiusOpros=function(){loadOpros(function(){if(window.CitiusOpros)CitiusOpros.open({source:'app'})})};
+  const oprosBtn=()=>`<button type="button" class="btn ghost opros-open" style="width:100%;margin-top:8px;padding:8px" onclick="(function(){var s=document.getElementById('sheet');if(s)s.style.display='none'})();openCitiusOpros()">Быстрый вопрос сотруднику</button>`;
+  if(typeof cBtns==='function' && !cBtns.__opros){
+    const orig=cBtns;
+    cBtns=function(ctx){return orig(ctx)+oprosBtn()};
+    cBtns.__opros=1;
+  }
+  function injectHelp(){
+    const sh=document.getElementById('sheet');if(!sh||sh.querySelector('.opros-open'))return;
+    const box=sh.querySelector('.cbtns')||sh.querySelector('.in');if(!box)return;
+    const w=document.createElement('div');w.innerHTML=oprosBtn();
+    box.appendChild(w.firstChild);
+  }
+  if(typeof openHelp==='function'){
+    const oh=openHelp;
+    openHelp=function(f){oh(f);injectHelp()};
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',injectHelp);
+  else injectHelp();
+})();
+// ===== opros 23.11.2026 END
 
 // ---------- демо для скриншотов: #s=s1c&demo=1&help=1
 (function(){const h=new URLSearchParams(location.hash.slice(1));
