@@ -851,8 +851,9 @@ function openHelp(force){const s=SCR[cur];const st=STAGES.find(x=>x.n===s.st)||S
 $('helpbtn').onclick=openHelp;
 {const h0=new URLSearchParams(location.hash.slice(1)).get('theme');if(h0==='light'||h0==='dark')thForce=h0;}
 {const sp=$('splash');const hp=new URLSearchParams(location.hash.slice(1));
- if(hp.has('nosplash')||location.hash.includes('nosplash'))sp.remove();
- else{const hide=()=>{if(!sp.isConnected||sp.classList.contains('out'))return;sp.classList.add('out');setTimeout(()=>sp.remove(),600)};
+ const seen=(function(){try{return sessionStorage.getItem('sitius-splash')==='1'}catch(e){return false}})();
+ if(hp.has('nosplash')||location.hash.includes('nosplash')||(seen&&!hp.has('splashhold'))){try{sessionStorage.setItem('sitius-splash','1')}catch(e){}sp.remove()}
+ else{const hide=()=>{if(!sp.isConnected||sp.classList.contains('out'))return;sp.classList.add('out');try{sessionStorage.setItem('sitius-splash','1')}catch(e){}setTimeout(()=>sp.remove(),600)};
   sp.onclick=hide;sp.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')hide()};setTimeout(hide,hp.has('splashhold')?600000:4000)}}
 $('thbtn').onclick=()=>thSet(thNow()==='dark'?'light':'dark');thApply();
 // ===== правки 16.11.2026: несколько объектов, доли, налог по долям, навигация, сохранение, пояснения
@@ -2395,7 +2396,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:20';
+var APPV='23.11.2026 16:23';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3647,15 +3648,15 @@ document.head.insertAdjacentHTML('beforeend',`<style>#loginbtn{position:absolute
 function auBtnPlace(){const t=document.querySelector('.top'),b=document.getElementById('loginbtn');if(!t||!b||b.style.display==='none')return;
  const tr=t.getBoundingClientRect();let L=null;
  t.querySelectorAll('button,a').forEach(e=>{if(e===b||!e.offsetParent)return;const r=e.getBoundingClientRect();if(r.width<20||r.width>70||r.top-tr.top>90)return;if(!L||r.left<L.left)L=r});
- if(!L)return;const bh=b.offsetHeight||28;
- b.style.right=Math.round(tr.right-L.left+8)+'px';b.style.top=Math.round(L.top-tr.top+(L.height-bh)/2)+'px';
- const h=t.querySelector('h1');if(h){const br=b.getBoundingClientRect(),hr=h.getBoundingClientRect();h.style.paddingRight='';const need=Math.round(hr.right-br.left+6);if(need>0&&hr.top<br.bottom&&hr.bottom>br.top)h.style.paddingRight=need+'px'}}
+ if(!L)return;const bh=b.offsetHeight||28,op=(b.offsetParent||t).getBoundingClientRect(),ob=b.offsetParent?parseFloat(getComputedStyle(b.offsetParent).borderTopWidth)||0:0;
+ const z=(b.getBoundingClientRect().height/(b.offsetHeight||1))||1;b.style.right=Math.round((op.right-L.left)/z+8)+'px';b.style.top=Math.round((L.top-op.top)/z-ob+(L.height/z-bh)/2)+'px';
+ const h=t.querySelector('h1');if(h){const br=b.getBoundingClientRect(),hr=h.getBoundingClientRect();h.style.paddingRight='';const need=Math.round((hr.right-br.left)/z+6);if(need>0&&hr.top<br.bottom&&hr.bottom>br.top)h.style.paddingRight=need+'px'}}
 {const bs=auBtnSync;auBtnSync=function(){const x=bs.apply(this,arguments);try{auBtnPlace()}catch(e){}return x}}
 addEventListener('resize',()=>{try{auBtnPlace()}catch(e){}});addEventListener('orientationchange',()=>setTimeout(()=>{try{auBtnPlace()}catch(e){}},300));
 setTimeout(()=>{try{auBtnPlace()}catch(e){}},50);setTimeout(()=>{try{auBtnPlace()}catch(e){}},1500);
 {const sh=show;show=function(){const x=sh.apply(this,arguments);try{auBtnPlace()}catch(e){}return x}}
-document.head.insertAdjacentHTML('beforeend','<style>#loginbtn{height:28px;line-height:25px}@media (min-width:700px){#loginbtn{height:34px;line-height:31px}}</style>');
-const TGQ=1;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
+document.head.insertAdjacentHTML('beforeend','<style>#loginbtn{box-sizing:border-box;min-height:0;min-width:0;height:28px;line-height:25px;white-space:nowrap}@media (min-width:700px){#loginbtn{height:36px;line-height:33px;padding:0 16px}}</style>');
+const TGQ=0;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
 // ---------- n29 (23.11 15:35) · верхняя кнопка — меню: «Связаться с Ситиусом» (те же кнопки cBtns) + «Продолжить на другом устройстве» (вход, ссылка, файл)
 const TGQ_URL='https://t.me/citius_zayavki_bot?start=q';
 const tgqBtn=()=>TGQ?`<a class="btn ghost tgq" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:8px;text-align:center;text-decoration:none" href="${TGQ_URL}" target="_blank" rel="noopener">Задать вопрос в Telegram ↗</a><div class="hint" style="margin-top:3px">Откроется бот Ситиуса: нажмите «Старт» и напишите вопрос — сотрудник ответит там же.</div>`:'';
@@ -3949,13 +3950,15 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #cmpsheet .cs-more{margin:4px 0 0;font-size:13px;color:#5a6e8a}#cmpsheet .cs-more summary{cursor:pointer;color:#a8844a;padding:6px 0;list-style-position:inside}#cmpsheet .cs-more div{padding:2px 0 4px;line-height:1.45}
 #cmpsheet .cs-qr{display:flex;justify-content:center;margin:0 0 8px}#cmpsheet .cs-qr svg{width:min(62vw,240px);height:auto;background:#fff;padding:8px;border-radius:10px}
 </style>`);
-// ---------- n29 (23.11) · встречающий экран после заставки: картина, кто мы, цифры, «С чего начнём?»; при прогрессе — «Продолжить» здесь же (вместо отдельного окна n28)
-// #nosplash / #nowelcome / #demo / автообновление — экран не показываем, чтобы не ломать walk*-тесты
+// ---------- n29 (23.11) · встречающий главный экран после заставки: картина, кто мы, цифры, «С чего начнём?»; при прогрессе — «Продолжить» здесь же (вместо отдельного окна n28)
+// Заставка — один раз за сессию (sessionStorage sitius-splash). #nosplash / #nowelcome / #demo / автообновление — экран не показываем, чтобы не ломать walk*-тесты
 (function(){
-const HI_IMG={
-  v:'https://www.citius-solution.ru/assets/img/film_poster_vertical.jpg?v=3',
-  h:'https://www.citius-solution.ru/assets/img/film_poster.jpg?v=3'
-};
+const HI_SP='sitius-splash';
+const HI_IMG=(function(){
+  try{if(location.protocol==='file:')return '/workspace/sitius/app_spec/film_poster_hero.jpg'}catch(e){}
+  try{return new URL('film_poster_hero.jpg', location.href.replace(/[^/]*$/, '')).href}catch(e){}
+  return 'https://www.citius-solution.ru/app-test/film_poster_hero.jpg';
+})();
 const HI_GOALS=[
   ['sell','Продать',''],
   ['buy','Купить',''],
@@ -3964,6 +3967,8 @@ const HI_GOALS=[
   ['new','Купить новостройку','']
 ];
 function hiHash(){try{return new URLSearchParams(location.hash.slice(1))}catch(e){return new URLSearchParams()}}
+function hiSplashSeen(){try{return sessionStorage.getItem(HI_SP)==='1'}catch(e){return false}}
+function hiMarkSplash(){try{sessionStorage.setItem(HI_SP,'1')}catch(e){}}
 function hiSkip(){
   const h=hiHash();
   if(h.has('nosplash')||h.has('nowelcome')||h.has('demo'))return true;
@@ -3972,7 +3977,16 @@ function hiSkip(){
 }
 function hiHasProgress(){return !!(window.__restored&&window.__restored.cur)}
 function hiKillResume(){const o=document.getElementById('resumeov');if(o)o.remove()}
-function hiPic(){return (typeof window.innerWidth==='number'&&window.innerWidth>=700)?HI_IMG.h:HI_IMG.v}
+function hiDropSplash(){
+  const sp=document.getElementById('splash');
+  if(!sp)return;
+  const h=hiHash();
+  if(h.has('splashhold'))return;
+  if(h.has('nosplash')||location.hash.includes('nosplash')||hiSplashSeen()){
+    hiMarkSplash();
+    sp.remove();
+  }
+}
 
 window.helloClose=function(){
   const o=document.getElementById('helloov');
@@ -4001,12 +4015,11 @@ window.helloGoal=function(g){
 
 function hiHtml(){
   const prog=hiHasProgress();
-  const src=hiPic();
   const goals=HI_GOALS.map(([v,t,w])=>`<button type="button" class="hi-g${w?' '+w:''}" onclick="helloGoal('${v}')">${t}</button>`).join('');
   const resume=prog?`<button type="button" class="hi-go" id="hello-go" onclick="helloGo()">Продолжить</button>
     <button type="button" class="hi-nw" onclick="helloNew()">Начать заново</button>
     <p class="hi-res">На этом устройстве есть сохранённые ответы. «Продолжить» откроет то место, где вы остановились.</p>`:'';
-  return `<div class="hi-pic"><img src="${src}" alt="Ситиус Недвижимость"></div>
+  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="Ситиус Недвижимость" width="1080" height="608"></div></div>
     <div class="hi-copy">
       <p class="hi-name">Ситиус Недвижимость</p>
       <p class="hi-line">Недвижимость в Москве и Санкт-Петербурге · премиальное качество на каждом этапе сделки</p>
@@ -4027,21 +4040,22 @@ function hiHtml(){
 function hiCss(){
   if(document.getElementById('hi-css'))return;
   document.head.insertAdjacentHTML('beforeend',`<style id="hi-css">
-#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;font-family:Montserrat,system-ui,sans-serif}
-#helloov .hi-pic{flex:0 1 22vh;min-height:96px;max-height:200px;overflow:hidden;background:#152033}
-#helloov .hi-pic img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 40%}
-#helloov .hi-copy{flex:0 0 auto;padding:10px 16px 6px;text-align:center}
+#phone>#helloov#helloov,#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;width:100%;max-width:100%;height:100%;max-height:100%;box-sizing:border-box;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;overflow:hidden;font-family:Montserrat,system-ui,sans-serif;grid-column:1/-1;grid-row:1/-1}
+#helloov .hi-pic{flex:0 0 auto;width:100%;max-width:100%;min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#152033}
+#helloov .hi-pic-in{width:min(100%,calc(min(30vh,280px)*16/9));max-width:100%;aspect-ratio:16/9;max-height:min(30vh,280px);height:auto;overflow:hidden;position:relative;background:#152033}
+#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:100%;object-fit:cover;object-position:center center}
+#helloov .hi-copy{flex:0 0 auto;padding:10px 16px 6px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));text-align:center;box-sizing:border-box;width:100%;max-width:100%}
 #helloov .hi-name{margin:0 0 4px;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:22px;line-height:1.2;color:#fbf8f1}
 #helloov .hi-line{margin:0 0 10px;font-size:12.5px;line-height:1.35;color:#e8dcc4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 #helloov .hi-stats{display:flex;margin:0 0 8px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden;background:rgba(18,28,45,.45)}
-#helloov .hi-stats>div{flex:1;text-align:center;padding:8px 4px 7px;border-left:1px solid rgba(201,164,106,.35)}
+#helloov .hi-stats>div{flex:1;min-width:0;text-align:center;padding:8px 4px 7px;border-left:1px solid rgba(201,164,106,.35)}
 #helloov .hi-stats>div:first-child{border-left:0}
 #helloov .hi-stats b{display:block;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:18px;line-height:1.15;color:#d4b57e}
 #helloov .hi-stats span{display:block;margin-top:3px;font-size:10px;line-height:1.25;color:rgba(247,243,234,.88)}
 #helloov .hi-more{display:inline-block;color:#d4b57e;font-size:13.5px;padding:4px 2px}
-#helloov .hi-start{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 16px 16px;min-height:0}
+#helloov .hi-start{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 16px max(16px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));min-height:0;box-sizing:border-box;width:100%;max-width:100%}
 #helloov .hi-q{margin:8px 0 8px;text-align:center;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:20px;line-height:1.2;color:#fbf8f1}
-#helloov .hi-goals{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#helloov .hi-goals{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:100%;box-sizing:border-box}
 #helloov .hi-g{min-height:48px;padding:10px 8px;border:0;border-radius:12px;background:linear-gradient(180deg,#d4b57e,#c9a46a);color:#1e2f4a;font-weight:700;font-size:15px;line-height:1.2;cursor:pointer;font-family:Montserrat,system-ui,sans-serif}
 #helloov .hi-g.wide{grid-column:1/-1}
 #helloov .hi-go{display:block;width:100%;min-height:54px;margin:0 0 8px;padding:12px 14px;border:0;border-radius:14px;background:linear-gradient(180deg,#f0dcb0,#c9a46a);color:#1e2f4a;font-weight:700;font-size:19px;cursor:pointer;font-family:Montserrat,system-ui,sans-serif;box-shadow:0 6px 18px rgba(201,164,106,.35)}
@@ -4049,19 +4063,19 @@ function hiCss(){
 #helloov .hi-res{margin:0 0 4px;font-size:11.5px;line-height:1.35;color:#e8dcc4;text-align:center}
 #helloov .hi-g:focus-visible,#helloov .hi-go:focus-visible,#helloov .hi-nw:focus-visible,#helloov .hi-more:focus-visible{outline:2px solid #fbf8f1;outline-offset:2px}
 @media (min-width:700px){
-  #helloov .hi-pic{max-height:240px;flex-basis:26vh}
+  #helloov .hi-pic-in{width:min(100%,calc(min(32vh,320px)*16/9));max-height:min(32vh,320px)}
   #helloov .hi-name{font-size:28px}
-  #helloov .hi-line{font-size:14px;white-space:normal}
+  #helloov .hi-line{font-size:14px;white-space:normal;-webkit-line-clamp:unset}
   #helloov .hi-stats b{font-size:24px}
   #helloov .hi-stats span{font-size:11px}
   #helloov .hi-q{font-size:24px}
   #helloov .hi-g{min-height:54px;font-size:16px}
-  #helloov .hi-copy,#helloov .hi-start{padding-left:28px;padding-right:28px}
+  #helloov .hi-copy,#helloov .hi-start{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
   #helloov .hi-start{max-width:560px;width:100%;margin:0 auto;box-sizing:border-box}
   #helloov .hi-copy{max-width:560px;width:100%;margin:0 auto;box-sizing:border-box}
 }
 @media (max-height:700px){
-  #helloov .hi-pic{max-height:120px;min-height:72px;flex-basis:18vh}
+  #helloov .hi-pic-in{width:min(100%,calc(min(22vh,160px)*16/9));max-height:min(22vh,160px)}
   #helloov .hi-name{font-size:20px}
   #helloov .hi-g{min-height:44px;padding:8px}
   #helloov .hi-go{min-height:48px;font-size:17px}
@@ -4090,7 +4104,7 @@ function hiWaitSplash(fn){
   const sp=document.getElementById('splash');
   if(!sp||!sp.isConnected){fn();return}
   let done=0;
-  const go=()=>{if(done)return;done=1;fn()};
+  const go=()=>{if(done)return;done=1;try{hiMarkSplash()}catch(e){}fn()};
   const obs=new MutationObserver(()=>{
     if(!sp.isConnected)go();
     else if(sp.classList.contains('out'))setTimeout(go,500);
@@ -4102,10 +4116,15 @@ function hiWaitSplash(fn){
 }
 
 function hiBoot(){
+  hiDropSplash();
   hiKillResume();
   if(hiSkip())return;
+  const sp=document.getElementById('splash');
+  if(!sp||!sp.isConnected){hiShow();return}
   hiWaitSplash(function(){hiKillResume();hiShow()});
 }
+// сразу, пока парсится страница: если заставка уже была в этой сессии — убрать, не дожидаясь DOMContentLoaded
+hiDropSplash();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hiBoot,0));
 else setTimeout(hiBoot,0);
 })();
