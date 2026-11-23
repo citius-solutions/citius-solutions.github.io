@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 17:31';
+var APPV='23.11.2026 18:09';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3908,9 +3908,11 @@ function csView(){const on=authOn(),a=on?authGet():null,v=CS.v,em=hq(AU.email||'
   if(AU.step!=='code')return ['Вход',`<input id="auemail" class="cs-in" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="Электронная почта" aria-label="Электронная почта" value="${em}" oninput="AU.email=this.value.trim()" onkeydown="if(event.key==='Enter')auMail()">${csPd()}${csBtn(AU.busy?'Отправляем…':'Получить код','auMail()','pri')}${msg}<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="csGo('tg')">Войти через Telegram</button></div>`];
   return ['Вход',`<input id="aucode" class="cs-in cs-code" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="Код из письма" aria-label="Код из письма" value="${hq(AU.code||'')}" oninput="AU.code=this.value.replace(/\\D/g,'');if(AU.code.length===6)auMailV()">${csBtn(AU.busy?'Проверяем…':'Войти','auMailV()','pri')}${msg}<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="AU.code='';auMail()">Отправить ещё раз</button></div>`]}
  if(v==='tg'){if(on)return ['Вы вошли',`<div class="cs-who">${hq(a.who||'')}</div>`+csBtn('Готово','csClose()','pri')];
-  const link=AU.nonce&&AU.tg!=='expired'?csLink('Открыть бота в Telegram ↗',hq(AU.link),'нажмите «Старт» — бот пришлёт код'):csBtn(AU.busy?'Готовим ссылку…':'Получить ссылку на бота','auTg()','pri');
+  const link=AU.nonce&&AU.tg!=='expired'?csLink('Открыть бота в Telegram ↗',hq(AU.link),'нажмите «Старт» (или «Запустить») — код придёт сразу'):csBtn(AU.busy?'Готовим ссылку…':'Получить ссылку на бота','auTg()','pri');
+  const hint=AU.nonce&&AU.tg!=='expired'&&AU.tg!=='sent'?'<div class="cs-h">Нажмите «Старт» (или «Запустить») в боте — код придёт сразу.</div>':'';
+  const late=AU.tgLate&&AU.tg==='wait'?'<div class="cs-err" role="status">Откройте бота и нажмите «Старт».</div>':'';
   const code=AU.nonce&&AU.tg!=='expired'?`<input id="aucode" class="cs-in cs-code" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="код из Telegram" value="${hq(AU.code||'')}" oninput="AU.code=this.value.replace(/\\D/g,'');if(AU.code.length===6)auTgV()">${csBtn(AU.busy?'Проверяем…':'Войти','auTgV()',AU.tg==='sent'?'pri':'')}${AU.tg==='sent'?'<div class="cs-ok" role="status">Код пришёл в Telegram.</div>':''}`:'';
-  return ['Вход через Telegram',link+code+msg]}
+  return ['Вход через Telegram',link+hint+late+code+msg]}
  if(v==='qr'){if(!on)return ['QR-код',csBtn('Войти',"csGo('login')",'pri')];
   return ['QR-код для другого устройства',(AU.qr?`<div class="cs-qr">${AU.qr}</div><div class="cs-h" style="text-align:center">Наведите камеру другого устройства. Действует 10 минут, один раз.</div><div class="cs-h cs-url"><a href="${hq(AU.qrl)}">${hq(AU.qrl)}</a></div>`:`<div class="cs-h" role="status">${AU.busy?'Готовим QR-код…':''}</div>`)+msg+(AU.qr?'':csBtn('Сделать QR-код','auQr()','pri'))]}
  if(v==='sup'&&typeof supView==='function')return supView(msg);
@@ -3962,6 +3964,11 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 {const o1=auOut;auOut=function(){const x=o1.apply(this,arguments);try{csClose()}catch(e){}try{auBtnSync()}catch(e){}
  try{if(typeof sitiusSuccess==='function')sitiusSuccess({title:'Вы вышли',text:'Ответы на этом устройстве остались. Чтобы снова сохранять их в облаке, нажмите «Войти».',btn:'Хорошо'})}catch(e){}return x}}
 document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-b.out{min-height:48px;background:transparent;border:2px solid #c9a46a;color:#8a6a2f;font-weight:700;justify-content:center}#cmpsheet .cs-b.out .cs-oi{font-weight:400;margin-right:6px;font-size:18px}#cmpsheet .cs-b.out:hover{background:rgba(201,164,106,.12)}</style>');
+// подсказка, если бот не получил «Старт» за 20 с (состояние только на устройстве, совместимо с Code.gs v2.2)
+{const w0=authTgWait;authTgWait=function(nonce,onState){AU.tgLate=0;if(AU._tgLateT)clearTimeout(AU._tgLateT);
+  AU._tgLateT=setTimeout(()=>{if(AU.tg==='wait'){AU.tgLate=1;try{onState('wait')}catch(e){}}},20000);
+  const stop=w0(nonce,st=>{if(st&&st!=='wait'){AU.tgLate=0;if(AU._tgLateT)clearTimeout(AU._tgLateT)}onState(st)});
+  return()=>{if(AU._tgLateT)clearTimeout(AU._tgLateT);stop()}}}
 // ---------- n29 (23.11) · встречающий главный экран после заставки: картина, кто мы, цифры, «С чего начнём?»; при прогрессе — «Продолжить» здесь же (вместо отдельного окна n28)
 // Заставка — один раз за сессию (sessionStorage sitius-splash). Главный экран рисуется под заставкой, чтобы после неё не мелькал экран заявки.
 // #nosplash / #nowelcome / #demo / автообновление — экран не показываем, чтобы не ломать walk*-тесты
@@ -4390,37 +4397,50 @@ ${opros}
  try{const b=document.getElementById('helpbtn');if(b)b.onclick=function(e){openHelp(e)}}catch(e){}
 })();
 const PHQ=1;  // вход по телефону — Code.gs v2.2 задеплоен, включено по умолчанию; выключить: N29_V22=0
-// ===== Вход по номеру телефона с кодом в Telegram (владелец 17:20 МСК). Включается сборкой N29_PHONE=1 — только после деплоя Code.gs v2.2.
+// ===== Вход по номеру телефона с кодом в Telegram (владелец 17:20 МСК; правки 23.11 19:04 МСК).
+// Включается сборкой PHQ (N29_V22). Совместимо с Code.gs v2.2 и v2.3: новые статусы с сервера не обязательны, «нет Старта» считается на устройстве.
 // Бот не может написать первым по номеру: Апп даёт ссылку t.me/<бот>?start=ph_<nonce>, бот просит «Поделиться номером»,
 // сверяет его с введённым и присылает код. Номер уходит на сервер только для сверки (там хранится хэш), в облако с ответами не попадает.
-Object.assign(AU,{phone:'',phn:'',phl:'',ph:''});let AU_phstop=null;
+Object.assign(AU,{phone:'',phn:'',phl:'',ph:'',phLate:0,tgLate:0});let AU_phstop=null,AU_phLateT=0;
 AUTH_ERR.bad_phone=AUTH_ERR.bad_phone||'Проверьте номер телефона.';
+const PH_LATE_MS=20000;
 function phDigits(s){let d=String(s||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);if(d.length===10&&d[0]==='9')d='7'+d;return d}
 function phFmt(s){let d=String(s||'').replace(/\D/g,'');if(!d)return '';if(d[0]==='8')d='7'+d.slice(1);if(d[0]==='9')d='7'+d;if(/^7[78]9|^788/.test(d))d='7'+d.slice(2);if(d[0]!=='7')return '+'+d.slice(0,15);d=d.slice(0,11);
  const p=[d.slice(1,4),d.slice(4,7),d.slice(7,9),d.slice(9,11)];let r='+7';if(p[0])r+=' ('+p[0]+(p[0].length===3?')':'');if(p[1])r+=' '+p[1];if(p[2])r+='-'+p[2];if(p[3])r+='-'+p[3];return r}
 function phIn(e){const v=phFmt(e.value);e.value=v;AU.phone=v}
-function phWait(nonce,onState){let stop=false,n=0;const tick=()=>{if(stop)return;apiCall('phStatus',{nonce},10000).then(r=>{if(stop)return;
-  const st=r&&r.ok?r.state:(r&&r.err==='expired'?'expired':'');if(st&&st!=='wait'&&st!=='ask'){onState(st);if(st!=='mismatch')return}else if(st)onState(st);
-  if(++n<200&&!['sent','blocked','expired'].includes(st))setTimeout(tick,n<40?3000:6000)})};tick();return ()=>{stop=true}}
+function phWait(nonce,onState){let stop=false,n=0;AU.phLate=0;if(AU_phLateT)clearTimeout(AU_phLateT);
+ AU_phLateT=setTimeout(()=>{if(!stop&&(AU.ph==='wait'||!AU.ph)){AU.phLate=1;onState(AU.ph||'wait')}},PH_LATE_MS);
+ const tick=()=>{if(stop)return;apiCall('phStatus',{nonce},10000).then(r=>{if(stop)return;
+  const st=r&&r.ok?r.state:(r&&r.err==='expired'?'expired':'');if(st&&st!=='wait')AU.phLate=0;
+  if(st&&st!=='wait'&&st!=='ask'){onState(st);if(st!=='mismatch')return}else if(st)onState(st);
+  if(++n<200&&!['sent','blocked','expired'].includes(st))setTimeout(tick,n<40?3000:6000)})};tick();return()=>{stop=true;clearTimeout(AU_phLateT)}}
 function auPh(){const e=csE('auphone');if(e)AU.phone=e.value;const d=phDigits(AU.phone);
  if(!/^\d{10,15}$/.test(d)||(d[0]==='7'&&d.length!==11)){AU.err='Проверьте номер телефона.';auR();return}
  if(!A.pdauth){AU.err='Чтобы получить код, отметьте согласие на обработку персональных данных.';auR();return}
- auRun(apiCall('phStart',{phone:d}),r=>{if(!r.ok||!r.nonce){AU.err=authErr(r);return}AU.phn=r.nonce;AU.phl=r.link;AU.ph='wait';AU.code='';AU.step='ph';
-  if(AU_phstop)AU_phstop();AU_phstop=phWait(r.nonce,st=>{AU.ph=st;if(st==='mismatch')AU.err='Номер в Telegram не совпадает с введённым. Проверьте номер и запросите код ещё раз.';
+ auRun(apiCall('phStart',{phone:d}),r=>{if(!r.ok||!r.nonce){AU.err=authErr(r);return}AU.phn=r.nonce;AU.phl=r.link;AU.ph='wait';AU.phLate=0;AU.code='';AU.step='ph';
+  if(AU_phstop)AU_phstop();AU_phstop=phWait(r.nonce,st=>{AU.ph=st;if(st==='mismatch')AU.err='Номер в Telegram не совпадает с введённым. Проверьте номер или войдите через Telegram без номера.';
    if(st==='blocked'){AU.err='Слишком много попыток. Запросите код ещё раз.';AU.step=''}if(st==='expired'){AU.err='Ссылка устарела. Запросите код ещё раз.';AU.step=''}auR()})})}
+function auPhToTg(){AU.step='';AU.code='';AU.phn='';AU.ph='';AU.phLate=0;AU.err='';AU.m='';if(AU_phstop)AU_phstop();csGo('tg')}
 function auPhV(){const e=csE('aucode');if(e)AU.code=e.value.replace(/\D/g,'');if(AU.busy)return;if(!/^\d{6}$/.test(AU.code)){AU.err=AUTH_ERR.bad_code;auR();return}
- auRun(apiCall('verifyCode',{phnonce:AU.phn,code:AU.code}).then(authAfter),r=>{if(r&&r.ok){if(AU_phstop)AU_phstop();AU.step='';AU.phn='';AU.ph=''}auAfter(r)})}
+ auRun(apiCall('verifyCode',{phnonce:AU.phn,code:AU.code}).then(authAfter),r=>{if(r&&r.ok){if(AU_phstop)AU_phstop();AU.step='';AU.phn='';AU.ph='';AU.phLate=0}auAfter(r)})}
 function auMode(m){AU.m=m;AU.err='';AU.msg='';if(m!=='phone'&&AU.step==='ph')AU.step='';csR();setTimeout(()=>{const f=csE(m==='phone'?'auphone':'auemail');f&&f.focus({preventScroll:true})},30)}
 function phSeg(){return `<div class="cs-seg" role="tablist"><button type="button" role="tab" aria-selected="${AU.m!=='phone'}" class="${AU.m!=='phone'?'on':''}" onclick="auMode('mail')">Почта</button><button type="button" role="tab" aria-selected="${AU.m==='phone'}" class="${AU.m==='phone'?'on':''}" onclick="auMode('phone')">Телефон</button></div>`}
+function phSteps(){return `<ol class="cs-steps"><li>Нажмите «Старт» в боте.</li><li>Нажмите «📱 Поделиться номером».</li><li>Код придёт в Telegram — введите его здесь.</li></ol>`}
+function phStatusHtml(){if(AU.ph==='sent')return '<div class="cs-ok" role="status">Код пришёл в Telegram.</div>';
+ if(AU.ph==='ask')return '<div class="cs-ok" role="status">Бот ждёт ваш номер: нажмите «📱 Поделиться номером» в чате с ботом.</div>';
+ if(AU.ph==='wait'&&AU.phLate)return '<div class="cs-err" role="status">Откройте бота и нажмите «Старт».</div>';return ''}
 if(typeof PHQ!=='undefined'&&PHQ){
  const cv=csView;csView=function(){const v=CS.v;if((v!=='login'&&v!=='mail')||authOn())return cv.apply(this,arguments);
   const msg=`${AU.err?`<div class="cs-err" id="auerr" role="alert">${hq(AU.err)}</div>`:''}${AU.msg?`<div class="cs-ok" role="status">${hq(AU.msg)}</div>`:''}`;
   if(AU.m!=='phone'){const r=cv.apply(this,arguments);if(AU.step!=='code')r[1]=phSeg()+r[1];return r}
   if(AU.step!=='ph')return ['Вход',phSeg()+`<input id="auphone" class="cs-in" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (900) 000-00-00" aria-label="Номер телефона" value="${hq(AU.phone||'')}" oninput="phIn(this)" onfocus="if(!this.value){this.value='+7 ';AU.phone=this.value}" onkeydown="if(event.key==='Enter')auPh()">${csPd()}${csBtn(AU.busy?'Готовим ссылку…':'Получить код в Telegram','auPh()','pri')}${msg}`];
-  const st=AU.ph==='sent'?'<div class="cs-ok" role="status">Код пришёл в Telegram.</div>':'';
-  return ['Вход',(AU.ph==='sent'?'':csLink('Открыть Telegram ↗',hq(AU.phl),'нажмите «Старт» и «Поделиться номером»').replace('class="cs-b"','class="cs-b pri"'))+`<input id="aucode" class="cs-in cs-code" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="Код из Telegram" aria-label="Код из Telegram" value="${hq(AU.code||'')}" oninput="AU.code=this.value.replace(/\\D/g,'');if(AU.code.length===6)auPhV()">${csBtn(AU.busy?'Проверяем…':'Войти','auPhV()',AU.ph==='sent'?'pri':'')}${st}${msg}<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="AU.step='';AU.code='';if(AU_phstop)AU_phstop();csR()">Изменить номер</button></div>`]};
- const r1=csR;csR=function(){const f=document.activeElement&&document.activeElement.id;const x=r1.apply(this,arguments);if(f==='auphone'){const e=csE(f);if(e){e.focus({preventScroll:true});try{e.setSelectionRange(e.value.length,e.value.length)}catch(z){}}}return x};
- document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-seg{display:flex;gap:0;margin:0 0 10px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden}#cmpsheet .cs-seg button{flex:1;min-height:44px;border:0;background:#fff;color:#1e2f4a;font:600 15px Montserrat,system-ui,sans-serif;cursor:pointer}#cmpsheet .cs-seg button.on{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a)}</style>');
+  const open=AU.ph==='sent'?'':csLink('Открыть Telegram ↗',hq(AU.phl),'нажмите «Старт» и «Поделиться номером»').replace('class="cs-b"','class="cs-b pri"');
+  const steps=AU.ph==='sent'?'':phSteps();
+  const code=AU.ph==='sent'?`<input id="aucode" class="cs-in cs-code" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="Код из Telegram" aria-label="Код из Telegram" value="${hq(AU.code||'')}" oninput="AU.code=this.value.replace(/\\D/g,'');if(AU.code.length===6)auPhV()">${csBtn(AU.busy?'Проверяем…':'Войти','auPhV()','pri')}`:'';
+  const sw=AU.ph==='mismatch'?`<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="auPhToTg()">Войти через Telegram без номера</button></div>`:'';
+  return ['Вход',open+steps+phStatusHtml()+code+msg+sw+`<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="AU.step='';AU.code='';AU.phLate=0;if(AU_phstop)AU_phstop();csR()">Изменить номер</button></div>`]};
+ const r1=csR;csR=function(){const f=document.activeElement&&document.activeElement.id;const x=r1.apply(this,arguments);if(f==='auphone'||(f==='aucode'&&AU.ph==='sent')){const e=csE(f);if(e){e.focus({preventScroll:true});try{e.setSelectionRange(e.value.length,e.value.length)}catch(z){}}}return x};
+ document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-seg{display:flex;gap:0;margin:0 0 10px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden}#cmpsheet .cs-seg button{flex:1;min-height:44px;border:0;background:#fff;color:#1e2f4a;font:600 15px Montserrat,system-ui,sans-serif;cursor:pointer}#cmpsheet .cs-seg button.on{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a)}#cmpsheet .cs-steps{margin:0 0 10px;padding:0 0 0 1.25em;color:#5a6e8a;font-size:13.5px;line-height:1.45}#cmpsheet .cs-steps li{margin:0 0 4px}</style>');
 }
 // ---------- n29 (23.11) · вкладка «О нас» в нижней полосе рядом с «Безопасность» (не правит p8_menu.js)
 (function(){
