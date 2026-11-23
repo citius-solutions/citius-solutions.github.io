@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 18:22';
+var APPV='23.11.2026 18:27';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -4899,16 +4899,74 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-c19-css">
   #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:24px;margin:6px 0 4px}
 }
 @media (min-width:1100px) and (min-height:821px){
-  #phone.c19-s0:not(:has(#helloov)) #body{display:grid;grid-template-columns:minmax(0,560px) 260px;justify-content:center;align-items:start;gap:28px 32px;padding-left:24px;padding-right:24px}
-  #phone.c19-s0:not(:has(#helloov)) #body>.f,
-  #phone.c19-s0:not(:has(#helloov)) #body>.c19-add,
-  #phone.c19-s0:not(:has(#helloov)) #body>.card{max-width:none;width:100%;grid-column:1}
-  #phone.c19-s0 #c19-side{display:block;grid-column:2;grid-row:1 / span 30;position:sticky;top:8px;width:100%;max-width:280px;background:rgba(201,164,106,.08);border:1px solid rgba(201,164,106,.35);border-radius:12px;padding:14px 14px 12px;box-sizing:border-box}
+  #phone.c19-s0:not(:has(#helloov)) #body{display:flex;flex-direction:row;justify-content:center;align-items:flex-start;gap:32px;padding-left:24px;padding-right:24px}
+  #c19-main{flex:0 1 560px;width:100%;max-width:560px;min-width:0}
+  #c19-main>.f,#c19-main>.card,#c19-main>.c19-add{width:100%;max-width:none;margin-bottom:12px;box-sizing:border-box}
+  #phone.c19-s0 #c19-side{display:block;flex:0 0 280px;width:280px;max-width:280px;position:sticky;top:8px;background:rgba(201,164,106,.08);border:1px solid rgba(201,164,106,.35);border-radius:12px;padding:14px 14px 12px;box-sizing:border-box}
   #phone.c19-s0 #c19-side .c19-sh{font-family:"Playfair Display",Georgia,serif;font-size:16px;color:#d4b57e;margin:0 0 8px;font-weight:600}
   #phone.c19-s0 #c19-side p{margin:0 0 8px;font-size:13px;line-height:1.45;opacity:.9}
   #phone.c19-s0 #c19-side ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55}
   [data-theme=light] #phone.c19-s0 #c19-side{background:#fff;border-color:#e6dccb}
   [data-theme=light] #phone.c19-s0 #c19-side .c19-sh{color:#2a3f5f}
+}
+
+/* планшет/телефон в горизонтали: вкладки ровным списком под «Помощь», не растянуты на всю высоту */
+@media (orientation:landscape) and (max-height:500px),
+       (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){
+  #phone>.tab{
+    height:auto!important;
+    max-height:none!important;
+    flex:none!important;
+    align-self:start!important;
+    justify-content:flex-start!important;
+    align-items:stretch!important;
+    gap:2px!important;
+    overflow:visible!important;
+  }
+  #phone>.tab>span,
+  #phone>.tab>span.c19t{
+    flex:0 0 auto!important;
+    flex-grow:0!important;
+    width:auto!important;
+    min-height:48px!important;
+    max-height:56px!important;
+    height:auto!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:8px!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+  }
+  #phone>.tab>span .c19-ico{width:16px!important;height:16px!important;flex:none!important;display:block!important;margin:0!important}
+  #phone>.tab>span .c19-tl{font-size:13px!important;line-height:1.2!important;white-space:nowrap!important;display:block!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important}
+  #phone:not(:has(#helloov)) #body{min-height:0;padding-bottom:28px}
+}
+@media (orientation:landscape) and (max-height:500px){
+  #phone>.tab>span,
+  #phone>.tab>span.c19t{min-height:40px!important;max-height:48px!important;padding:6px 8px!important;font-size:12.5px!important}
+  #phone>.tab>span .c19-tl{font-size:12.5px!important}
+}
+
+/* ПК: #body сжимается и прокручивается, снизу запас, чтобы карточка не пряталась под «Назад/Далее/Помощь» (в т.ч. при zoom) */
+@media (min-width:700px) and (min-height:821px){
+  /* zoom на каждом ребёнке #phone даёт наезд нижней панели на карточки — выключаем, размер держим шрифтом */
+  #phone>*:not(#splash){zoom:1!important}
+  #phone:not(:has(#helloov)) #body{min-height:0;flex:1 1 0;overflow-y:auto;padding-bottom:24px;box-sizing:border-box}
+  #phone:not(:has(#helloov)) #body>.f,#c19-main>.f{margin-bottom:12px}
+  #body .chips span{font-size:18px;padding:10px 14px}
+  #body .lbl{font-size:17px}
+  #body .locin,#body input{font-size:16px}
+  #phone>#nav .btn{font-size:16px;min-height:44px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:28px}
+  #phone>.tab>span,#phone>.tab>span.c19t,#phone>.tab>span .c19-tl{font-size:11px}
+  #phone:not(:has(#helloov))>#nav,#phone:not(:has(#helloov))>#helpbtn,#phone:not(:has(#helloov))>.tab{position:relative;z-index:8;background:#1e2f4a}
+  [data-theme=light] #phone:not(:has(#helloov))>#nav,[data-theme=light] #phone:not(:has(#helloov))>#helpbtn,[data-theme=light] #phone:not(:has(#helloov))>.tab{background:#f7f3ea}
 }
 </style>`);
 
@@ -5054,6 +5112,15 @@ function sideBox(){
   s.innerHTML='<div class="c19-sh">Ваш старт</div><p>'+(st?st+'. ':'')+'Ответьте по очереди — следующий вопрос появится после ответа на предыдущий.</p><ol><li>Цель</li><li>Что продаёте или ищете</li><li>Адрес</li><li>Срок</li><li>Как будете действовать</li></ol>';
   body.appendChild(s);
 }
+function c19WrapMain(){
+  const body=document.getElementById('body');
+  if(!body||document.getElementById('c19-main'))return;
+  const main=document.createElement('div');
+  main.id='c19-main';
+  const side=document.getElementById('c19-side');
+  [...body.children].forEach(n=>{if(n!==side)main.appendChild(n)});
+  body.insertBefore(main, side||null);
+}
 function compactHelp(){
   const b=document.getElementById('helpbtn');
   if(!b)return;
@@ -5114,6 +5181,7 @@ function afterShow(){
   if(typeof cur==='string'&&cur==='s0a'){
     reveal();
     sideBox();
+    c19WrapMain();
   }else{
     collapseBodyHints();
   }
