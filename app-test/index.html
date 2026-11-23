@@ -196,7 +196,7 @@ a{color:#f0dcb0}
   ["scroll","touchstart","mousemove","keydown","click"].forEach(function(v){m.addEventListener(v,go,{once:true,passive:true})});
   setTimeout(go,3000)})
   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-  ym(113852512, "init", {clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true});
+  ym(113852512, "init", {clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:false});
 </script>
 <!-- /Yandex.Metrika counter --></head><body><noscript><div><img src="https://mc.yandex.ru/watch/113852512" style="position:absolute; left:-9999px;" alt=""></div></noscript>
 <div id="phone">
@@ -596,9 +596,11 @@ SCR.order={st:-13,t:'Заказать услугу',i:'Короткая заяв
  <button class="btn primary" style="width:100%" onclick="if(!(A.oname||'').trim()||!(A.ophone||'').trim()){const e=document.getElementById('oerr');e.textContent='Укажите имя и телефон.';e.dataset.pd='';return}if(pdFail('pdord','oerr'))return;A.pdord=0;A.orders=(A.orders||[]).concat([{s:A.osvc,n:A.oname,p:A.ophone,c:A.ocon||'call',at:A.oback}]);A.osent=1;show('order',true)">Отправить заявку</button>`},next:()=>A.oback||'path'};
 
 // ===== тема оформления: как на телефоне / светлая / тёмная
-const PDURL='#';// ⚠ на сайте citius-solution.ru нет страницы политики — заглушка прототипа
-function pdBox(k,errId){return `<div class="ck pdc ${A[k]?'on':''}" role="checkbox" aria-checked="${!!A[k]}" tabindex="0" onclick="if(event.target.tagName==='A')return;A['${k}']=!A['${k}'];this.classList.toggle('on',A['${k}']);this.setAttribute('aria-checked',A['${k}']);if(A['${k}']){this.classList.remove('bad');const e=document.getElementById('${errId}');if(e&&e.dataset.pd)e.textContent=''}"><i></i><div>Соглашаюсь на обработку персональных данных · <a href="${PDURL}" onclick="return false" title="Страница политики пока не опубликована на сайте Ситиус">Политика конфиденциальности</a> ⚠</div></div>`}
-function pdFail(k,errId){if(A[k])return false;const e=document.getElementById(errId);if(e){e.textContent='Чтобы отправить, отметьте согласие на обработку персональных данных.';e.dataset.pd=1}const b=document.querySelector('.pdc');if(b){b.classList.add('bad');const n=e&&e.nextElementSibling;(n||b).scrollIntoView({block:'nearest'})}return true}
+const PDURL='/app-test/privacy.html',CONSURL='/app-test/consent.html',TERMSURL='/app-test/terms.html';// документы ПДн (черновики: app_spec/legal/)
+const LEGALNOTE='Сведения в приложении не являются юридической консультацией и не заменяют проверку документов юристом, нотариусом или банком. Это общий порядок действий: решения по вашей сделке принимаете вы.';
+const lgA=(u,t)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+function pdBox(k,errId){return `<div class="ck pdc ${A[k]?'on':''}" data-k="${k}" role="checkbox" aria-checked="${!!A[k]}" tabindex="0" onclick="if(event.target.tagName==='A')return;A['${k}']=!A['${k}'];this.classList.toggle('on',A['${k}']);this.setAttribute('aria-checked',A['${k}']);if(A['${k}']){this.classList.remove('bad');const e=document.getElementById('${errId}');if(e&&e.dataset.pd)e.textContent=''}"><i></i><div>Даю ${lgA(CONSURL,'согласие на обработку персональных данных')}. Как обрабатываются данные — в ${lgA(PDURL,'политике')}.</div></div>`}
+function pdFail(k,errId){if(A[k])return false;const e=document.getElementById(errId);if(e){e.textContent='Чтобы отправить, отметьте согласие на обработку персональных данных.';e.dataset.pd=1}const b=document.querySelector('.pdc[data-k="'+k+'"]');if(b){b.classList.add('bad');const n=e&&e.nextElementSibling;(n||b).scrollIntoView({block:'nearest'})}return true}
 const THK='sitius-theme',THMQ=matchMedia('(prefers-color-scheme: dark)');
 const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>';
 const MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
@@ -906,7 +908,7 @@ function resetAll(){if(!confirm('Стереть ответы на этом ус�
 document.addEventListener('input',()=>setTimeout(saveSt,0));document.addEventListener('change',()=>setTimeout(saveSt,0));
 (function(){const h=new URLSearchParams(location.hash.slice(1));if([...h.keys()].some(k=>!['theme','nosplash','splashhold','help','scroll'].includes(k)))return;const rd=k=>{try{const x=JSON.parse(localStorage.getItem(k)||'null');return x&&x.A&&x.A.goal?x:null}catch(e){return null}};let d=rd(SVK);if(!d)d=rd(SVK+'-prev');
  if(!d||!d.A||!d.A.goal)return;Object.assign(A,d.A);A.ck=d.A.ck||{};(d.done||[]).forEach(x=>done.add(x));hist.push(...(d.hist||[]));window.__restored={cur:d.cur,t:d.t};
- const sp=document.getElementById('splash');if(sp)sp.remove()})();
+ /* 23.11 n27: заставка и при восстановлении сохранённого прогресса держится 4 с (тап пропускает) */})();
 // ---------- пояснения к тегам
 function tipText(c,t){const s=String(t||'').replace(/<[^>]+>/g,'');
  if(c==='t-warn'||/^требует проверки/.test(s))return 'Это нужно проверить: в прототипе такие места отмечены ⚠, данные уточняются.';
@@ -2405,7 +2407,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='22.11.2026 20:01';
+var APPV='23.11.2026 12:34';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
