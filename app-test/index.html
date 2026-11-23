@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 18:36';
+var APPV='23.11.2026 19:05';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -5196,6 +5196,275 @@ const boot=function(){
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
 else boot();
+})();
+// ---------- n29 (23.11) · визуал и содержание: расширенный список «Что важно в новом жилье» + свой вариант;
+// нотариус — тёмно-синий блок как шапка; информационные таблички — белые; «?» без слова «Подробнее»;
+// на экране итога — сравнение «Сам или с агентством». Не трогает p20_fixes и логику заявок/адреса/бюджета.
+(function(){
+if(document.getElementById('n29-c21-css'))return;
+
+document.head.insertAdjacentHTML('beforeend',`<style id="n29-c21-css">
+/* Нотариус (.ntr) — фирменный тёмно-синий, как шапка, не белый */
+.ntr,
+[data-theme=light] .ntr,
+[data-theme=dark] .ntr{
+  background:#1e2f4a;
+  color:#f7f3ea;
+  border:1.5px solid #c9a46a;
+  box-shadow:0 2px 10px rgba(30,47,74,.28);
+}
+.ntr b,
+[data-theme=light] .ntr b,
+[data-theme=dark] .ntr b{color:#fbf8f1}
+.ntr .hint,
+.ntr .mut,
+[data-theme=light] .ntr .hint,
+[data-theme=dark] .ntr .hint,
+[data-theme=dark] .ntr .mut{color:#c3cbd8}
+.ntr a,
+[data-theme=light] .ntr a,
+[data-theme=dark] .ntr a{color:#e2c48e}
+.ntr,#body .ntr,#body>.ntr{width:100%;max-width:100%;box-sizing:border-box;display:block}
+
+
+/* Информационные таблички — белые, тонкая рамка; в тёмной теме тоже светлая пластина */
+.card:not(.risk):not(.ord),
+.note:not(.risk),
+.card.agx,
+[data-theme=light] .card:not(.risk):not(.ord),
+[data-theme=light] .note:not(.risk),
+[data-theme=light] .card.agx,
+[data-theme=dark] .card:not(.risk):not(.ord),
+[data-theme=dark] .note:not(.risk),
+[data-theme=dark] .card.agx{
+  background:#fff;
+  color:#243248;
+  border:1px solid #e6dccb;
+  box-shadow:0 1px 3px rgba(30,47,74,.08);
+}
+[data-theme=dark] .card:not(.risk):not(.ord),
+[data-theme=dark] .note:not(.risk),
+[data-theme=dark] .card.agx{
+  border-color:rgba(201,164,106,.45);
+  box-shadow:0 2px 10px rgba(0,0,0,.22);
+}
+.card:not(.risk) b,
+.note:not(.risk) b,
+.card.agx b,
+[data-theme=light] .card:not(.risk) b,
+[data-theme=light] .card.agx b,
+[data-theme=dark] .card:not(.risk) b,
+[data-theme=dark] .note:not(.risk) b,
+[data-theme=dark] .card.agx b{color:#1e2f4a}
+.card.agx>b:first-child,
+[data-theme=light] .card.agx>b:first-child,
+[data-theme=dark] .card.agx>b:first-child{color:#876832}
+.card:not(.risk) .hint,
+.card:not(.risk) .mut,
+.note:not(.risk) .hint,
+.agx .hint,
+.agx .mut,
+[data-theme=dark] .card:not(.risk) .hint,
+[data-theme=dark] .card:not(.risk) .mut,
+[data-theme=dark] .agx .hint,
+[data-theme=dark] .agx .mut{color:#4f5d70}
+.card:not(.risk) a,
+.agx a,
+[data-theme=dark] .card:not(.risk) a,
+[data-theme=dark] .agx a{color:#7a5f30}
+.card.agx,
+[data-theme=light] .card.agx,
+[data-theme=dark] .card.agx{
+  border-left:4px solid #c9a46a;
+}
+
+/* «?» в кружке без слова «Подробнее»; зона нажатия ≥32px */
+#body .c19-more>summary.c21-q,
+#cmpsheet .cs-more>summary.c21-q{
+  cursor:pointer;
+  list-style:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  min-width:32px;
+  min-height:32px;
+  padding:0;
+  margin:0;
+  color:transparent;
+  font-size:0;
+  line-height:0;
+  font-weight:700;
+  vertical-align:middle;
+}
+#body .c19-more>summary.c21-q::-webkit-details-marker,
+#cmpsheet .cs-more>summary.c21-q::-webkit-details-marker{display:none}
+#body .c19-more>summary.c21-q:before,
+#cmpsheet .cs-more>summary.c21-q:before{
+  content:"?";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border:1.5px solid #c9a46a;
+  border-radius:50%;
+  font-size:14px;
+  font-weight:700;
+  line-height:1;
+  color:#e2c48e;
+  box-sizing:border-box;
+}
+[data-theme=light] #body .c19-more>summary.c21-q:before,
+[data-theme=light] #cmpsheet .cs-more>summary.c21-q:before{color:#7a5a24}
+#cmpsheet .cs-more>summary.c21-q:before{color:#a8844a}
+
+/* свой вариант */
+.c21-cusrow{margin-top:8px}
+#body .chips span.c21-cus{padding-right:8px}
+.c21-x{margin-left:4px;opacity:.7;font-weight:700}
+.c21-cusadd{display:flex;gap:8px;align-items:center;margin-top:8px}
+.c21-cusadd input,.c21-cusin{flex:1 1 auto;min-width:0;margin:0;width:auto}
+.c21-cusbtn{flex:none;padding:8px 12px;min-height:36px;font-size:13px}
+.c21-cusnote{margin-top:6px;font-size:12.5px;line-height:1.4;opacity:.85}
+
+/* сравнение на итоге */
+.c21-vs{margin:12px 0 10px;padding:14px 14px 12px;border-radius:12px;background:#fff;color:#243248;border:1px solid #e6dccb;box-shadow:0 1px 3px rgba(30,47,74,.08)}
+[data-theme=dark] .c21-vs{border-color:rgba(201,164,106,.45);box-shadow:0 2px 10px rgba(0,0,0,.22)}
+.c21-vs h3{margin:0 0 8px;font-family:"Playfair Display",Georgia,serif;font-size:18px;line-height:1.3;font-weight:600;color:#1e2f4a}
+.c21-vs p{margin:0 0 8px;font-size:14px;line-height:1.5;color:#243248}
+.c21-vs-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 12px}
+@media (max-width:520px){.c21-vs-cols{grid-template-columns:1fr}}
+.c21-vs-col{border:1px solid #e6dccb;border-radius:10px;padding:10px 12px 8px;background:#fff}
+.c21-vs-col h4{margin:0 0 6px;font-size:14px;line-height:1.3;color:#1e2f4a}
+.c21-vs-col ul{margin:0 0 8px;padding-left:18px;font-size:13px;line-height:1.45}
+.c21-vs-col li{margin:0 0 4px}
+.c21-vs-col .c21-lab{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:6px 0 2px;color:#7a5f30}
+.c21-vs .c21-cta{display:block;width:100%;box-sizing:border-box;margin-top:4px}
+</style>`);
+
+function esc(s){
+  return (typeof hq==='function')?hq(s):String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// 1) «Что важно в новом жилье» — прежние ключи сохранены, список расширен, плюс свой вариант
+if(typeof needOpts==='function'){
+  needOpts=function(){
+    const lt=A.ltype||'sec',rm=lt==='room';
+    const L=[];
+    if(!rm)L.push(['rooms','Больше комнат']);
+    L.push(['area','Большая площадь'],['kitchen','Большая кухня']);
+    if(typeof hasMetro==='function'?hasMetro():false)L.push(['metro','Рядом метро']);
+    L.push(
+      ['school','Школа / детский сад'],
+      ['park','Парк / зелень'],
+      ['work','Близко к работе'],
+      ['infra','Развитая инфраструктура'],
+      ['quiet','Тихий двор'],
+      ['parking','Парковка'],
+      ['lift','Лифт'],
+      ['balcony','Балкон / лоджия'],
+      ['ceiling','Высокие потолки'],
+      ['view','Вид из окна'],
+      ['remont','Хороший ремонт']
+    );
+    if(lt==='sec'||lt==='any')L.push(['new','Новостройка']);
+    L.push(['newhouse','Новый дом'],['secure','Безопасность / консьерж']);
+    L.push(['nf1','Не первый этаж'],['top','Последний этаж'],['ntop','Не последний этаж']);
+    return L;
+  };
+}
+window.needCusAdd=function(){
+  const inp=document.getElementById('needcusin');
+  const t=((inp&&inp.value)||'').replace(/\s+/g,' ').trim();
+  if(!t)return;
+  const cut=t.slice(0,60);
+  A.needcus=A.needcus||[];
+  const low=cut.toLowerCase();
+  if(A.needcus.some(x=>String(x).toLowerCase()===low)){if(inp)inp.value='';return;}
+  if(A.needcus.length>=12)return;
+  A.needcus.push(cut);
+  if(inp)inp.value='';
+  if(typeof show==='function')show(cur,true);
+};
+window.needCusDel=function(i){
+  A.needcus=(A.needcus||[]).filter((_,k)=>k!==i);
+  if(typeof show==='function')show(cur,true);
+};
+if(typeof needChips==='function'){
+  needChips=function(){
+    if(A.need){
+      A.need=A.need.map(x=>x==='floor'?'nf1':x);
+      const ok=needOpts().map(x=>x[0]);
+      A.need=A.need.filter(x=>ok.includes(x));
+    }
+    const cus=A.needcus||[];
+    const cusH=cus.map((t,i)=>`<span class="on c21-cus" onclick="needCusDel(${i})">${esc(t)} <span class="c21-x" aria-hidden="true">×</span></span>`).join('');
+    return chips('need',needOpts(),1)
+      +(cusH?`<div class="chips c21-cusrow">${cusH}</div>`:'')
+      +`<div class="c21-cusadd"><input id="needcusin" class="c21-cusin" maxlength="60" placeholder="Свой вариант" aria-label="Свой вариант" onkeydown="if(event.key==='Enter'){needCusAdd();event.preventDefault()}">`
+      +`<button type="button" class="btn ghost c21-cusbtn" onclick="needCusAdd()">Добавить</button></div>`
+      +`<div class="c21-cusnote">Можно отметить несколько и добавить свой вариант.</div>`
+      +`<div class="hint">Остальные условия задайте в фильтрах на площадках.</div>`;
+  };
+}
+
+// 3) убрать слово «Подробнее» у переключателей «?»; заголовок карточки опыта агента не трогаем
+function qify(root){
+  const box=root||document;
+  box.querySelectorAll('.c19-more>summary, .cs-more>summary').forEach(sm=>{
+    const tx=(sm.textContent||'').replace(/\s+/g,' ').trim();
+    if(tx==='Подробнее'||tx===''||sm.classList.contains('c21-q')){
+      if(!sm.getAttribute('aria-label'))sm.setAttribute('aria-label','Подробнее');
+      if(tx==='Подробнее')sm.textContent='';
+      sm.classList.add('c21-q');
+    }
+  });
+}
+
+// 4) блок сравнения на экране итога
+const C21_VS=
+  `<div class="c21-vs" id="c21-vs">`
+  +`<h3>Сам или с агентством</h3>`
+  +`<p>Когда вы ведёте сделку сами, вы тратите своё время на поиск, торг, документы и проверки. Если в это же время вы занимаетесь тем, что умеете, вы зарабатываете — и этой суммы обычно хватает, чтобы покрыть работу агента Ситиуса.</p>`
+  +`<p>Обычно услуги агента обходятся дешевле, чем выгода по сделке: агент может продать дороже или купить выгоднее за счёт торга и знания рынка, и цена или условия объекта становятся для вас привлекательнее.</p>`
+  +`<div class="c21-vs-cols">`
+  +`<div class="c21-vs-col"><h4>Самостоятельно</h4>`
+  +`<span class="c21-lab">Плюсы</span><ul><li>Без комиссии агенту</li><li>Вы сами решаете каждый шаг</li></ul>`
+  +`<span class="c21-lab">Минусы</span><ul><li>Нужно ваше время</li><li>Риски ошибки в документах и проверках</li><li>Торг и поиск остаются на вас</li></ul>`
+  +`</div>`
+  +`<div class="c21-vs-col"><h4>С Ситиусом</h4>`
+  +`<span class="c21-lab">Плюсы</span><ul><li>Вы экономите время жизни и занимаетесь своей работой</li><li>Агент ведёт торг, документы и проверки</li><li>Обычно услуги агента стоят меньше, чем выгода в цене и условиях объекта</li></ul>`
+  +`<span class="c21-lab">Минусы</span><ul><li>Есть комиссия</li><li>Важно выбрать надёжного агента</li></ul>`
+  +`</div></div>`
+  +`<button type="button" class="btn primary c21-cta" onclick="openHelp()">Связаться с Ситиусом</button>`
+  +`</div>`;
+
+if(typeof SCR==='object'&&SCR.plan&&typeof SCR.plan.b==='function'&&!SCR.plan.b.__c21){
+  const b0=SCR.plan.b;
+  SCR.plan.b=function(){
+    const h=b0.apply(this,arguments);
+    if(!A||!A.goal)return h;
+    if(h.indexOf('id="c21-vs"')>=0)return h;
+    const mark='<div class="row" style="margin-top:4px"><button class="btn primary planpdf"';
+    const i=h.indexOf(mark);
+    return i>=0?h.slice(0,i)+C21_VS+h.slice(i):h+C21_VS;
+  };
+  SCR.plan.b.__c21=1;
+}
+
+function after(){qify(document)}
+if(typeof show==='function'&&!show.__c21){
+  const sh=show;
+  show=function(){
+    const r=sh.apply(this,arguments);
+    try{after()}catch(e){}
+    return r;
+  };
+  show.__c21=1;
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',after);
+else setTimeout(after,0);
 })();
 // ===== n29 END
 
