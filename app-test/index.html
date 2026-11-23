@@ -2395,7 +2395,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:12';
+var APPV='23.11.2026 16:17';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3863,7 +3863,7 @@ const CS={v:'',hist:[]};
 const csE=id=>document.getElementById(id);
 function csBtn(t,on,cls,sub){return `<button type="button" class="cs-b ${cls||''}" onclick="${on}"${AU.busy?' disabled':''}><span>${t}</span>${sub?`<small>${sub}</small>`:''}</button>`}
 function csLink(t,href,sub){return `<a class="cs-b" href="${href}" target="_blank" rel="noopener"><span>${t}</span>${sub?`<small>${sub}</small>`:''}</a>`}
-function csPd(){return pdBox('pdauth','auerr').replace(/\.\s*Как обрабатываются данные — в <a[^>]*>политике<\/a>\./,'.')}
+function csPd(){return pdBox('pdauth','auerr').replace(/\.\s*Как обрабатываются данные — в <a[^>]*>политике<\/a>\./,'.').replace(/<a([^>]*)>(согласие на обработку персональных данных)<\/a>\./,'$2 (<a$1>текст</a>).')}
 function csMore(t){return `<details class="cs-more"><summary>Подробнее</summary><div>${t}</div></details>`}
 function csGo(v){if(CS.v&&CS.v!==v)CS.hist.push(CS.v);CS.v=v;AU.err='';AU.msg='';csR();csAuto()}
 function csBack(){CS.v=CS.hist.pop()||'';AU.err='';csR()}
@@ -3927,7 +3927,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #cmpsheet .cs-b:focus-visible,#cmpsheet .cs-x:focus-visible,#cmpsheet .cs-bk:focus-visible{outline:2px solid #a8844a;outline-offset:2px}
 #cmpsheet .cs-in{display:block;width:100%;box-sizing:border-box;margin:0 0 9px;padding:13px 14px;border-radius:12px;border:1.5px solid #c9a46a;background:#fff;color:#1e2f4a;font-size:16px}
 #cmpsheet .cs-code{font-size:22px;letter-spacing:6px;text-align:center}#cmpsheet .cs-code::placeholder{letter-spacing:0;font-size:16px}
-#cmpsheet .pdc{margin:0 0 9px;background:transparent;border:0;padding:2px 0;color:#1e2f4a;font-size:13px}#cmpsheet .pdc a{color:#a8844a}
+#cmpsheet .pdc{margin:0 0 9px;background:transparent;border:0;padding:10px 0;min-height:44px;cursor:pointer;-webkit-tap-highlight-color:transparent;color:#1e2f4a;font-size:13px}#cmpsheet .pdc a{color:#a8844a}
 #cmpsheet .cs-h{font-size:13px;color:#5a6e8a;margin:0 0 9px;line-height:1.4}#cmpsheet .cs-h a{color:#a8844a}
 #cmpsheet .cs-url{font-size:11px;word-break:break-all;text-align:center}
 #cmpsheet .cs-who{text-align:center;font-weight:600;font-size:16px;margin:2px 0 12px}
@@ -4097,6 +4097,111 @@ function hiBoot(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hiBoot,0));
 else setTimeout(hiBoot,0);
 })();
+// ---------- n29 (23.11) · «Сообщить о проблеме»: пункт в меню 📲 (хук SUP_ON / supView в p11_compact.js), заявка kind «🛠 Поддержка» через существующий sendLead, без редеплоя
+const SUP_ON=1;
+const SUP={txt:'',contact:'',fileName:'',shot:null,busy:0,ok:0,err:'',hadContact:0,id:''};
+function supEsc(s){return typeof hq==='function'?hq(s):String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function supReset(){SUP.txt='';SUP.contact='';SUP.fileName='';SUP.shot=null;SUP.busy=0;SUP.ok=0;SUP.err='';SUP.hadContact=0;SUP.id=''}
+function supRedraw(){if(typeof csR==='function'&&typeof csE==='function'&&csE('cmpsheet')&&csE('cmpsheet').style.display==='flex'){csR();return}supOwnPaint()}
+function supOpen(){SUP.ok=0;SUP.err='';SUP.busy=0;if(typeof csOpen==='function'){csOpen('sup');return}supOwnOpen()}
+function supClose(){try{const o=typeof csE==='function'&&csE('cmpsheet');if(o&&o.style.display==='flex'&&typeof csClose==='function'){csClose();supReset();return}}catch(e){}supOwnClose();supReset()}
+function supView(){
+ if(SUP.ok){return ['Сообщить о проблеме',`<div class="cs-ok" role="status">Спасибо, мы получили сообщение и ответим.</div>`+(typeof csBtn==='function'?csBtn('Закрыть','supClose()','pri'):`<button type="button" class="cs-b pri" onclick="supClose()">Закрыть</button>`)]}
+ const err=SUP.err?`<div class="cs-err" role="alert">${supEsc(SUP.err)}</div>`:'';
+ const btn=SUP.busy?'Отправляем…':(SUP.err?'Отправить ещё раз':'Отправить');
+ const file=SUP.fileName?`<div class="cs-h" id="supfn">Файл: ${supEsc(SUP.fileName)}</div>`:'';
+ const dis=SUP.busy?' disabled':'';
+ return ['Сообщить о проблеме',
+  `<label class="cs-h" for="suptxt" style="display:block;margin:0 0 4px">Что не работает</label>`+
+  `<textarea id="suptxt" class="cs-in cs-ta" rows="4" maxlength="1200" placeholder="Коротко опишите, что произошло" aria-required="true" ${SUP.busy?'disabled':''} oninput="SUP.txt=this.value">${supEsc(SUP.txt)}</textarea>`+
+  `<label class="cs-h" for="supshot" style="display:block;margin:0 0 4px">Скриншот, по желанию</label>`+
+  `<input id="supshot" class="cs-in cs-file" type="file" accept="image/*" aria-label="Скриншот, по желанию" ${SUP.busy?'disabled':''} onchange="supPick(this)">`+file+
+  `<label class="cs-h" for="supct" style="display:block;margin:0 0 4px">Телефон или Telegram, по желанию</label>`+
+  `<input id="supct" class="cs-in" type="text" maxlength="80" placeholder="+7… или @ник" autocomplete="tel" aria-label="Телефон или Telegram, по желанию" value="${supEsc(SUP.contact)}" ${SUP.busy?'disabled':''} oninput="SUP.contact=this.value.trim()">`+
+  err+`<button type="button" class="cs-b pri" onclick="supSend()"${dis}><span>${btn}</span></button>`]}
+function supPick(inp){
+ SUP.fileName='';SUP.shot=null;
+ const f=inp&&inp.files&&inp.files[0];if(!f){supRedraw();return}
+ SUP.fileName=f.name||'скриншот';
+ const rd=new FileReader();
+ rd.onerror=function(){SUP.fileName='';SUP.shot=null;SUP.err='Не получилось прочитать файл';supRedraw()};
+ rd.onload=function(){const img=new Image();
+  img.onerror=function(){SUP.fileName='';SUP.shot=null;SUP.err='Этот файл не открылся как изображение';supRedraw()};
+  img.onload=function(){try{let w=img.width,h=img.height,max=1280;if(w>max||h>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k)}
+   const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+   let q=0.8,url=c.toDataURL('image/jpeg',q);
+   while(url.length>300*1024*1.37&&q>0.35){q-=0.12;url=c.toDataURL('image/jpeg',q)}
+   SUP.shot=url;SUP.err='';supRedraw()}catch(e){SUP.shot=null;SUP.err='Не получилось подготовить скриншот';supRedraw()}};
+  img.src=rd.result};
+ rd.readAsDataURL(f)}
+function supCtx(){
+ const G={sell:'Продажа',buy:'Покупка',alt:'Продажа и покупка',share:'Доля',new:'Новостройка'};
+ const goal=(typeof A!=='undefined'&&A&&A.goal)?(G[A.goal]||A.goal):'не выбрана';
+ const id=typeof cur!=='undefined'?String(cur):'';
+ const ttl=(typeof SCR!=='undefined'&&SCR[id]&&SCR[id].t)?SCR[id].t:'';
+ const scr=ttl?(ttl+(id?' · '+id:'')):(id||'неизвестно');
+ const ver=typeof APPV!=='undefined'?String(APPV):'';
+ const sz=(window.innerWidth||0)+'×'+(window.innerHeight||0)+(window.devicePixelRatio?' @'+window.devicePixelRatio:'');
+ return {goal,scr,ver,sz}}
+function supLead(txt,contact){
+ const c=supCtx(),ph=(typeof phOk==='function'&&contact&&phOk(contact))?('+7'+phDig(contact)):'';
+ const summary=[['Что не работает',txt],['Цель',c.goal],['Экран',c.scr],['Версия',c.ver],['Окно',c.sz]];
+ if(SUP.shot)summary.push(['Скриншот','выбран, не передан (лимит сервера)']);
+ // контакт обязателен на текущем бэкенде: если человек его не указал, передаём «не указан»
+ return {kind:'contact',svc:'🛠 Поддержка',contact:contact||'не указан',phone:ph,ctx:'🛠 Поддержка',summary}}
+function supSend(){
+ const ta=document.getElementById('suptxt');if(ta)SUP.txt=ta.value;const ct=document.getElementById('supct');if(ct)SUP.contact=ct.value.trim();
+ const txt=(SUP.txt||'').replace(/^\s+|\s+$/g,'');
+ if(!txt){SUP.err='Напишите, что не работает';SUP.ok=0;supRedraw();return}
+ if(txt.length>1200){SUP.err='Текст слишком длинный, сократите описание';supRedraw();return}
+ SUP.busy=1;SUP.err='';supRedraw();
+ const L=supLead(txt,SUP.contact);
+ const done=res=>{SUP.busy=0;if(res&&res.ok){SUP.ok=1;SUP.hadContact=!!SUP.contact;SUP.id=res.id||'';SUP.shot=null;supRedraw()}
+  else{const e=res&&res.err;SUP.err=e==='rate'?'Слишком много заявок за час, попробуйте позже':e==='too_big'?'Сообщение слишком большое, сократите текст':'Не получилось отправить. Проверьте интернет и нажмите «Отправить ещё раз»';supRedraw()}};
+ if(typeof sendLead!=='function'){done({ok:false,err:'no_send'});return}
+ sendLead(L).then(done,()=>done({ok:false,err:'net'}))}
+// запасной путь, если компактное меню ещё не подключено
+function supOwnOpen(){let o=document.getElementById('supsheet');if(!o){o=document.createElement('div');o.id='supsheet';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','supttl');o.onclick=e=>{if(e.target===o)supOwnClose()};document.body.appendChild(o)}
+ o.style.display='flex';document.addEventListener('keydown',supOwnKey);supOwnPaint();setTimeout(()=>{const f=o.querySelector('textarea,input,.cs-b');f&&f.focus({preventScroll:true})},60)}
+function supOwnClose(){const o=document.getElementById('supsheet');if(o)o.style.display='none';document.removeEventListener('keydown',supOwnKey)}
+function supOwnKey(e){if(e.key==='Escape')supOwnClose()}
+function supOwnPaint(){const o=document.getElementById('supsheet');if(!o||o.style.display!=='flex')return;const [t,b]=supView();
+ o.innerHTML=`<div class="cs-card"><div class="cs-hd"><span class="cs-sp"></span><b id="supttl">${supEsc(t)}</b><button type="button" class="cs-x" onclick="supOwnClose();supReset()" aria-label="Закрыть">✕</button></div><div class="cs-bd">${b}</div></div>`}
+(function(){if(document.getElementById('sup-css'))return;
+ document.head.insertAdjacentHTML('beforeend',`<style id="sup-css">
+#cmpsheet textarea.cs-ta,#supsheet textarea.cs-ta{min-height:96px;resize:vertical;line-height:1.4;font-family:inherit}
+#cmpsheet input.cs-file,#supsheet input.cs-file{padding:10px 12px;font-size:14px}
+#supsheet{position:fixed;inset:0;z-index:150;display:none;align-items:flex-end;justify-content:center;background:rgba(18,28,45,.55);font-family:Montserrat,system-ui,-apple-system,'Segoe UI',sans-serif}
+#supsheet .cs-card{background:#fbf8f1;color:#1e2f4a;width:100%;max-height:70vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:18px 18px 0 0;padding:6px 16px calc(14px + env(safe-area-inset-bottom));box-sizing:border-box;box-shadow:0 -6px 30px rgba(0,0,0,.25)}
+@media (min-width:600px){#supsheet{align-items:center}#supsheet .cs-card{width:420px;max-height:80vh;border-radius:18px;padding-bottom:16px}}
+#supsheet .cs-hd{display:flex;align-items:center;gap:6px;min-height:46px;position:sticky;top:-6px;background:#fbf8f1;z-index:1}
+#supsheet .cs-hd b{flex:1;text-align:center;font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:600;color:#1e2f4a}
+#supsheet .cs-x{width:36px;height:36px;border-radius:50%;border:0;background:#efe7d6;color:#1e2f4a;font-size:18px;cursor:pointer;flex:none}#supsheet .cs-sp{width:36px;flex:none}
+#supsheet .cs-bd{padding:4px 0 2px}
+#supsheet .cs-b{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:54px;margin:0 0 9px;padding:9px 14px;box-sizing:border-box;border-radius:14px;border:1.5px solid #c9a46a;background:#fff;color:#1e2f4a;font:600 16px/1.25 Montserrat,system-ui,sans-serif;text-decoration:none;cursor:pointer;text-align:center}
+#supsheet .cs-b.pri{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a);border-color:#c9a46a}
+#supsheet .cs-b[disabled]{opacity:.6}#supsheet .cs-b:focus-visible,#supsheet .cs-x:focus-visible{outline:2px solid #a8844a;outline-offset:2px}
+#supsheet .cs-in{display:block;width:100%;box-sizing:border-box;margin:0 0 9px;padding:13px 14px;border-radius:12px;border:1.5px solid #c9a46a;background:#fff;color:#1e2f4a;font-size:16px}
+#supsheet .cs-h{font-size:13px;color:#5a6e8a;margin:0 0 9px;line-height:1.4}
+#supsheet .cs-err{background:#fbe9e7;color:#8a2a1c;border-radius:10px;padding:9px 12px;font-size:14px;margin:0 0 9px}
+#supsheet .cs-ok{background:#eef5e9;color:#2f5a22;border-radius:10px;padding:9px 12px;font-size:14px;margin:0 0 9px}
+[data-theme=dark] #supsheet .cs-card,[data-theme=dark] #supsheet .cs-hd{background:#24364f;color:#fbf8f1}
+[data-theme=dark] #supsheet .cs-hd b{color:#fbf8f1}[data-theme=dark] #supsheet .cs-x{background:#1e2f4a;color:#fbf8f1}
+[data-theme=dark] #supsheet .cs-in{background:#1a2a40;color:#fbf8f1;border-color:#c9a46a}
+[data-theme=dark] #supsheet .cs-h{color:#c5d0de}[data-theme=dark] #supsheet .cs-b{background:#1a2a40;color:#fbf8f1}
+[data-theme=dark] #supsheet .cs-b.pri{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a);color:#1e2f4a}
+</style>`)})();
+// если открыто старое окно 📲 (dealsheet), добавляем туда тот же пункт
+(function(){if(typeof dealSheet!=='function')return;const ds=dealSheet;dealSheet=function(){const r=ds.apply(this,arguments);try{const inn=document.querySelector('#dealsheet .dsmenu');
+ if(inn&&!inn.querySelector('.sup-open')){const b=document.createElement('button');b.type='button';b.className='btn ghost sup-open';b.style.cssText='display:block;width:100%;margin-top:6px;padding:8px';b.textContent='🛠 Сообщить о проблеме';b.onclick=function(){try{dealClose()}catch(e){}supOpen()};inn.appendChild(b)}}catch(e){}return r}})();
+// подстраховка: если в p11 нет ветки v==="sup" или пункта меню, добавляем их здесь, не меняя p11
+(function(){if(typeof csView!=='function'||csView._supHook)return;const orig=csView;
+ csView=function(){try{if(typeof CS!=='undefined'&&CS.v==='sup'&&typeof supView==='function')return supView()}catch(e){}
+  const r=orig.apply(this,arguments);
+  try{if(typeof CS!=='undefined'&&CS.v==='menu'&&r&&typeof r[1]==='string'&&r[1].indexOf('Сообщить о проблеме')<0){
+   r[1]+=(typeof csBtn==='function'?csBtn('🛠 Сообщить о проблеме',"csGo('sup')",'','если что-то не работает'):'')}
+  }catch(e){}return r};
+ csView._supHook=1})();
 // ===== n29 END
 
 // ===== opros 23.11.2026 BEGIN
