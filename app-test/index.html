@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 17:12';
+var APPV='23.11.2026 17:14';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -4603,18 +4603,22 @@ function adrHide(){
 function adrPlace(el){
   const b=adrBox();if(!el||!el.isConnected||!b.innerHTML){if(b&&!b.innerHTML)adrHide();return}
   const r=el.getBoundingClientRect();
+  const ph=document.getElementById('phone');
+  const pr=ph?ph.getBoundingClientRect():{top:0,bottom:window.innerHeight,left:0,right:window.innerWidth};
   const vv=window.visualViewport;
-  const vh=(vv&&vv.height)||window.innerHeight,vy=(vv&&vv.offsetTop)||0;
-  const vw=(vv&&vv.width)||window.innerWidth,vx=(vv&&vv.offsetLeft)||0;
-  const below=vy+vh-r.bottom,above=r.top-vy;
+  const topB=Math.max(pr.top, vv?vv.offsetTop:0);
+  const botB=Math.min(pr.bottom, vv?(vv.offsetTop+vv.height):window.innerHeight);
+  const leftB=Math.max(pr.left, vv?vv.offsetLeft:0);
+  const rightB=Math.min(pr.right, vv?(vv.offsetLeft+vv.width):window.innerWidth);
+  const below=botB-r.bottom,above=r.top-topB;
   const openDown=below>=above||(below>=160&&above<120);
   const maxH=Math.min(260,Math.max(120,(openDown?below:above)-8));
-  const left=Math.min(Math.max(vx+8,r.left),vx+vw-Math.max(r.width,180)-8);
-  const z=(el.offsetWidth&&r.width)?(r.width/el.offsetWidth):1;
-  b.style.zoom=String(z);
+  const width=Math.max(180,Math.min(r.width,rightB-leftB-16));
+  const left=Math.min(Math.max(leftB+8,r.left),rightB-width-8);
+  b.style.zoom='1';
   b.style.left=left+'px';
-  b.style.width=(Math.max(180,Math.min(r.width,vw-16))/z)+'px';
-  b.style.maxHeight=(maxH/z)+'px';
+  b.style.width=width+'px';
+  b.style.maxHeight=maxH+'px';
   b.style.zIndex='120';
   if(openDown)b.style.top=(r.bottom+3)+'px';
   else b.style.top=(r.top-3-maxH)+'px';
