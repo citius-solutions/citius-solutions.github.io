@@ -1,0 +1,328 @@
+/* Ситиус · быстрый опрос-заявка. Тема как в Аппе: dusk-deep + золото. */
+.opros, .opros * { box-sizing: border-box; }
+.opros {
+  --bg: #121d2f;
+  --card: #1e2f4a;
+  --card2: #2a3f5f;
+  --line: rgba(201, 164, 106, .35);
+  --gold: #d4b57e;
+  --gold2: #c9a46a;
+  --gold3: #a8844a;
+  --cream: #f7f3ea;
+  --mute: #c3cbd8;
+  --placeholder: #a9b4c6;
+  --border: #5a6e8a;
+  --err: #f0c7b0;
+  --ok: #cfe6c8;
+  --shadow: 0 8px 28px rgba(0,0,0,.35);
+  font-family: "Montserrat", system-ui, Arial, sans-serif;
+  color: var(--cream);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.opros-hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ---- страница ---- */
+.opros--page {
+  min-height: 100%;
+  background:
+    radial-gradient(1200px 500px at 50% -80px, #22355a 0%, transparent 70%),
+    var(--bg);
+  padding: 18px 14px 40px;
+}
+.opros--page .opros-shell {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ---- модалка ---- */
+.opros--modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.opros-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 16, 28, .72);
+}
+.opros--modal .opros-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  max-height: min(92vh, 860px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, #1e2f4a 0%, #18273d 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px 16px 0 0;
+  box-shadow: var(--shadow);
+  padding: 16px 16px 28px;
+}
+@media (min-width: 700px) {
+  .opros--modal { align-items: center; padding: 24px; }
+  .opros--modal .opros-shell {
+    border-radius: 16px;
+    max-height: min(88vh, 860px);
+  }
+}
+
+.opros-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.opros-brand {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #d4b57e, #f0dcb0 50%, #c9a46a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 4px;
+}
+.opros-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.25;
+  color: #fbf8f1;
+  margin: 0;
+  letter-spacing: .01em;
+}
+.opros-close {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--gold2);
+  background: transparent;
+  color: #f0dcb0;
+  border-radius: 10px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+}
+.opros-close:focus-visible,
+.opros-btn:focus-visible,
+.opros-chip:focus-visible,
+.opros input:focus-visible,
+.opros textarea:focus-visible,
+.opros-check:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.opros-lead {
+  color: var(--mute);
+  font-size: 13.5px;
+  margin: 0 0 14px;
+}
+.opros-prog {
+  height: 3px;
+  background: rgba(247, 243, 234, .2);
+  border-radius: 3px;
+  margin: 0 0 6px;
+}
+.opros-prog > span {
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #a8844a, #d4b57e);
+  border-radius: 3px;
+  width: 0;
+  transition: width .25s ease;
+}
+.opros-stepn {
+  font-size: 11px;
+  color: #e8dfcf;
+  margin: 0 0 14px;
+}
+
+.opros-card {
+  background: var(--card2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 14px 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.2);
+}
+.opros-q {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--gold);
+  margin: 0 0 10px;
+}
+.opros-q + .opros-q,
+.opros-field + .opros-q { margin-top: 16px; }
+.opros-req { font-weight: 600; }
+.opros-opt { font-size: 12px; color: var(--mute); font-family: "Montserrat", system-ui, sans-serif; font-weight: 500; }
+
+.opros-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.opros-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 40px;
+}
+.opros-chip.is-on {
+  background: linear-gradient(180deg, #d4b57e, #c9a46a);
+  color: #1e2f4a;
+  border-color: var(--gold2);
+  font-weight: 600;
+}
+
+.opros-field { margin-top: 10px; }
+.opros-lbl {
+  display: block;
+  font-size: 13px;
+  color: var(--gold);
+  margin-bottom: 5px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+}
+.opros input[type="text"],
+.opros input[type="tel"],
+.opros textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 16px; /* меньше автозума на iOS */
+  font-family: inherit;
+  background: var(--card);
+  color: var(--cream);
+}
+.opros input::placeholder,
+.opros textarea::placeholder { color: var(--placeholder); }
+.opros textarea { min-height: 88px; resize: vertical; line-height: 1.4; }
+
+.opros-nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.opros-btn {
+  flex: 1;
+  text-align: center;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--cream);
+}
+.opros-btn:disabled { opacity: .55; cursor: default; }
+.opros-btn--primary {
+  background: linear-gradient(180deg, #d4b57e, #c9a46a);
+  color: #1e2f4a;
+  border: 1px solid var(--gold3);
+}
+.opros-btn--ghost {
+  background: rgba(247, 243, 234, .08);
+  border: 1.5px solid var(--gold);
+  color: #f0dcb0;
+}
+.opros-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.opros-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  cursor: pointer;
+  color: var(--cream);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.opros-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opros-check i {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--gold2);
+  border-radius: 5px;
+  background: var(--card);
+  position: relative;
+  margin-top: 1px;
+}
+.opros-check input:checked + i {
+  background: linear-gradient(180deg, #d4b57e, #c9a46a);
+  border-color: var(--gold2);
+}
+.opros-check input:checked + i::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 11px;
+  border: solid #1e2f4a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.opros-check.is-bad i { box-shadow: 0 0 0 2px #e08a6a; }
+.opros-check a { color: var(--gold); }
+
+.opros-hint { font-size: 12px; color: var(--mute); margin-top: 6px; line-height: 1.4; }
+.opros-err { font-size: 13px; color: var(--err); margin-top: 8px; line-height: 1.4; }
+.opros-ok { font-size: 15px; color: var(--ok); margin: 0; line-height: 1.45; }
+.opros-copy {
+  margin-top: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  color: var(--cream);
+}
+
+.opros-foot {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--mute);
+  text-align: center;
+}
+.opros-foot a { color: var(--gold); }

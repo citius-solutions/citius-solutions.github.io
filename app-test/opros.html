@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1e2f4a">
+<title>Быстрый вопрос сотруднику · Ситиус Недвижимость</title>
+<meta name="description" content="Ответьте на несколько вопросов и оставьте имя, телефон и удобное время звонка. Сотрудник Ситиуса свяжется с вами.">
+<link rel="canonical" href="https://www.citius-solution.ru/app-test/opros.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Ситиус Недвижимость">
+<meta property="og:title" content="Быстрый вопрос сотруднику · Ситиус Недвижимость">
+<meta property="og:description" content="Ответьте на несколько вопросов и оставьте имя, телефон и удобное время звонка. Сотрудник Ситиуса свяжется с вами.">
+<meta property="og:url" content="https://www.citius-solution.ru/app-test/opros.html">
+<meta property="og:image" content="https://www.citius-solution.ru/app-test/opros-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Быстрый вопрос сотруднику · Ситиус Недвижимость">
+<meta name="twitter:description" content="Ответьте на несколько вопросов и оставьте имя, телефон и удобное время звонка. Сотрудник Ситиуса свяжется с вами.">
+<meta name="twitter:image" content="https://www.citius-solution.ru/app-test/opros-og.jpg">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="/assets/css/fonts.css">
+<link rel="stylesheet" href="./citius_opros.css">
+<style>
+  html,body{margin:0;padding:0;min-height:100%;background:#121d2f;color:#f7f3ea}
+</style>
+<!-- Yandex.Metrica 113852512, webvisor:false — как на остальных страницах app-test -->
+<script type="text/javascript">
+  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+  m[i].l=1*new Date();
+  for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+  var go=function(){if(go.d)return;go.d=1;
+  k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)};
+  ["scroll","touchstart","mousemove","keydown","click"].forEach(function(v){m.addEventListener(v,go,{once:true,passive:true})});
+  setTimeout(go,3000)})
+  (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+  ym(113852512, "init", {clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:false});
+</script>
+</head>
+<body>
+<noscript><div><img src="https://mc.yandex.ru/watch/113852512" style="position:absolute; left:-9999px;" alt=""></div>
+<p style="padding:20px;font-family:system-ui,sans-serif">Чтобы отправить заявку, включите JavaScript. Можно позвонить: <a href="tel:+79215725085" style="color:#d4b57e">+7 921 572-50-85</a>, написать в <a href="https://t.me/citiusrealty" style="color:#d4b57e">Telegram</a> или в <a href="https://max.ru/channel_citiusrealty" style="color:#d4b57e">MAX</a>.</p>
+</noscript>
+<div id="opros-root"></div>
+<!-- Тот же файл, что и клиент заявок Аппа: LEADS_URL задаётся только там. Пока URL пустой — честный запасной блок, без «отправлено». -->
+<script src="./leads_client.js"></script>
+<script src="./citius_opros.js"></script>
+<script>
+  CitiusOpros.mount('#opros-root', { mode: 'page', source: 'link' });
+</script>
+</body>
+</html>
