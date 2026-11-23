@@ -2396,7 +2396,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:23';
+var APPV='23.11.2026 16:27';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3650,13 +3650,13 @@ function auBtnPlace(){const t=document.querySelector('.top'),b=document.getEleme
  t.querySelectorAll('button,a').forEach(e=>{if(e===b||!e.offsetParent)return;const r=e.getBoundingClientRect();if(r.width<20||r.width>70||r.top-tr.top>90)return;if(!L||r.left<L.left)L=r});
  if(!L)return;const bh=b.offsetHeight||28,op=(b.offsetParent||t).getBoundingClientRect(),ob=b.offsetParent?parseFloat(getComputedStyle(b.offsetParent).borderTopWidth)||0:0;
  const z=(b.getBoundingClientRect().height/(b.offsetHeight||1))||1;b.style.right=Math.round((op.right-L.left)/z+8)+'px';b.style.top=Math.round((L.top-op.top)/z-ob+(L.height/z-bh)/2)+'px';
- const h=t.querySelector('h1');if(h){const br=b.getBoundingClientRect(),hr=h.getBoundingClientRect();h.style.paddingRight='';const need=Math.round((hr.right-br.left)/z+6);if(need>0&&hr.top<br.bottom&&hr.bottom>br.top)h.style.paddingRight=need+'px'}}
-{const bs=auBtnSync;auBtnSync=function(){const x=bs.apply(this,arguments);try{auBtnPlace()}catch(e){}return x}}
-addEventListener('resize',()=>{try{auBtnPlace()}catch(e){}});addEventListener('orientationchange',()=>setTimeout(()=>{try{auBtnPlace()}catch(e){}},300));
+ const br=b.getBoundingClientRect();[['.brand','paddingRight',1],['h1','paddingRight',1],['.prog','marginRight',0]].forEach(([q,pr,vert])=>{const e=t.querySelector(q);if(!e)return;e.style[pr]='';const er=e.getBoundingClientRect();const need=Math.round((er.right-br.left)/z+8);if(need>0&&(!vert||(er.top<br.bottom&&er.bottom>br.top)))e.style[pr]=need+'px'})}
+{const bs=auBtnSync;auBtnSync=function(){const x=bs.apply(this,arguments);try{const b=document.getElementById('loginbtn');if(b&&authOn())b.textContent=innerWidth<400?'✓ Вошли':'✓ Вы вошли';auBtnPlace()}catch(e){}return x}}
+addEventListener('resize',()=>{try{auBtnSync()}catch(e){}});addEventListener('orientationchange',()=>setTimeout(()=>{try{auBtnPlace()}catch(e){}},300));
 setTimeout(()=>{try{auBtnPlace()}catch(e){}},50);setTimeout(()=>{try{auBtnPlace()}catch(e){}},1500);
 {const sh=show;show=function(){const x=sh.apply(this,arguments);try{auBtnPlace()}catch(e){}return x}}
-document.head.insertAdjacentHTML('beforeend','<style>#loginbtn{box-sizing:border-box;min-height:0;min-width:0;height:28px;line-height:25px;white-space:nowrap}@media (min-width:700px){#loginbtn{height:36px;line-height:33px;padding:0 16px}}</style>');
-const TGQ=0;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
+document.head.insertAdjacentHTML('beforeend','<style>.top .brand{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#loginbtn{box-sizing:border-box;min-height:0;min-width:0;height:28px;line-height:25px;white-space:nowrap}@media (min-width:700px){#loginbtn{height:36px;line-height:33px;padding:0 16px}}</style>');
+const TGQ=1;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
 // ---------- n29 (23.11 15:35) · верхняя кнопка — меню: «Связаться с Ситиусом» (те же кнопки cBtns) + «Продолжить на другом устройстве» (вход, ссылка, файл)
 const TGQ_URL='https://t.me/citius_zayavki_bot?start=q';
 const tgqBtn=()=>TGQ?`<a class="btn ghost tgq" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:8px;text-align:center;text-decoration:none" href="${TGQ_URL}" target="_blank" rel="noopener">Задать вопрос в Telegram ↗</a><div class="hint" style="margin-top:3px">Откроется бот Ситиуса: нажмите «Старт» и напишите вопрос — сотрудник ответит там же.</div>`:'';
@@ -3895,7 +3895,7 @@ function csView(){const on=authOn(),a=on?authGet():null,v=CS.v,em=hq(AU.email||'
  if(v==='dev')return ['Открыть на другом устройстве',(on?csBtn('QR-код для другого устройства',"csGo('qr')",'pri','наведите камеру другого телефона'):csBtn('Войти',"csGo('login')",'pri','ответы будут на всех ваших устройствах'))
    +csBtn('Отправить себе ссылку','dealShare()')+csBtn('Сохранить файл','dealSaveHtml()')+csBtn('Открыть файл','dealOpen()','','с другого устройства')+'<div id="dealst" class="cs-h" role="status"></div>'
    +csMore('Ответы хранятся в этом браузере. Ссылка и файл открывают приложение с вашими ответами на другом устройстве. В них — ваши личные данные: отправляйте только себе.')];
- if(v==='login'||v==='mail'){if(on)return ['Вы вошли',`<div class="cs-who">${hq(a.who||'')}</div>${msg}`+(AU.has?csBtn('Загрузить сохранённое','auLoad()','pri'):'')+csBtn('QR-код для другого устройства',"csGo('qr')",AU.has?'':'pri')+csBtn('Сохранить сейчас','auSave()','',a.saved?'сохранено '+auT(a.saved):'')+csBtn('Выйти','auOut()','ghost')];
+ if(v==='login'||v==='mail'){if(on)return ['Вы вошли',`<div class="cs-who">${hq(a.who||'')}</div>${msg}`+(AU.has?csBtn('Загрузить сохранённое','auLoad()','pri'):'')+csBtn('QR-код для другого устройства',"csGo('qr')",AU.has?'':'pri')+csBtn('Сохранить сейчас','auSave()','',a.saved?'сохранено '+auT(a.saved):'')+csBtn('<b class="cs-oi" aria-hidden="true">⎋</b> Выйти','auOut()','out')];
   // владелец 17:10 МСК: только вход и код, без пояснений; Telegram — одной мелкой ссылкой
   if(AU.step!=='code')return ['Вход',`<input id="auemail" class="cs-in" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="Электронная почта" aria-label="Электронная почта" value="${em}" oninput="AU.email=this.value.trim()" onkeydown="if(event.key==='Enter')auMail()">${csPd()}${csBtn(AU.busy?'Отправляем…':'Получить код','auMail()','pri')}${msg}<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="csGo('tg')">Войти через Telegram</button></div>`];
   return ['Вход',`<input id="aucode" class="cs-in cs-code" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="Код из письма" aria-label="Код из письма" value="${hq(AU.code||'')}" oninput="AU.code=this.value.replace(/\\D/g,'');if(AU.code.length===6)auMailV()">${csBtn(AU.busy?'Проверяем…':'Войти','auMailV()','pri')}${msg}<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="AU.code='';auMail()">Отправить ещё раз</button></div>`]}
@@ -3950,6 +3950,10 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #cmpsheet .cs-more{margin:4px 0 0;font-size:13px;color:#5a6e8a}#cmpsheet .cs-more summary{cursor:pointer;color:#a8844a;padding:6px 0;list-style-position:inside}#cmpsheet .cs-more div{padding:2px 0 4px;line-height:1.45}
 #cmpsheet .cs-qr{display:flex;justify-content:center;margin:0 0 8px}#cmpsheet .cs-qr svg{width:min(62vw,240px);height:auto;background:#fff;padding:8px;border-radius:10px}
 </style>`);
+// владелец 17:21 МСК: «Выйти» заметная; после выхода — окно «Вы вышли», в шапке снова «Войти», ответы на устройстве остаются
+{const o1=auOut;auOut=function(){const x=o1.apply(this,arguments);try{csClose()}catch(e){}try{auBtnSync()}catch(e){}
+ try{if(typeof sitiusSuccess==='function')sitiusSuccess({title:'Вы вышли',text:'Ответы на этом устройстве остались. Чтобы снова сохранять их в облаке, нажмите «Войти».',btn:'Хорошо'})}catch(e){}return x}}
+document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-b.out{min-height:48px;background:transparent;border:2px solid #c9a46a;color:#8a6a2f;font-weight:700;justify-content:center}#cmpsheet .cs-b.out .cs-oi{font-weight:400;margin-right:6px;font-size:18px}#cmpsheet .cs-b.out:hover{background:rgba(201,164,106,.12)}</style>');
 // ---------- n29 (23.11) · встречающий главный экран после заставки: картина, кто мы, цифры, «С чего начнём?»; при прогрессе — «Продолжить» здесь же (вместо отдельного окна n28)
 // Заставка — один раз за сессию (sessionStorage sitius-splash). #nosplash / #nowelcome / #demo / автообновление — экран не показываем, чтобы не ломать walk*-тесты
 (function(){
