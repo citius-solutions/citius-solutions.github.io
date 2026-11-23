@@ -2395,7 +2395,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 15:20';
+var APPV='23.11.2026 15:38';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3425,6 +3425,320 @@ Object.defineProperty(SCR.plan,'t',{get:()=>'Итог: ваш '+planTitle().char
 {const sb=SCR.sum&&SCR.sum.b;if(sb)SCR.sum.b=function(){const h=sb.apply(this,arguments);const L='Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1);
  if(!A.goal)return h;if(h.includes('>Итог: ваш план продажи</button>'))return h.replace(/>Итог: ваш план продажи<\/button>/g,'>'+L+'</button>');
  return h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:6px" onclick="go('plan')">${L}</button>`}}
+// >>> qrcode.min.js (qrcode-generator 2.0.4, MIT)
+// qrcode-generator 2.0.4 · (c) Kazuhiko Arase · MIT · https://github.com/kazuhikoarase/qrcode-generator
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(o*r,n*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+// <<< qrcode.min.js
+// >>> auth_client.js
+// ===== Ситиус · вход по коду (почта / Telegram) + прогресс в облаке + перенос на другое устройство (QR)
+// Требует: leads_client.js (LEADS_URL), vendor/qrcode.min.js (глобальная qrcode), из Аппа — DEAL_APP, DEAL_KEYS, dealCheck, dealApply, saveSt.
+// Ключ входа хранится в 'citius-auth' (НЕ 'sitius-…'): не попадает в «Файл сделки» и не стирается «Начать заново».
+const AUTH_K='citius-auth';
+function apiCall(action,body,ms){if(!LEADS_URL)return Promise.resolve({ok:false,err:'no_url'});
+ const ctl=typeof AbortController!=='undefined'?new AbortController():null,tm=setTimeout(()=>ctl&&ctl.abort(),ms||20000);
+ return fetch(LEADS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},body||{})),redirect:'follow',signal:ctl&&ctl.signal})
+  .then(r=>r.ok?r.json():{ok:false,err:'http '+r.status}).catch(e=>({ok:false,err:'net'})).then(r=>{clearTimeout(tm);return r})}
+function authGet(){try{return JSON.parse(localStorage.getItem(AUTH_K)||'null')}catch(e){return null}}
+function authSet(o){try{o?localStorage.setItem(AUTH_K,JSON.stringify(o)):localStorage.removeItem(AUTH_K)}catch(e){}}
+function authOn(){const a=authGet();return !!(a&&a.t)}
+// Тексты ошибок для показа пользователю
+const AUTH_ERR={bad_email:'Проверьте адрес почты.',wait:'Код уже отправлен. Повторно — через минуту.',rate:'Слишком много попыток. Попробуйте через час.',
+ busy:'Сервис входа перегружен. Попробуйте позже.',bad_code:'Введите 6 цифр из письма или Telegram.',wrong:'Код не подошёл.',expired:'Код устарел. Запросите новый.',
+ tries:'Слишком много неверных попыток. Запросите новый код.',net:'Нет связи с сервером. Проверьте интернет и повторите.',no_url:'Вход временно недоступен.',auth:'Вход устарел. Войдите снова.',server:'Ошибка сервера. Повторите позже.'};
+function authErr(r){return (AUTH_ERR[r&&r.err]||'Не получилось. Повторите позже.')+(r&&r.err==='wrong'&&r.left!=null?' Осталось попыток: '+r.left+'.':'')}
+
+// --- способ 1: код на почту
+function authEmailSend(email){return apiCall('sendCode',{email})}
+function authEmailVerify(email,code){return apiCall('verifyCode',{email,code}).then(authAfter)}
+// --- способ 2: Telegram. 1) authTgStart → открыть r.link (кнопка-ссылка, target=_blank); 2) authTgWait — ждём, пока бот пришлёт код; 3) authTgVerify
+function authTgStart(){return apiCall('tgStart',{})}
+function authTgWait(nonce,onState){let stop=false,n=0;const tick=()=>{if(stop)return;apiCall('tgStatus',{nonce},10000).then(r=>{if(stop)return;
+  if(r.ok&&r.state==='sent'){onState('sent');return}if(!r.ok&&r.err==='expired'){onState('expired');return}if(++n>150){onState('expired');return}setTimeout(tick,4000)})};
+ setTimeout(tick,2500);return()=>{stop=true}}
+function authTgVerify(nonce,code){return apiCall('verifyCode',{nonce,code}).then(authAfter)}
+function authAfter(r){if(r.ok)authSet({t:r.token,who:r.who,at:Date.now()});return r}
+function authLogout(){const a=authGet();authSet(null);return a?apiCall('logout',{token:a.t}):Promise.resolve({ok:true})}
+
+// --- прогресс: тот же формат, что «Файл сделки»
+function progPack(){const d=new Date(),data={};(typeof DEAL_KEYS==='function'?DEAL_KEYS():[]).forEach(k=>data[k]=localStorage.getItem(k));
+ return JSON.stringify({app:typeof DEAL_APP!=='undefined'?DEAL_APP:'sitius-deal',v:1,saved:d.toISOString(),appv:typeof APPV!=='undefined'?APPV:'',data})}
+function cloudSave(){const a=authGet();if(!a)return Promise.resolve({ok:false,err:'auth'});if(typeof saveSt==='function')saveSt();
+ return apiCall('saveProgress',{token:a.t,data:progPack()},30000).then(r=>{if(!r.ok&&r.err==='auth')authSet(null);else if(r.ok){a.saved=r.savedAt;authSet(a)}return r})}
+// Применить прогресс из облака (спросит подтверждение, если на устройстве уже есть ответы; перезагрузит страницу)
+function cloudApply(json){const o=typeof dealCheck==='function'?dealCheck(json||''):null;if(!o)return false;return dealApply(o)}
+function cloudLoad(){const a=authGet();if(!a)return Promise.resolve({ok:false,err:'auth'});
+ return apiCall('loadProgress',{token:a.t},30000).then(r=>{if(!r.ok){if(r.err==='auth')authSet(null);return r}if(!r.data)return {ok:true,empty:true};return {ok:cloudApply(r.data)!==false}})}
+// Автосохранение: через 15 с после последнего изменения, если вошли
+let __cloudT=0;
+if(typeof saveSt==='function'){const _ss=saveSt;saveSt=function(){const r=_ss.apply(this,arguments);if(authOn()&&!window.__noSave&&!window.__cloudIn){clearTimeout(__cloudT);__cloudT=setTimeout(()=>{window.__cloudIn=1;cloudSave().finally(()=>{window.__cloudIn=0})},15000)}return r}}
+window.addEventListener('pagehide',()=>{if(authOn()&&__cloudT){clearTimeout(__cloudT);try{const a=authGet();navigator.sendBeacon&&navigator.sendBeacon(LEADS_URL,new Blob([JSON.stringify({action:'saveProgress',token:a.t,data:progPack()})],{type:'text/plain'}))}catch(e){}}});
+
+// --- перенос на другое устройство: настоящий QR со ссылкой …/app-test/#t=<одноразовый id на 10 минут>
+function xferMake(){const a=authGet();if(!a)return Promise.resolve({ok:false,err:'auth'});return cloudSave().then(s=>s.ok?apiCall('mkTransfer',{token:a.t}):s)}
+function qrSvgReal(text,px){const q=qrcode(0,'M');q.addData(text);q.make();const n=q.getModuleCount();let r='';
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(q.isDark(y,x))r+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;
+ return `<svg viewBox="-4 -4 ${n+8} ${n+8}" width="${px||180}" height="${px||180}" role="img" aria-label="QR-код для продолжения на другом устройстве" style="background:#fff;border-radius:8px;display:block;margin:0 auto" shape-rendering="crispEdges"><g fill="#000">${r}</g></svg>`}
+// При открытии по ссылке/QR с #t=… — забрать вход и прогресс. Вызывать как можно раньше (до восстановления из localStorage неважно: dealApply перезагрузит).
+function xferBoot(){const h=new URLSearchParams(location.hash.slice(1)),t=h.get('t');if(!t||!/^[a-f0-9]{24}$/.test(t))return false;
+ const clear=()=>{try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}};
+ apiCall('useTransfer',{t},30000).then(r=>{clear();if(!r.ok){alert(r.err==='expired'?'Ссылка для продолжения устарела (действует 10 минут). Создайте новую на первом устройстве.':authErr(r));location.reload();return}
+  authSet({t:r.token,who:r.who,at:Date.now()});if(!r.data||cloudApply(r.data)===false)location.reload()});return true}
+// <<< auth_client.js
+// ---------- n29 · вход v2 и облако: код на почту (основной), через Telegram (дополнительный), QR переноса; личные данные в облако не уходят
+// 1) фильтр личных данных: имена, телефоны, почта, ники, паспортные данные — только на устройстве
+const PD_KEYS=/^(nm|oname|name|fio|ph|phone|ophone|cbh|ohandle|handle|nick|longPh|devEmail|email|mail|tel|contact|passport|pasp|snils|inn|bdate|birth|dob|regAddr|propiska)$/i;
+function pdStrip(v){if(Array.isArray(v))return v.map(pdStrip);if(v&&typeof v==='object'){const o={};for(const k in v)if(!PD_KEYS.test(k))o[k]=pdStrip(v[k]);return o}return v}
+progPack=function(){const d=new Date(),data={};(typeof DEAL_KEYS==='function'?DEAL_KEYS():[]).forEach(k=>{if(k===LEADS_Q||k==='sitius-err')return;const raw=localStorage.getItem(k);
+ let v=raw;try{const j=JSON.parse(raw);if(j&&typeof j==='object')v=JSON.stringify(pdStrip(j))}catch(e){}data[k]=v});
+ return JSON.stringify({app:typeof DEAL_APP!=='undefined'?DEAL_APP:'sitius-deal',v:1,saved:d.toISOString(),appv:typeof APPV!=='undefined'?APPV:'',pd:'stripped',data})};
+// из облака — без окна «Продолжить или начать заново»
+{const ca=cloudApply;cloudApply=function(){try{sessionStorage.setItem('sitius-autoupd','1');localStorage.setItem('sitius-fresh','2311')}catch(e){}return ca.apply(this,arguments)}}
+// 2) открытие по QR/ссылке #t=… — раньше всего остального
+if(LEADS_URL&&/[#&]t=[a-f0-9]{24}/.test(location.hash)){const ov=document.createElement('div');ov.id='xferov';ov.setAttribute('role','status');
+ ov.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#1e2f4a;color:#f7f3ea;font:600 16px Montserrat,sans-serif';
+ ov.textContent='Загружаем ваши ответы…';document.body.appendChild(ov);try{xferBoot()}catch(e){ov.remove()}}
+// 3) окно «Перенести на другое устройство»: блок входа
+const AU={m:'mail',step:'',email:'',code:'',nonce:'',link:'',tg:'',busy:0,err:'',msg:'',has:0,qr:'',qrl:''};let AU_stop=null;
+function auR(){const b=document.getElementById('authbox');if(b)b.innerHTML=authHtml()}
+function auRun(p,f){AU.busy=1;AU.err='';AU.msg='';auR();return Promise.resolve(p).catch(()=>({ok:false,err:'net'})).then(r=>{AU.busy=0;f(r||{});auR();return r})}
+function auT(t){const d=new Date(t);return isNaN(d)?'':d.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function auEmpty(){return !(A.goal||done.size||Object.keys(A.ck||{}).length)}
+function auMsg(){return `${AU.err?`<div class="dv-st" id="auerr" role="alert">${hq(AU.err)}</div>`:''}${AU.msg?`<div class="dv-st" role="status">${hq(AU.msg)}</div>`:''}`}
+function authHtml(){if(!LEADS_URL)return '';const ds=AU.busy?' disabled aria-busy="true"':'',B=(cls,on,t)=>`<button class="btn ${cls}" style="width:100%;margin-top:6px"${ds} onclick="${on}">${AU.busy?'Подождите…':t}</button>`;
+ const pdn='<div class="dv-h" style="margin-top:6px">Имена, телефоны, почта и ники в облако не сохраняются — они остаются только на этом устройстве. Вход действует 180 дней.</div>';
+ if(authOn()){const a=authGet();return `<div class="aubox"><b>Вы вошли как ${hq(a.who||'')}</b><div class="dv-h">${a.saved?'Сохранено в облаке '+auT(a.saved)+'. ':''}Ответы сохраняются в облаке автоматически.</div>
+  ${AU.has?B('primary','auLoad()','Загрузить сохранённое'):''}${B('ghost','auSave()','Сохранить сейчас')}${B('ghost','auQr()','QR-код для другого устройства')}
+  ${AU.qr?`<div style="margin-top:8px">${AU.qr}</div><div class="dv-link"><a href="${hq(AU.qrl)}">${hq(AU.qrl)}</a></div><div class="dv-h" style="text-align:center">Действует 10 минут, один раз.</div>`:''}
+  ${B('ghost','auOut()','Выйти')}${auMsg()}${pdn}</div>`}
+ const tabs=`<div class="row" style="gap:6px;margin-top:6px"><button class="btn ${AU.m==='mail'?'primary':'ghost'}" style="flex:1;padding:7px" onclick="AU.m='mail';AU.err='';auR()">Код на почту</button><button class="btn ${AU.m==='tg'?'primary':'ghost'}" style="flex:1;padding:7px" onclick="AU.m='tg';AU.err='';auR()">Через Telegram</button></div>`;
+ let h='';
+ if(AU.m==='mail'){h=AU.step!=='code'?`<label class="dv-h" for="auemail" style="display:block;margin-top:6px">Почта</label><input id="auemail" type="email" inputmode="email" autocomplete="email" placeholder="name@mail.ru" value="${hq(AU.email)}" oninput="AU.email=this.value.trim()">${pdBox('pdauth','auerr')}${B('primary','auMail()','Получить код')}<div class="dv-h">Код на почту придёт в течение минуты, проверьте «Спам».</div>`
+  :`<div class="dv-h" style="margin-top:6px">Код отправлен на ${hq(AU.email)}. Код на почту придёт в течение минуты, проверьте «Спам».</div><label class="dv-h" for="aucode" style="display:block;margin-top:5px">Код из письма</label><input id="aucode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 цифр" oninput="AU.code=this.value.replace(/\\D/g,'')">${B('primary','auMailV()','Войти')}<button class="btn ghost" style="width:100%;margin-top:6px" onclick="AU.step='';AU.code='';AU.err='';auR()">Другой адрес</button>`}
+ else{h=`<div class="dv-h" style="margin-top:6px">Telegram: нужен доступ к Telegram на этом устройстве.</div>`+(!AU.nonce||AU.tg==='expired'?`${AU.tg==='expired'?'<div class="dv-st" role="alert">Ссылка устарела, нажмите ещё раз.</div>':''}${B('primary','auTg()','Получить ссылку на бота')}`
+  :`<a class="btn primary" style="display:block;text-align:center;text-decoration:none;margin-top:6px" href="${hq(AU.link)}" target="_blank" rel="noopener">Открыть бота в Telegram ↗</a>${AU.tg==='sent'?`<div class="dv-st" role="status">Код пришёл в Telegram.</div><label class="dv-h" for="aucode" style="display:block;margin-top:5px">Код из Telegram</label><input id="aucode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 цифр" oninput="AU.code=this.value.replace(/\\D/g,'')">${B('primary','auTgV()','Войти')}`:'<div class="dv-h" style="margin-top:5px">В боте нажмите «Старт» — он пришлёт код. Ждём…</div>'}`)}
+ return `<div class="aubox"><b>Войти, чтобы продолжить на другом устройстве</b>${tabs}${h}${auMsg()}${pdn}</div>`}
+function auAfter(r){if(!r.ok){AU.err=authErr(r);return}AU.step='';AU.code='';AU.nonce='';AU.tg='';if(AU_stop){AU_stop();AU_stop=null}AU.has=!!r.hasProgress&&auEmpty();AU.msg=AU.has?'В облаке есть ваши сохранённые ответы.':'Вы вошли.';
+ if(!AU.has&&!auEmpty())cloudSave().then(s=>{if(s.ok)auR()})}
+function auMail(){if(!/^\S+@\S+\.\S+$/.test(AU.email)){AU.err='Проверьте адрес почты.';auR();return}if(!A.pdauth){AU.err='Чтобы получить код, отметьте согласие на обработку персональных данных.';auR();return}
+ auRun(authEmailSend(AU.email),r=>{if(r.ok){AU.step='code';setTimeout(()=>{const c=document.getElementById('aucode');c&&c.focus()},0)}else AU.err=authErr(r)})}
+function auMailV(){if(!/^\d{6}$/.test(AU.code)){AU.err=AUTH_ERR.bad_code;auR();return}auRun(authEmailVerify(AU.email,AU.code),auAfter)}
+function auTg(){auRun(authTgStart(),r=>{if(!r.ok||!r.nonce){AU.err=authErr(r);return}AU.nonce=r.nonce;AU.link=r.link;AU.tg='wait';if(AU_stop)AU_stop();AU_stop=authTgWait(r.nonce,st=>{AU.tg=st;auR()})})}
+function auTgV(){if(!/^\d{6}$/.test(AU.code)){AU.err=AUTH_ERR.bad_code;auR();return}auRun(authTgVerify(AU.nonce,AU.code),auAfter)}
+function auSave(){auRun(cloudSave(),r=>{if(r.ok)AU.msg='Сохранено в облаке.';else AU.err=authErr(r)})}
+function auQr(){auRun(xferMake(),r=>{if(r.ok&&r.link){AU.qr=qrSvgReal(r.link);AU.qrl=r.link}else AU.err=authErr(r)})}
+function auLoad(){auRun(cloudLoad(),r=>{if(!r.ok)AU.err=authErr(r);else if(r.empty){AU.has=0;AU.msg='В облаке пока ничего нет.'}})}
+function auOut(){auRun(authLogout(),()=>{AU.qr='';AU.qrl='';AU.has=0;AU.msg='Вы вышли. Ответы на этом устройстве остались.'})}
+{const ds=dealSheet;dealSheet=function(){const r=ds.apply(this,arguments);const sh=document.getElementById('dealsheet');if(sh&&LEADS_URL&&!document.getElementById('authbox')){const t=sh.querySelector('.dealshare');
+  const box=document.createElement('div');box.id='authbox';box.style.cssText='margin:0 0 10px;padding-bottom:10px;border-bottom:1px solid #3d5578';box.innerHTML=authHtml();const intro=sh.querySelector('.dv-h');if(intro)intro.textContent='Ответы хранятся в этом браузере. Чтобы продолжить на другом телефоне, планшете или компьютере, войдите по коду — или отправьте себе ссылку или файл: они откроют приложение с вашими ответами.';if(t)t.parentNode.insertBefore(box,t);else sh.querySelector('.in').appendChild(box)}return r}}
+document.head.insertAdjacentHTML('beforeend','<style>#dealsheet .aubox input{width:100%;box-sizing:border-box;margin-top:5px;padding:8px;border-radius:8px;border:1px solid #c9a46a;background:#fff;color:#1e2f4a;font-size:14px}#dealsheet .aubox .dv-st{font-size:12.5px;margin-top:5px}#dealsheet .aubox .dv-link{font-size:11.5px;word-break:break-all;text-align:center;margin-top:4px}#dealsheet .aubox button[disabled]{opacity:.6}</style>');
+// ---------- n29 (23.11 15:30) · заметная кнопка «Войти»: в шапке и на «Моём пути»; открывает окно входа (dealSheet, блок входа первым)
+function auOpen(){if(!LEADS_URL)return;dealSheet();const b=document.getElementById('authbox');
+ if(b){b.scrollIntoView({block:'start'});setTimeout(()=>{const e=document.getElementById('auemail');if(e&&!authOn())e.focus()},60)}}
+function auBtnSync(){const t=document.querySelector('.top');if(!t||!LEADS_URL)return;let b=document.getElementById('loginbtn');
+ if(!b){b=document.createElement('button');b.id='loginbtn';b.type='button';b.onclick=auOpen;t.appendChild(b)}
+ const on=authOn();b.textContent=on?'✓ Вы вошли':'Войти';b.title=on?'Вход и сохранение в облаке':'Войти, чтобы сохранить ответы и продолжить на другом устройстве';b.setAttribute('aria-label',b.title);b.classList.toggle('on',on);
+ b.style.display=['order','theme'].includes(cur)?'none':''}
+document.head.insertAdjacentHTML('beforeend',`<style>#loginbtn{position:absolute;right:54px;top:5px;height:23px;padding:0 12px;border-radius:12px;border:1.5px solid #c9a46a;background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a);color:#1e2f4a;font-weight:700;font-size:12.5px;line-height:20px;cursor:pointer;z-index:3}
+#loginbtn.on{background:transparent;color:#f0dcb0}#loginbtn:focus-visible{outline:2px solid #f0dcb0;outline-offset:2px}
+[data-theme=light] #loginbtn.on{color:#8a6a2f}
+@media (min-width:700px) and (orientation:portrait){#loginbtn{top:10px;right:76px;height:32px;font-size:15px;padding:0 16px;border-radius:16px;line-height:28px}}
+@media (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){#loginbtn{top:9px;right:96px;height:32px;line-height:28px;font-size:14px}.top:has(#loginbtn) h1{padding-right:120px}}
+@media (orientation:landscape) and (max-height:500px){#loginbtn{top:5px;right:92px;height:30px;line-height:26px}}
+.aupath{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px 12px;border:1.5px solid #c9a46a;border-radius:12px}.aupath .t{flex:1;font-size:13.5px;line-height:1.35}.aupath button{white-space:nowrap;padding:8px 14px}</style>`);
+{const sh0=show;show=function(){const r=sh0.apply(this,arguments);try{auBtnSync()}catch(e){}return r}}
+{const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);if(!LEADS_URL||h.includes('aupath'))return h;const on=authOn(),a=on?authGet():null;
+ const c=on?`<div class="aupath"><div class="t"><b>Вы вошли${a&&a.who?' как '+hq(a.who):''}</b><br><span class="hint">Пройденное сохраняется в облаке — войдите на другом устройстве, и ответы будут там.</span></div><button class="btn ghost" onclick="auOpen()">Вход и QR</button></div>`
+ :`<div class="aupath"><div class="t"><b>Сохраните пройденное</b><br><span class="hint">Войдите по коду на почту или через Telegram — и продолжайте с любого устройства.</span></div><button class="btn primary" onclick="auOpen()">Войти</button></div>`;
+ return c+h}}
+// на чистом устройстве после входа — сразу загружаем сохранённое из облака (страница перезагрузится с ответами)
+{const aa=auAfter;auAfter=function(r){const em=auEmpty();const x=aa.apply(this,arguments);try{auBtnSync();if(r&&r.ok&&r.hasProgress&&em){AU.has=0;AU.msg='Загружаем ваши сохранённые ответы…';AU.busy=1;auR();cloudLoad().then(z=>{if(!z||!z.ok){AU.busy=0;AU.err=authErr(z||{});auR()}else if(z.empty){AU.busy=0;AU.msg='В облаке пока ничего нет.';auR()}})}else if(cur==='path')show('path')}catch(e){}return x}}
+{const ao=auOut;auOut=function(){const x=ao.apply(this,arguments);setTimeout(()=>{try{auBtnSync();if(cur==='path')show('path')}catch(e){}},400);return x}}
+const TGQ=0;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
+// ---------- n29 (23.11 15:35) · верхняя кнопка — меню: «Связаться с Ситиусом» (те же кнопки cBtns) + «Продолжить на другом устройстве» (вход, ссылка, файл)
+const TGQ_URL='https://t.me/citius_zayavki_bot?start=q';
+const tgqBtn=()=>TGQ?`<a class="btn ghost tgq" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:8px;text-align:center;text-decoration:none" href="${TGQ_URL}" target="_blank" rel="noopener">Задать вопрос в Telegram ↗</a><div class="hint" style="margin-top:3px">Откроется бот Ситиуса: нажмите «Старт» и напишите вопрос — сотрудник ответит там же.</div>`:'';
+if(TGQ){const cb0=cBtns;cBtns=function(){const h=cb0.apply(this,arguments);const k=h.indexOf('<div class="hint" style="margin-top:5px">MAX откроет');return k>=0?h.slice(0,k)+tgqBtn()+h.slice(k):h+tgqBtn()};
+ // окно «Нужна помощь человека» собрано при загрузке — добавляем туда же
+ (function(){try{const b=document.querySelector('#sheet .cbtns');if(b&&!b.querySelector('.tgq')){const m=b.querySelector('.hint');const d=document.createElement('div');d.innerHTML=tgqBtn();[...d.childNodes].forEach(n=>m?b.insertBefore(n,m):b.appendChild(n))}}catch(e){}})()}
+const DEVLBL='📲 Связаться или продолжить на другом устройстве',DEVLBL_S='📲 Связаться · другое устройство';
+function devLblSync(){const g=document.getElementById('devbig'),b=document.getElementById('devbtn');
+ if(b){b.title='Связаться с Ситиусом или продолжить на другом устройстве';b.setAttribute('aria-label',b.title)}
+ if(g){if(g.dataset.l!=='1'){g.textContent=DEVLBL;g.dataset.l='1'}if(g.offsetWidth&&g.scrollWidth>g.clientWidth+1&&g.textContent!==DEVLBL_S)g.textContent=DEVLBL_S}}
+{const sh0=show;show=function(){const r=sh0.apply(this,arguments);try{devLblSync()}catch(e){}return r}}
+window.addEventListener('resize',()=>{const g=document.getElementById('devbig');if(g){g.dataset.l='';try{devLblSync()}catch(e){}}});
+{const ds=dealSheet;dealSheet=function(){const r=ds.apply(this,arguments);const sh=document.getElementById('dealsheet');if(!sh)return r;const inn=sh.querySelector('.in');if(!inn||inn.querySelector('.dsmenu'))return r;
+ const t=inn.querySelector('#dealttl');
+ // кнопки связи закрывают и это окно
+ const c=cBtns('шапка: связаться').replace(/\(function\(\)\{var s=document\.getElementById\('sheet'\);/g,"(function(){try{dealClose()}catch(e){};var s=document.getElementById('sheet');");
+ const box=document.createElement('div');box.className='dsmenu';box.style.cssText='margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid #3d5578';
+ box.innerHTML=`<div id="dsmttl" style="font-weight:700;font-size:16px;margin-bottom:6px">Связаться с Ситиусом</div>${c}`;
+ inn.insertBefore(box,inn.firstChild);
+ if(t){t.textContent='Продолжить на другом устройстве'}
+ sh.setAttribute('aria-labelledby','dsmttl');
+ box.querySelectorAll('.opros-open').forEach(x=>x.setAttribute('onclick',"try{dealClose()}catch(e){};"+x.getAttribute('onclick')));
+ return r}}
+document.head.insertAdjacentHTML('beforeend','<style>#dealsheet{z-index:6}#dealsheet .in{max-height:calc(100% - 12px);overflow-y:auto;box-sizing:border-box;-webkit-overflow-scrolling:touch}#dealsheet .dsmenu .hint{color:inherit;opacity:.8}#devbig{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style>');
+try{devLblSync()}catch(e){}
+// ---------- n29 (23.11) · раздел «О нас»: тексты только с сайта citius-solution.ru и из Аппа; вход с «Моего пути» и из «Оформления»
+(function(){
+const AB_SITE='https://www.citius-solution.ru';
+const AB_FILM={
+  h:AB_SITE+'/assets/video/sitius_film_web.mp4?v=5',
+  hp:AB_SITE+'/assets/img/film_poster.jpg?v=3',
+  v:AB_SITE+'/assets/video/sitius_film_vertical_web.mp4?v=5',
+  vp:AB_SITE+'/assets/img/film_poster_vertical.jpg?v=3'
+};
+function abNarrow(){const p=document.getElementById('phone');const w=Math.min(window.innerWidth,p?p.clientWidth:window.innerWidth);return w<700}
+function abFilm(){return abNarrow()?{src:AB_FILM.v,poster:AB_FILM.vp}:{src:AB_FILM.h,poster:AB_FILM.hp}}
+window.aboutFilmPlay=function(btn){
+  const box=btn.closest('.ab-film');if(!box)return;
+  const v=box.querySelector('video');const s=abFilm();
+  btn.hidden=true;btn.style.display='none';
+  v.setAttribute('controls','controls');
+  v.setAttribute('playsinline','');
+  v.setAttribute('webkit-playsinline','');
+  v.preload='metadata';
+  if(v.getAttribute('src')!==s.src){v.poster=s.poster;v.src=s.src}
+  const p=v.play();if(p&&p.catch)p.catch(function(){});
+};
+const AB_DIR=[
+  {h:'Покупка и продажа квартир',t:'Помогаем продать или купить квартиру в Москве и Санкт-Петербурге — спокойно, юридически чисто и без лишних недель ожидания.',u:AB_SITE+'/napravleniya/kvartiry.html'},
+  {h:'Юридически сложные объекты',t:'Наследство, долевая собственность, обременения, запутанная история. Распутываем каждый узел и доводим сделку до чистого результата.',u:AB_SITE+'/napravleniya/yuridicheski-slozhnye.html'},
+  {h:'Законная налоговая оптимизация',t:'Заранее продумываем структуру сделки, чтобы решение было не только юридически безупречным, но и финансово красивым.',u:AB_SITE+'/napravleniya/nalogovaya-optimizaciya.html'},
+  {h:'Загородные дома бизнес- и премиум-класса',t:'У воды, в окружении природы, с уникальной архитектурой. Найдём или построим дом, который превзойдёт ваши ожидания.',u:AB_SITE+'/napravleniya/zagorodnye-doma.html'},
+  {h:'Инвестиции в недвижимость',t:'От выбора объекта до стратегии владения — сопровождаем решения, которые сохраняют ценность капитала.',u:AB_SITE+'/napravleniya/investicii.html'},
+  {h:'Земельные участки',t:'Помогаем продать или купить земельный участок в Подмосковье и Ленинградской области, рядом с Москвой и Санкт-Петербургом: проверяем назначение, границы и ограничения, готовим документы и сопровождаем сделку до регистрации.',u:AB_SITE+'/napravleniya/zemelnye-uchastki.html'},
+  {h:'Коммерческая и индустриальная недвижимость',t:'Помогаем купить или продать офис, торговое помещение, склад или производственный объект в Москве и Санкт-Петербурге так, чтобы сделка была юридически чистой, а налоговые последствия — понятными заранее.',u:AB_SITE+'/napravleniya/kommercheskaya-nedvizhimost.html'}
+];
+function abHtml(){
+  const f=abFilm();
+  const dirs=AB_DIR.map((d,i)=>`<a class="ab-dir" href="${d.u}" target="_blank" rel="noopener"><span class="ab-n">${String(i+1).padStart(2,'0')}</span><span class="ab-dh">${d.h}</span><span class="ab-dt">${d.t}</span><span class="ab-more">Подробнее на сайте</span></a>`).join('');
+  return `${typeof brandPl==='function'?brandPl():''}
+<div class="ab">
+  <p class="ab-eye">О компании</p>
+  <h2 class="ab-h">Ситиус Недвижимость</h2>
+  <p class="ab-tag">Где богатство обретает уют</p>
+  <p>Недвижимость в Москве и Санкт-Петербурге. Премиальное качество на каждом этапе сделки.</p>
+  <p class="ab-name"><b lang="la">Citius</b> — лат. «быстрее». Отсюда наше название: сделки у нас часто проходят быстро.</p>
+  <p>Мы работаем с недвижимостью, которая требует опыта, выдержки и такта. Берём в работу и юридически сложные объекты. Выстраиваем сделки с законной налоговой оптимизацией. Строим и продаём загородные дома. Сопровождаем инвестиции в недвижимость: от выбора объекта до стратегии владения.</p>
+
+  <div class="ab-film">
+    <video class="ab-vid" poster="${f.poster}" preload="none" playsinline webkit-playsinline></video>
+    <button type="button" class="ab-play" onclick="aboutFilmPlay(this)" aria-label="Смотреть фильм о компании">
+      <span class="ab-playi" aria-hidden="true"></span>
+      <span class="ab-playt">Смотреть фильм</span>
+    </button>
+  </div>
+  <p class="ab-filmcap"><b>Ситиус — ваш Bentley в мире недвижимости</b><br>Ручная работа, ощущение материала и инженерия тишины — все грани бриллианта на своём месте.</p>
+
+  <p class="ab-eye">Почему Ситиус</p>
+  <h2 class="ab-h">Почему Ситиус</h2>
+  <p>Скорость сделки складывается не из спешки, а из подготовки. Мы делаем три вещи, которые сокращают путь до покупателя:</p>
+  <ul class="ab-ul">
+    <li><b>Точная оценка.</b> Опыт позволяет назвать цену, по которой объект найдёт покупателя, а не простоит на рынке месяцами в ожидании торга.</li>
+    <li><b>Предпродажная подготовка объекта.</b> Продумываем, как объект будет выглядеть на показе и в объявлении, чтобы покупатель увидел его сильные стороны с первого взгляда.</li>
+    <li><b>Подготовка документов.</b> Заранее проверяем права, историю перехода собственности, зарегистрированных жильцов и обременения, чтобы у покупателя и его банка не возникло вопросов в последний момент.</li>
+  </ul>
+  <ul class="ab-ul">
+    <li>Берём юридически сложные объекты: наследство, долевую собственность, обременения, запутанную историю. Распутываем каждый узел и доводим сделку до чистого результата.</li>
+    <li>Заранее продумываем законную налоговую структуру, чтобы решение было не только юридически безупречным, но и финансово красивым.</li>
+  </ul>
+  <div class="ab-pills">
+    <div><b>Конфиденциально</b><span>Сделки и переговоры остаются между нами.</span></div>
+    <div><b>Деликатно</b><span>Особенно когда в деле семья, наследство или сложная история.</span></div>
+    <div><b>С вниманием к деталям</b><span>Юридическая чистота, структура и спокойный финал.</span></div>
+  </div>
+  <p class="hint" style="margin-top:8px"><a href="https://vk.com/reviews-235383821" target="_blank" rel="noopener">Читать отзывы во ВКонтакте</a></p>
+
+  <p class="ab-eye">Направления</p>
+  <h2 class="ab-h">Чем мы занимаемся</h2>
+  <p>От запутанных объектов до дома у воды — с одной логикой: точность, законность и спокойный результат.</p>
+  <div class="ab-dirs">${dirs}</div>
+
+  <p class="ab-eye">Процесс</p>
+  <h2 class="ab-h">Как мы работаем</h2>
+  <p>Без лишней суеты: сначала понимаем задачу, затем снимаем риски и только потом ведём сделку.</p>
+  <ol class="ab-ol">
+    <li><b>Знакомство.</b> Обсуждаем ваш объект или задачу: что важно сохранить, какие сроки и какие ограничения уже есть.</li>
+    <li><b>Проверка и структура.</b> Смотрим историю, обременения и налоговую картину. Предлагаем законную и понятную схему сделки.</li>
+    <li><b>Сопровождение.</b> Ведём переговоры, документы и согласования — деликатно и с вниманием к деталям.</li>
+    <li><b>Чистый результат.</b> Доводим дело до регистрации и спокойного финала, когда всё оформлено прозрачно.</li>
+  </ol>
+
+  <p class="ab-eye">Контакты</p>
+  <h2 class="ab-h">Обсудим ваш объект</h2>
+  <p>Напишите в Telegram или позвоните — ответим деликатно и по существу. Работаем ежедневно 09:00–21:00. География: Москва и Санкт-Петербург.</p>
+  <div class="about-c">
+    <div><span>Телефон</span><a href="tel:${TEL}">${TELH}</a></div>
+    <div><span>Сайт</span><a href="${AB_SITE}" target="_blank" rel="noopener">www.citius-solution.ru</a></div>
+    <div><span>Telegram</span><a href="https://t.me/citiusrealty" target="_blank" rel="noopener">t.me/citiusrealty</a></div>
+    <div><span>MAX</span><a href="https://max.ru/channel_citiusrealty" target="_blank" rel="noopener">max.ru/channel_citiusrealty</a></div>
+    <div><span>ВКонтакте</span><a href="https://vk.ru/citius.solutions" target="_blank" rel="noopener">vk.ru/citius.solutions</a></div>
+    <div><span>YouTube</span><a href="https://www.youtube.com/@citiusrealty" target="_blank" rel="noopener">youtube.com/@citiusrealty</a></div>
+  </div>
+  <div style="margin-top:12px">${typeof cBtns==='function'?cBtns('о нас'):''}</div>
+</div>`}
+
+SCR.about={st:-16,t:'О нас',i:'Ситиус Недвижимость',b:abHtml,next:function(){return 'path'}};
+
+if(!document.getElementById('ab-css'))document.head.insertAdjacentHTML('beforeend',`<style id="ab-css">
+.ab{font-size:14px;line-height:1.45}
+.ab-eye{margin:18px 0 2px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a8844a}
+.ab-h{margin:0 0 8px;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:22px;line-height:1.25;color:inherit}
+.ab-tag{font-family:"Playfair Display",Georgia,serif;font-style:italic;color:#a8844a;margin:-2px 0 10px;font-size:15px}
+.ab-name{padding:8px 10px;border-left:2px solid #c9a46a;margin:10px 0}
+.ab-film{position:relative;margin:14px 0 8px;border-radius:12px;overflow:hidden;background:#1e2f4a;border:1.5px solid #c9a46a;aspect-ratio:9/16;max-height:58vh}
+.ab-vid{display:block;width:100%;height:100%;object-fit:contain;background:#1e2f4a;vertical-align:middle}
+.ab-play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:0;background:rgba(30,47,74,.28);color:#fbf8f1;cursor:pointer;font-family:Montserrat,sans-serif}
+.ab-playi{width:56px;height:56px;border-radius:50%;border:1.5px solid #c9a46a;background:linear-gradient(180deg,#d4b57e,#c9a46a);box-shadow:0 4px 16px rgba(0,0,0,.25);position:relative}
+.ab-playi:before{content:"";position:absolute;left:22px;top:18px;border-style:solid;border-width:10px 0 10px 16px;border-color:transparent transparent transparent #1e2f4a}
+.ab-playt{font-size:13px;letter-spacing:.04em}
+.ab-filmcap{font-size:13px;line-height:1.4;margin:0 0 6px;color:inherit}
+.ab-ul,.ab-ol{margin:8px 0 12px;padding:0 0 0 18px}
+.ab-ul li,.ab-ol li{margin:0 0 8px}
+.ab-pills{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.ab-pills>div{padding:10px 12px;border:1px solid rgba(201,164,106,.45);border-radius:10px}
+.ab-pills b{display:block;margin-bottom:2px}
+.ab-pills span{font-size:13px;opacity:.9}
+.ab-dirs{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px}
+.ab-dir{display:block;padding:10px 12px;border:1px solid rgba(201,164,106,.45);border-radius:10px;text-decoration:none;color:inherit}
+.ab-n{display:block;font-size:11px;letter-spacing:.08em;color:#a8844a;margin-bottom:2px}
+.ab-dh{display:block;font-weight:650;margin-bottom:4px}
+.ab-dt{display:block;font-size:13px;line-height:1.4;opacity:.92}
+.ab-more{display:block;margin-top:6px;font-size:12px;color:#7a5f30}
+[data-theme=dark] .ab-h{color:#fbf8f1}
+[data-theme=dark] .ab-more{color:#d4b57e}
+[data-theme=dark] .ab-pills>div,[data-theme=dark] .ab-dir{background:rgba(30,47,74,.35);border-color:rgba(201,164,106,.4)}
+[data-theme=light] .ab-h{color:#1e2f4a}
+[data-theme=light] .ab-pills>div,[data-theme=light] .ab-dir{background:#fff;border-color:#e6dccb}
+.ab-play[hidden]{display:none!important}@media (min-width:700px){.ab-film{aspect-ratio:16/9;max-height:min(52vh,440px)}.ab-pills{flex-direction:row}.ab-pills>div{flex:1}}
+</style>`);
+
+{const pb=SCR.path.b;SCR.path.b=function(){
+  const h=pb.apply(this,arguments);
+  if(h.includes("go('about')")||h.includes('go("about")'))return h;
+  const row='<div class="setlink"><span class="mut">О компании</span><a href="#" onclick="go(\'about\');return false">О нас</a></div>';
+  const k=h.indexOf('<div class="setlink">');
+  return k>=0?h.slice(0,k)+row+h.slice(k):h+row;
+}}
+{const tb=SCR.theme&&SCR.theme.b;if(tb)SCR.theme.b=function(){
+  const h=tb.apply(this,arguments);
+  if(h.includes("go('about')"))return h;
+  const btn='<button class="btn ghost" style="width:100%;padding:8px;margin-top:8px" onclick="go(\'about\')">О нас: кто мы и почему Ситиус</button>';
+  const k=h.lastIndexOf('</div>');
+  return k>=0?h.slice(0,k)+btn+h.slice(k):h+btn;
+}}
+{const sh0=show;show=function(id,keep){
+  const r=sh0.apply(this,arguments);
+  try{
+    if((id||cur)==='about'){
+      const n=document.getElementById('next');
+      if(n)n.textContent='Мой путь';
+    }
+  }catch(e){}
+  return r;
+}}
+})();
 // ===== n29 END
 
 // ===== opros 23.11.2026 BEGIN
