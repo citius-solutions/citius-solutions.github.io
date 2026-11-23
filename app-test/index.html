@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 19:19';
+var APPV='23.11.2026 19:35';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -5197,6 +5197,164 @@ const boot=function(){
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
 else boot();
+})();
+// ---------- n29 c21 (23.11 вечер) · правки по списку владельца: план продажи и сделки, без повторных вопросов,
+// бюджет только по вашим данным и на сегодня, «Объекты» без сбоев, системная кнопка «назад», акцент на «Передать Ситиусу».
+// Классы fx20-* (визуальные правки другого исполнителя — c21-*, p19 — c19-*; их не трогаем).
+(function(){
+if(window.__fx20)return;window.__fx20=1;
+const LOG=(id,e)=>{try{logErr(id,e)}catch(x){}};
+const TODAY=()=>{const d=new Date();return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()};
+const ISO=()=>{const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())};
+const RU=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(s||'');return m?m[3]+'.'+m[2]+'.'+m[1]:''};
+const ago=s=>{const t=Date.parse(s||'');return isNaN(t)?0:Math.floor((Date.now()-t)/864e5)};
+
+document.head.insertAdjacentHTML('beforeend',`<style id="fx20-css">
+#body .fx20-sum{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:13.5px;line-height:1.4;margin:0 0 8px}
+#body .fx20-sum b{font-weight:600}
+#body .fx20-sum .fx20-ed{background:none;border:0;padding:0;font:inherit;font-size:12.5px;color:#8a6a2f;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+[data-theme=dark] #body .fx20-sum .fx20-ed{color:#e2c48e}
+#body .fx20-hide{display:none!important}
+#body .chips span.fx20-sit:not(.on){border:2px solid #c9a46a;font-weight:600}
+#body .fx20-date{font-size:12px;opacity:.85;margin:4px 0 0}
+#body .fx20-old{font-size:12.5px;margin:6px 0 0;padding:6px 8px;border-left:3px solid #c9a46a;background:rgba(201,164,106,.12);border-radius:4px}
+#body .fx20-ref{font-size:12px;opacity:.85;margin-top:6px}
+#body .fx20-plan{width:100%;margin:8px 0 6px}
+#body .fx20-err{margin:0 0 10px}
+</style>`);
+
+// ===== B. Телефон в формах связи — исправлено переименованием в p14_phone.js (auPhFmt/auPhIn).
+// Страховка: если в форме всё же оказалось «undefined» — очищаем поле.
+// Набор с 8 или 7 («8 921…», «+7 8 921…») и вставка «+7 (921) …» в поле, где уже стоит «+7 », давали лишнюю цифру впереди.
+try{phDig=function(v){let s=String(v||'');let d;if(/^\s*\+\s*7/.test(s))d=s.replace(/^\s*\+\s*7/,'').replace(/\D/g,'');else d=s.replace(/\D/g,'');
+  if(d.length>10&&(d[0]==='7'||d[0]==='8'))d=d.slice(1);if(/^[78]9/.test(d))d=d.slice(1);return d.slice(0,10)}}catch(e){}
+function fixTel(){document.querySelectorAll('#body input[type=tel]').forEach(i=>{if(i.value==='undefined'||i.value==='null')i.value=''})}
+
+// ===== A. План продажи и сделки: понятное название и кнопка уже на старте
+try{if(typeof PLAN_TT==='object'){PLAN_TT.sell='План продажи и сделки';PLAN_TT.buy='План покупки и сделки';PLAN_TT.new='План покупки новостройки и сделки';PLAN_TT.alt='План продажи, покупки и сделки';PLAN_TT.share='План сделки с долей'}}catch(e){}
+function planWord(){try{const t=planTitle();return t.charAt(0).toLowerCase()+t.slice(1)}catch(e){return 'план'}}
+function s0dPlan(){const b=document.getElementById('body');if(!b||!A.goal)return;
+  const lbl=b.querySelector('.f .lbl');if(lbl&&!lbl.dataset.fx20){lbl.dataset.fx20=1;try{lbl.innerHTML=hq(planTitle())+' · '+lbl.innerHTML}catch(e){}}
+  if(!b.querySelector('.fx20-plan')){const f=b.querySelector('.f');if(f)f.insertAdjacentHTML('afterend',`<button class="btn primary fx20-plan" onclick="go('plan')">Ваш ${hq(planWord())} по шагам</button>`)}}
+
+// ===== C. Без повторных вопросов: уже данный ответ — одной строкой «… · изменить»
+function lblOf(el){let p=el.previousElementSibling;while(p&&!(p.classList&&p.classList.contains('lbl')))p=p.previousElementSibling;return p}
+function collapse(nodes,label,val,key){
+  nodes=nodes.filter(Boolean);if(!nodes.length||!val)return;const first=nodes[0];if(first.dataset.fx20c)return;
+  if(window.__fx20open&&window.__fx20open[cur+'|'+key])return;
+  nodes.forEach(n=>n.classList.add('fx20-hide'));first.dataset.fx20c=1;
+  const s=document.createElement('div');s.className='fx20-sum';s.innerHTML=`<span><b>${hq(label)}:</b> ${hq(val)}</span><button type="button" class="fx20-ed">изменить</button>`;
+  s.querySelector('button').onclick=()=>{nodes.forEach(n=>n.classList.remove('fx20-hide'));s.remove();(window.__fx20open=window.__fx20open||{})[cur+'|'+key]=1;const i=nodes.find(n=>n.matches&&n.matches('input,select'))||nodes[0].querySelector&&nodes[0].querySelector('input,select');if(i)try{i.focus()}catch(e){}};
+  first.parentNode.insertBefore(s,first)}
+function chipGroup(re){const b=document.getElementById('body');for(const c of b.querySelectorAll('.chips')){const l=lblOf(c);if(l&&re.test(l.innerText.trim()))return {c,l}}return null}
+function chipVal(c){return [...c.querySelectorAll('span.on')].map(s=>s.innerText.trim()).join(', ')}
+function addrIn(){const b=document.getElementById('body');return [...b.querySelectorAll('input')].find(i=>/A\['addr'\]|OB\(\d+\)\.addr|\.addr=this/.test(i.getAttribute('oninput')||i.getAttribute('onchange')||''))}
+function fullAddr(v){try{const c=A.city||'';return c&&v.indexOf(c)<0?c+', '+v:v}catch(e){return v}}
+function noRepeat(){const b=document.getElementById('body');if(!b)return;
+  if(cur==='s0b'){
+    // «Что продаёте» уже выбрано на первом экране (только для первого объекта)
+    if(!(A.oi>0)){const g=chipGroup(/^Что продаёте/);if(g&&chipVal(g.c))collapse([g.l,g.c],'Что продаёте',chipVal(g.c),'otype')}
+    const i=addrIn();if(i&&i.value.trim()){const f=i.closest('.f');const sel=b.querySelector('select[aria-label="Район"]');const fs=sel&&sel.closest('.f');
+      let v=fullAddr(i.value.trim());if(sel&&sel.value)v+=' · район '+sel.value;
+      const nodes=[...(f?f.children:[])];collapse(nodes,'Адрес',v,'addr');
+      if(fs&&sel.value&&fs!==f){fs.classList.add('fx20-hide');const ed=f&&f.querySelector('.fx20-ed');if(ed){const o=ed.onclick;ed.onclick=()=>{fs.classList.remove('fx20-hide');o()}}}}
+  }
+  if(cur==='s1a'){
+    const i=addrIn();if(i&&i.value.trim()){const f=i.closest('.f')||i.parentNode;const l=lblOf(i);collapse([l,i,i.nextElementSibling&&i.nextElementSibling.tagName==='DETAILS'?i.nextElementSibling:null],'Адрес',fullAddr(i.value.trim()),'addr1')}
+    const a=[...b.querySelectorAll('input')].find(x=>/OB\(\d+\)\.area=this/.test(x.getAttribute('oninput')||''));if(a&&a.value.trim()){const l=lblOf(a);collapse([l,a],'Площадь',a.value.trim()+' м²','area1')}
+  }
+  if(cur==='s2c'){const g=chipGroup(/^Объект в ипотеке/);if(g&&chipVal(g.c))collapse([g.l,g.c],'Ипотека или залог',chipVal(g.c),'omort')}
+  if(cur==='s10b'){const g=chipGroup(/^Как получили/);if(g&&chipVal(g.c))collapse([g.l,g.c],'Как получили',chipVal(g.c),'acqs')}
+}
+
+// ===== D. Цена и бюджет — только по вашим данным и на сегодня
+// Раньше: без единого вашего объявления рыночная цена бралась из средней по району «на 01.11.2026» (juryst.ru) × площадь,
+// и из неё сразу считался бюджет покупки. Теперь средняя по району — только справка, в расчёт не входит.
+try{if(typeof vEst==='function'&&!vEst.__fx20){const v0=vEst;vEst=function(j){const e=v0.apply(this,arguments);if(e&&e.src==='dist'){e.fx20ref=e.ref;e.mkt=0;e.est=0;e.lo=0;e.hi=0;e.src='';e.price=e.own||0;e.over=0}return e};vEst.__fx20=1}}catch(e){LOG('fx20-vest',e)}
+try{if(typeof vSetR==='function'&&!vSetR.__fx20){const s0=vSetR;vSetR=function(j,k,f,v){try{const o=OB(j);if(o)o.vdt=ISO()}catch(e){}return s0.apply(this,arguments)};vSetR.__fx20=1}}catch(e){}
+function anDate(){try{const n=sells()?vN():0;let d='';for(let j=0;j<n;j++){const x=OB(j).vdt;if(x&&(!d||x<d))d=x}return d}catch(e){return ''}}
+function priceDate(){const b=document.getElementById('body');if(!b||!sells())return;
+  let V;try{V=vAll()}catch(e){return}
+  const has=V.E.some(e=>e.src==='an');
+  const blk=[...b.querySelectorAll('.f')].find(f=>{const l=f.querySelector('.lbl');return l&&/^(Рыночная цена|Вы можете получить)/.test(l.innerText.trim())});
+  if(!blk&&cur==='s1a'&&!has&&!b.querySelector('.fx20-date')){const r=V.E.map(e=>e.fx20ref).find(Boolean);const an=[...b.querySelectorAll('.f')].find(f=>{const l=f.querySelector('.lbl');return l&&/^Похожие объявления/.test(l.innerText.trim())});
+    if(an)an.insertAdjacentHTML('afterbegin',`<div class="fx20-date" style="margin:0 0 8px">Рыночную цену посчитаем на сегодня (${TODAY()}) по ценам, которые вы вставите ниже.${r?` Для сравнения, в расчёт не входит: средняя цена предложения квартир в районе ${hq(r.d)} — ${fmt(r.ppm)} за м² на ${hq(SPBPPM.date)} (${lnk(SPBPPM.url,SPBPPM.src)}).`:''}</div>`)}
+  if(blk&&!blk.querySelector('.fx20-date')){
+    if(has){const d=anDate(),old=d&&ago(d)>7;
+      blk.insertAdjacentHTML('beforeend',`<div class="fx20-date">Расчёт на ${TODAY()} — по ценам объявлений, которые вы вставили${d&&RU(d)!==TODAY()?' '+RU(d):''}.</div>`+(old?`<div class="fx20-old">Цены вставлены ${RU(d)}. Откройте похожие объявления и обновите цены — тогда расчёт будет по сегодняшнему рынку.</div>`:''))}
+    else{const r=V.E.map(e=>e.fx20ref).find(Boolean);
+      blk.insertAdjacentHTML('beforeend',`<div class="fx20-date">Рыночную цену посчитаем на сегодня (${TODAY()}), когда вы вставите цены похожих объявлений на этапе 1.</div>`+(r&&cur==='s1a'?`<div class="fx20-ref">Для сравнения, в расчёт не входит: средняя цена предложения квартир в районе ${hq(r.d)} — ${fmt(r.ppm)} за м² на ${hq(SPBPPM.date)} (${lnk(SPBPPM.url,SPBPPM.src)}).</div>`:''))}
+  }
+}
+function budgetNote(){const b=document.getElementById('body');if(!b||!buys())return;
+  const blk=[...b.querySelectorAll('.f')].find(f=>{const l=f.querySelector('.lbl');return l&&/^Бюджет на покупку/.test(l.innerText.trim())});
+  if(!blk||blk.querySelector('.fx20-date'))return;let bud=0;try{bud=budget()}catch(e){}
+  if(!bud)blk.insertAdjacentHTML('beforeend',`<div class="fx20-date">${A.goal==='alt'?'Бюджет посчитаем по вашим данным: впишите свои деньги и одобренную ипотеку, а цену своей квартиры — по похожим объявлениям на этапе 1 или своей ценой.':'Бюджет посчитаем по вашим данным: впишите свои деньги и одобренную ипотеку.'}</div>`);
+  else{let sv=0;try{sv=saleIn()}catch(e){}
+    blk.insertAdjacentHTML('beforeend',`<div class="fx20-date">Расчёт на ${TODAY()} по вашим данным.${A.goal==='alt'&&!sv?' Цена вашей квартиры пока не учтена — вставьте цены похожих объявлений на этапе 1 или укажите свою цену.':''}</div>`)}}
+
+// ===== E. «Объекты» (живые объекты = ссылки на площадки): без сбоев
+// «Передать избранное агенту Ситиуса» падал с ReferenceError (F вне функции) — кнопка молча не работала.
+try{if(SCR.fav&&!SCR.fav.b.__fx20){const fb=SCR.fav.b;SCR.fav.b=function(){return fb.apply(this,arguments).replace(/'\+F\.length\+'/g,"'+(A.flist||[]).length+'")};SCR.fav.b.__fx20=1}}catch(e){LOG('fx20-fav',e)}
+const OBJ=['live','links','dist','fav','kom','favq'];
+function objNote(){const b=document.getElementById('body');if(!b||!['live','links'].includes(cur)||b.querySelector('.fx20-ext'))return;
+  if(!b.querySelector('a[href^="http"]'))return;
+  b.insertAdjacentHTML('beforeend',`<details class="c19-more fx20-ext"><summary aria-label="Если площадка открылась с ошибкой"></summary><div class="c19-mb">Если площадка показывает ошибку или просит подтвердить, что вы не робот, — это защита самой площадки (чаще при VPN). Отключите VPN, обновите страницу или откройте ссылку ещё раз. Фильтры можно задать и на самой площадке.</div></details>`)}
+window.addEventListener('error',ev=>{try{if(typeof cur!=='string'||!OBJ.includes(cur))return;LOG('fx20-obj',ev.error||ev.message);
+  const b=document.getElementById('body');if(!b||b.querySelector('.fx20-err'))return;
+  b.insertAdjacentHTML('afterbegin',`<div class="note risk fx20-err">Это действие не сработало. Ваши ответы сохранены — попробуйте ещё раз или откройте «Мой путь».</div>`)}catch(e){}});
+
+// ===== G. Акцент на «Передать Ситиусу» (ваш выбор не подставляем — только выделение)
+function sitEmph(){const b=document.getElementById('body');if(!b)return;
+  b.querySelectorAll('button.btn').forEach(x=>{const t=x.innerText.trim();
+    if(/^Продолжить самостоятельно$/.test(t)&&x.classList.contains('primary')){x.classList.remove('primary');x.classList.add('ghost')}
+    if(/^Передать Ситиусу$/.test(t)&&x.classList.contains('ghost')){x.classList.remove('ghost');x.classList.add('primary')}});
+  b.querySelectorAll('.chips').forEach(c=>{const S=[...c.children];if(S.length!==2)return;const si=S.findIndex(s=>/Ситиус/.test(s.innerText));const me=S.findIndex(s=>/(^|\s)(Сам|сам|Я сам|Делаю сам|Разместить самому)/.test(s.innerText));
+    if(si>=0&&me>=0&&si!==me){S[si].classList.add('fx20-sit');if(si>me)c.insertBefore(S[si],S[me])}});
+  b.querySelectorAll('a').forEach(a=>{if(/^Ситиус посчитает$/.test(a.innerText.trim()))a.style.fontWeight='700'})}
+
+// ===== F. Системная «назад» (Android, жест iOS, стрелка браузера): шаг назад внутри Аппа, окна закрываются, данные сохраняются
+const OV=[['devsheet','block'],['dealsheet','block'],['cmpsheet','flex'],['supsheet','flex'],['sheet','']];
+function openOv(){for(const [id] of OV){const e=document.getElementById(id);if(e&&e.offsetParent!==null&&getComputedStyle(e).display!=='none')return e}
+  const pv=document.getElementById('pdfview');if(pv)return pv;
+  const sx=document.querySelector('.sx-ov');if(sx)return sx;
+  const xf=document.getElementById('xferov');if(xf&&getComputedStyle(xf).display!=='none')return xf;
+  const ab=document.getElementById('addrbox');if(ab&&ab.style.display!=='none'&&ab.innerHTML.trim())return ab;return null}
+function closeOv(o){try{document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))}catch(e){}
+  try{if(o.id==='addrbox'&&typeof adrHide==='function')adrHide()}catch(e){}
+  if(document.body.contains(o)&&o.offsetParent!==null){const x=o.querySelector('[aria-label*="акрыть"],.cs-x,.x,button[onclick*="Close"],button[onclick*="close"]');if(x)x.click();else if(o.id==='pdfview'&&typeof pvClose==='function')pvClose();else o.style.display='none'}}
+let depth=0,muted=0;
+function hpush(){try{depth++;history.pushState({fx20:depth},'')}catch(e){}}
+try{if(!history.state||!history.state.fx20)history.replaceState({fx20:0},'');else depth=history.state.fx20}catch(e){}
+if(typeof go==='function'&&!go.__fx20){const g0=go;go=function(id){const h0=hist.length;const r=g0.apply(this,arguments);if(!muted&&hist.length>h0)hpush();return r};go.__fx20=1}
+let ovEnt=0,skip=0;
+function ovCheck(){const o=openOv(),real=o&&o.id!=='addrbox';
+  if(real&&!ovEnt){ovEnt=1;hpush()}else if(!real&&ovEnt){ovEnt=0;skip=1;try{history.back()}catch(e){skip=0}}}
+document.addEventListener('click',()=>setTimeout(ovCheck,150),true);
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')setTimeout(ovCheck,150)},true);
+window.addEventListener('popstate',ev=>{try{
+  const st=ev.state&&typeof ev.state.fx20==='number'?ev.state.fx20:0;depth=st;
+  if(skip){skip=0;return}
+  const o=openOv();if(o){const had=ovEnt;ovEnt=0;closeOv(o);if(!had&&hist.length>st)hpush();return}
+  if(document.getElementById('helloov'))return;
+  if(hist.length){muted=1;try{goBackPos()}finally{muted=0}}
+  if(hist.length&&st===0){hpush()}
+}catch(e){LOG('fx20-pop',e)}});
+function wireBack(){}
+// «Назад» в Аппе идёт через историю браузера, чтобы системная «назад» и кнопка не расходились (перехват до onclick)
+document.addEventListener('click',ev=>{const t=ev.target&&ev.target.closest&&ev.target.closest('#back');if(!t)return;
+  if(depth>0&&hist.length&&!openOv()){ev.stopPropagation();ev.preventDefault();history.back()}},true);
+
+// ===== общий хук после отрисовки экрана
+function after(){fixTel();wireBack();
+  try{if(cur==='s0d')s0dPlan()}catch(e){LOG('fx20-a',e)}
+  try{noRepeat()}catch(e){LOG('fx20-c',e)}
+  try{if(['s1a','s1b','sum','plan'].includes(cur))priceDate();if(cur==='sum')budgetNote()}catch(e){LOG('fx20-d',e)}
+  try{objNote()}catch(e){}
+  try{sitEmph()}catch(e){LOG('fx20-g',e)}}
+if(typeof show==='function'&&!show.__fx20){const sh=show;show=function(){const r=sh.apply(this,arguments);after();return r};show.__fx20=1}
+const boot=()=>{wireBack();try{after()}catch(e){}};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else setTimeout(boot,0);
 })();
 // ---------- n29 (23.11) · визуал и содержание: расширенный список «Что важно в новом жилье» + свой вариант;
 // нотариус — тёмно-синий блок как шапка; информационные таблички — белые; «?» без слова «Подробнее»;
