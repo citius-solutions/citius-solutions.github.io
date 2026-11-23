@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 19:37';
+var APPV='23.11.2026 21:45';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3142,7 +3142,7 @@ SCR.s1b.b=()=>{const j=vCur(),o=OB(j),mu=vN()>1,e=vEst(j);
  const own=V.E.reduce((t,x)=>t+(x.own||0),0);
  const cmp=own?(pe?(V.n===1?overNote(e):overNote({own,mkt:pe.mkt,over:Math.round((own/pe.mkt-1)*100)})):`<div class="hint" style="margin-top:6px">Ваша цена: ${fmt(own)}. Рыночную определим по похожим объявлениям — <a href="#" onclick="go('s1a');return false">этап 1</a>.</div>`):'';
  const k=h.indexOf('<div class="big">');if(k>=0&&cmp){const e2=h.indexOf('</div>',k)+6;h=h.slice(0,e2)+cmp+h.slice(e2)}
- return h+`<button class="btn ghost" style="width:100%;padding:8px;margin-top:6px" onclick="go('plan')">Итог: ваш план продажи</button>`}}
+ return h+`<button class="btn ghost" style="width:100%;padding:8px;margin-top:6px" onclick="go('plan')">Итог: ваш план сделки</button>`}}
 // «Объекты на площадках» у продавца: похожие на его объект (а не фильтры покупателя); сбой — простые ссылки вместо «экран не открылся»
 {const lv=SCR.live.b;SCR.live.b=function(){if(sells()&&!buys()){try{const j=Math.min(A.lsale||0,vN()-1);return saleLinks(j)+`<button class="btn ghost" style="width:100%;padding:8px;margin-top:4px" onclick="A.vi=${j};go('s1a')">Вставить цены похожих — этап 1</button>`}catch(e){logErr('live-sell',e);return `<div class="f">${VAL.map(([nm,u])=>`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;padding:7px;margin-bottom:5px" target="_blank" rel="noopener" href="${u}">${nm} ↗</a>`).join('')}</div>`}}
  return lv.apply(this,arguments)}}
@@ -3208,7 +3208,7 @@ devRender=function(){};
   if(had&&!confirm(DEAL_T.ask(ds))){clean();return}
   try{[SVK,SVKB].forEach(k=>localStorage.removeItem(k));Object.entries(o.data).forEach(([k,v])=>{if(k!==THK)localStorage.setItem(k,v)});localStorage.setItem('sitius-fresh','2311');sessionStorage.setItem('sitius-autoupd','1')}catch(e){alert(DEAL_T.bad);clean();return}
   window.__noSave=1;clean();location.reload()}).catch(()=>{clean();alert('Ссылка повреждена или неполная. Попросите отправить её ещё раз или сохраните файл.')})})();
-// ---------- n29 · ИТОГ: «Ваш план продажи» — экран, PDF (печать на устройстве) и «Поделиться»
+// ---------- n29 · ИТОГ: «Ваш план сделки» — экран, PDF (печать на устройстве) и «Поделиться»
 const strip=h=>String(h||'').replace(/<br\s*\/?>/g,'\n').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&amp;/g,'&').replace(/[ \t]+/g,' ').trim();
 function planObj(j){const o=OB(j),t=o.otype||'flat';const [f,ft]=flP(o.floor);const P=[capF(OTN[t]||'объект')];
  if(t==='flat'&&o.rooms)P.push(o.rooms==='0'?'студия':o.rooms==='4'?'4 комнаты и больше':plw(+o.rooms,'комната','комнаты','комнат'));if(o.area)P.push(arS(o.area)+' м²');if(f)P.push('этаж '+f+(ft?' из '+ft:''));
@@ -3232,12 +3232,12 @@ function planHtml(){const D=planData(),P=planPrice(D);const row=(a,b)=>`<div><sp
  <div class="f"><div class="lbl">Ситиус</div><div class="about-c"><div><span>Телефон</span><a href="tel:${TEL}">${TELH}</a></div><div><span>Сайт</span><a href="https://www.citius-solution.ru" target="_blank" rel="noopener">www.citius-solution.ru</a></div><div><span>Telegram</span><a href="https://t.me/citiusrealty" target="_blank" rel="noopener">t.me/citiusrealty</a></div><div><span>MAX</span><a href="https://max.ru/channel_citiusrealty" target="_blank" rel="noopener">max.ru/channel_citiusrealty</a></div></div></div>`}
 function planDoc(){const D=planData(),P=planPrice(D);const d=new Date();const ds=p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear();
  const sec=(t,b)=>`<h2>${t}</h2>${b}`;const esc=hq;
- return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>План продажи · Ситиус · ${ds}</title><style>
+ return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>План сделки · Ситиус · ${ds}</title><style>
 @page{size:A4;margin:16mm 15mm}body{font:12.5pt/1.45 "Segoe UI",Roboto,Arial,sans-serif;color:#1e2f4a;margin:0}h1{font-size:20pt;margin:0 0 2px}h2{font-size:13.5pt;margin:16px 0 6px;border-bottom:1px solid #c9a46a;padding-bottom:3px}
 .sub{color:#5b6b82;font-size:10.5pt;margin:0 0 10px}table{border-collapse:collapse;width:100%}td{padding:4px 6px;vertical-align:top;border-bottom:1px solid #e6dfcf}td:first-child{width:42%;color:#5b6b82}ul{margin:4px 0 0 18px;padding:0}li{margin:2px 0}.note{font-size:10.5pt;color:#5b6b82}.warn{border-left:3px solid #c9a46a;padding:4px 8px;margin:8px 0}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:10px}.pb{background:#c9a46a;color:#1e2f4a;border:0;border-radius:10px;padding:10px 14px;font:700 14px system-ui,sans-serif;cursor:pointer}@media print{.noprint{display:none}}</style><\/head><body>
 <div class="noprint bar" style="background:#fbf8f1;padding:10px 12px;margin:0 0 12px;border-radius:10px"><span>Сохраните план: «Печать» → «Сохранить как PDF».</span><button class="pb" onclick="print()">Сохранить PDF</button></div>
-<h1>Ваш план продажи</h1><div class="sub">Ситиус · Сделка без агента · составлен ${ds}</div>
+<h1>Ваш план сделки</h1><div class="sub">Ситиус · Сделка без агента · составлен ${ds}</div>
 ${sec('Что продаёте',D.O.map((o,k)=>`<p style="margin:3px 0">${D.multi?'<b>Объект '+(k+1)+'.</b> ':''}${esc(o.t)}${o.loc?'<br><span class="note">'+esc(o.loc)+'</span>':''}</p>`).join(''))}
 ${sec('Цена',`<table>${P.R.map(([a,b])=>`<tr><td>${a}</td><td><b>${esc(b)}</b></td></tr>`).join('')}</table><p class="note">${esc(P.src)} Цена сделки обычно ниже цены объявления. Это ориентир, не оценка.</p>${D.O.length===1&&D.O[0].e.over>=5?`<div class="warn">Ваша цена выше рыночной на ${D.O[0].e.over} %. При такой цене звонков и показов обычно меньше, продажа идёт дольше или заканчивается торгом.</div>`:''}`)}
 ${sec('Какие документы понадобятся',`<ul>${D.docs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`)}
@@ -3245,17 +3245,17 @@ ${sec('Как пройдут расчёты',`<p style="margin:3px 0">${PLAN_PAY
 ${sec('Этапы и сроки',`<table>${D.stages.map(s=>`<tr><td>${s.n}. ${esc(s.t)}</td><td>${esc(s.w)}${s.done?' · готово':''}</td></tr>`).join('')}</table><p class="note">Сроки — ориентир; ⚠ требует проверки на реальных сделках.</p>`)}
 ${sec('Ситиус',`<table><tr><td>Телефон</td><td>${TELH}</td></tr><tr><td>Сайт</td><td>www.citius-solution.ru</td></tr><tr><td>Telegram</td><td>t.me/citiusrealty</td></tr><tr><td>MAX</td><td>max.ru/channel_citiusrealty</td></tr></table>`)}
 <p class="note" style="margin-top:14px">${esc(LEGALNOTE)}</p><\/body><\/html>`}
-function planText(){const D=planData(),P=planPrice(D);return ['Ваш план продажи · Ситиус',...D.O.map(o=>o.t+(o.loc?' — '+o.loc:'')),'',...P.R.map(([a,b])=>a+': '+b),'','Документы: '+D.docs.join('; '),'','Расчёты: '+PLAN_PAY,'','Этапы: '+D.stages.map(s=>s.n+'. '+s.t+' — '+s.w).join('; '),'','Ситиус: '+TELH+' · www.citius-solution.ru'].join('\n')}
+function planText(){const D=planData(),P=planPrice(D);return ['Ваш план сделки · Ситиус',...D.O.map(o=>o.t+(o.loc?' — '+o.loc:'')),'',...P.R.map(([a,b])=>a+': '+b),'','Документы: '+D.docs.join('; '),'','Расчёты: '+PLAN_PAY,'','Этапы: '+D.stages.map(s=>s.n+'. '+s.t+' — '+s.w).join('; '),'','Ситиус: '+TELH+' · www.citius-solution.ru'].join('\n')}
 function planPdf(){const doc=planDoc();let w=null;try{w=window.open('','_blank')}catch(e){}
  if(w&&w.document){w.document.open();w.document.write(doc);w.document.close();setTimeout(()=>{try{w.focus();w.print()}catch(e){}},600);return}
  const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';document.body.appendChild(f);const fd=f.contentDocument;fd.open();fd.write(doc);fd.close();setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){}setTimeout(()=>f.remove(),60000)},500)}
-async function planShare(btn){const t=planText();if(navigator.share){try{await navigator.share({title:'Мой план продажи',text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
+async function planShare(btn){const t=planText();if(navigator.share){try{await navigator.share({title:'Мой план сделки',text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
  try{await navigator.clipboard.writeText(t);btn.textContent='Текст плана скопирован'}catch(e){btn.textContent='Не получилось — сохраните PDF'}setTimeout(()=>{btn.textContent='Поделиться'},2500)}
-SCR.plan={st:-3,t:'Итог: ваш план продажи',i:'Объект, цена, документы, расчёты, сроки',b:()=>{if(!sells())return `<div class="hint">План продажи появится, когда вы выберете «Продать» на первом экране.</div>`;
+SCR.plan={st:-3,t:'Итог: ваш план сделки',i:'Объект, цена, документы, расчёты, сроки',b:()=>{if(!sells())return `<div class="hint">План сделки появится, когда вы выберете «Продать» на первом экране.</div>`;
  return `${planHtml()}<div class="row" style="margin-top:4px"><button class="btn primary planpdf" style="padding:9px" onclick="planPdf()">Сохранить PDF</button><button class="btn ghost planshare" style="padding:9px" onclick="planShare(this)">Поделиться</button></div>
- <div class="hint" style="margin-top:5px">Откроется окно печати — выберите «Сохранить как PDF».</div>${cBtns('итог: план продажи')}`},next:()=>'path'};
-{const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);if(!sells())return h;const b=`<button class="btn primary planbtn" style="width:100%;padding:8px;margin-bottom:8px" onclick="go('plan')">Итог: ваш план продажи</button>`;const k=h.indexOf('<div class="row" style="margin-bottom:7px">');return k>=0?h.slice(0,k)+b+h.slice(k):b+h}}
-{const b0=SCR.s10c.b;SCR.s10c.b=function(){const h=b0.apply(this,arguments);return sells()?h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:8px" onclick="go('plan')">Итог: ваш план продажи</button>`:h}}
+ <div class="hint" style="margin-top:5px">Откроется окно печати — выберите «Сохранить как PDF».</div>${cBtns('итог: план сделки')}`},next:()=>'path'};
+{const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);if(!sells())return h;const b=`<button class="btn primary planbtn" style="width:100%;padding:8px;margin-bottom:8px" onclick="go('plan')">Итог: ваш план сделки</button>`;const k=h.indexOf('<div class="row" style="margin-bottom:7px">');return k>=0?h.slice(0,k)+b+h.slice(k):b+h}}
+{const b0=SCR.s10c.b;SCR.s10c.b=function(){const h=b0.apply(this,arguments);return sells()?h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:8px" onclick="go('plan')">Итог: ваш план сделки</button>`:h}}
 // ---------- n29 · графики оценки v3: рыночная и желаемая цена, разница на графике (скобка + анимация)
 document.head.insertAdjacentHTML('beforeend',`<style>
 .chart{margin:8px 0 6px}.chart svg{width:100%;height:auto;display:block;overflow:visible;color:inherit}
@@ -3328,8 +3328,8 @@ function chartTerm(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).fil
 {const b2=SCR.s1b.b;SCR.s1b.b=function(){const h=b2.apply(this,arguments);const j=vCur();return h+chartPrices(j)+chartTerm(j)}}
 // ---------- n29 (23.11 15:10) · итоговый план по цели: продажа, покупка, новостройка, обмен (продать и купить), доля, расселение
 function planKind(){const g=A.goal;if(objTotal&&objTotal()>=5)return 'rass';return g==='sell'?'sell':g==='buy'?'buy':g==='new'?'new':g==='alt'?'alt':g==='share'?'share':''}
-const PLAN_TT={sell:'План продажи',buy:'План покупки',new:'План покупки новостройки',alt:'План обмена: продать и купить',share:'План сделки с долей',rass:'План расселения'};
-function planTitle(){return PLAN_TT[planKind()]||'Ваш план'}
+const PLAN_TT={sell:'План сделки',buy:'План сделки',new:'План сделки',alt:'План сделки',share:'План сделки',rass:'План сделки'};  // владелец 23.11 20:42 МСК: везде просто «План сделки»
+function planTitle(){return PLAN_TT[planKind()]||'План сделки'}
 const PLAN_PAYB='Безопасные расчёты банка (СБР) или аккредитив: ваши деньги лежат в банке, пока Росреестр не зарегистрирует переход права, затем банк переводит их продавцу. Коды из SMS, «Госключа» и банка не называйте никому.';
 const PLAN_PAYN='Бронь, ДДУ и эскроу — этап 9: условия брони (срок, стоимость, возврат), договор долевого участия и счёт эскроу в банке. Приёмка — этап 10: перечень недостатков письменно; при существенных — не подписывать акт до устранения. Коды из SMS, «Госключа» и банка не называйте никому.';
 const PLAN_PAYA='Продаёте и сразу покупаете (альтернативная сделка): задаток по своей продаже — только после выбора и экспресс-проверки покупки; общий день сделки. Расчёты по обеим сделкам — через СБР или аккредитив банка: деньги лежат в банке до регистрации перехода права.';
@@ -3379,10 +3379,10 @@ SCR.plan.b=()=>{if(!A.goal)return `<div class="hint">План появится, 
 Object.defineProperty(SCR.plan,'t',{get:()=>'Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1),configurable:true});
 // кнопка «Итог» — на «Моём пути» и в конце этапа 10 для любой цели
 {const pb=SCR.path.b;SCR.path.b=function(){let h=pb.apply(this,arguments);if(!A.goal||h.includes('planbtn'))return h;const b=`<button class="btn primary planbtn" style="width:100%;padding:8px;margin-bottom:8px" onclick="go('plan')">Итог: ваш ${planTitle().charAt(0).toLowerCase()+planTitle().slice(1)}</button>`;const k=h.indexOf('<div class="row" style="margin-bottom:7px">');return k>=0?h.slice(0,k)+b+h.slice(k):b+h}}
-{const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);return h.replace(/>Итог: ваш план продажи<\/button>/g,'>Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1)+'</button>')}}
+{const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);return h.replace(/>Итог: ваш план сделки<\/button>/g,'>Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1)+'</button>')}}
 ['s10c','nb4'].forEach(id=>{if(!SCR[id])return;const b0=SCR[id].b;SCR[id].b=function(){const h=b0.apply(this,arguments);return h.includes('planbtn')?h:h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:8px" onclick="go('plan')">Итог: ваш ${planTitle().charAt(0).toLowerCase()+planTitle().slice(1)}</button>`}});
 {const sb=SCR.sum&&SCR.sum.b;if(sb)SCR.sum.b=function(){const h=sb.apply(this,arguments);const L='Итог: ваш '+planTitle().charAt(0).toLowerCase()+planTitle().slice(1);
- if(!A.goal)return h;if(h.includes('>Итог: ваш план продажи</button>'))return h.replace(/>Итог: ваш план продажи<\/button>/g,'>'+L+'</button>');
+ if(!A.goal)return h;if(h.includes('>Итог: ваш план сделки</button>'))return h.replace(/>Итог: ваш план сделки<\/button>/g,'>'+L+'</button>');
  return h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:6px" onclick="go('plan')">${L}</button>`}}
 // ---------- n29 (23.11 15:45) · итоговый план: светлое оформление как на citius-solution.ru (экран и PDF) · настоящий PDF-файл (jsPDF, шрифты сайта) во встроенном просмотре · без окна печати
 const PDF_BASE=(()=>{try{return new URL('pdf/',location.href).href}catch(e){return 'pdf/'}})();
@@ -5198,7 +5198,7 @@ const boot=function(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
 else boot();
 })();
-// ---------- n29 c21 (23.11 вечер) · правки по списку владельца: план продажи и сделки, без повторных вопросов,
+// ---------- n29 c21 (23.11 вечер) · правки по списку владельца: план сделки, без повторных вопросов,
 // бюджет только по вашим данным и на сегодня, «Объекты» без сбоев, системная кнопка «назад», акцент на «Передать Ситиусу».
 // Классы fx20-* (визуальные правки другого исполнителя — c21-*, p19 — c19-*; их не трогаем).
 (function(){
@@ -5230,12 +5230,21 @@ try{phDig=function(v){let s=String(v||'');let d;if(/^\s*\+\s*7/.test(s))d=s.repl
   if(d.length>10&&(d[0]==='7'||d[0]==='8'))d=d.slice(1);if(/^[78]9/.test(d))d=d.slice(1);return d.slice(0,10)}}catch(e){}
 function fixTel(){document.querySelectorAll('#body input[type=tel]').forEach(i=>{if(i.value==='undefined'||i.value==='null')i.value=''})}
 
-// ===== A. План продажи и сделки: понятное название и кнопка уже на старте
-try{if(typeof PLAN_TT==='object'){PLAN_TT.sell='План продажи и сделки';PLAN_TT.buy='План покупки и сделки';PLAN_TT.new='План покупки новостройки и сделки';PLAN_TT.alt='План продажи, покупки и сделки';PLAN_TT.share='План сделки с долей'}}catch(e){}
+// ===== A. План сделки: понятное название и кнопка уже на старте
+try{if(typeof PLAN_TT==='object')Object.keys(PLAN_TT).forEach(k=>PLAN_TT[k]='План сделки')}catch(e){}
 function planWord(){try{const t=planTitle();return t.charAt(0).toLowerCase()+t.slice(1)}catch(e){return 'план'}}
 function s0dPlan(){const b=document.getElementById('body');if(!b||!A.goal)return;
   const lbl=b.querySelector('.f .lbl');if(lbl&&!lbl.dataset.fx20){lbl.dataset.fx20=1;try{lbl.innerHTML=hq(planTitle())+' · '+lbl.innerHTML}catch(e){}}
   if(!b.querySelector('.fx20-plan')){const f=b.querySelector('.f');if(f)f.insertAdjacentHTML('afterend',`<button class="btn primary fx20-plan" onclick="go('plan')">Ваш ${hq(planWord())} по шагам</button>`)}}
+
+// ===== Предупреждения на «Ваш ориентир по срокам» — только после ответа «Да» (владелец 23.11 20:43 МСК):
+// «Доли детей / маткапитал → опека и нотариус» — если отмечено «Маткапитал или доли детей: Да»; «Ипотека на квартире → банк» — если «Есть ипотека или залог».
+function anyObj(f){try{return [A,...(A.so||[])].some(o=>o&&f(o))||(typeof sObjs==='function'&&sObjs().some(o=>o&&f(o)))}catch(e){return false}}
+try{if(SCR.s0d&&!SCR.s0d.b.__fx20){const b0=SCR.s0d.b;SCR.s0d.b=function(){let h=b0.apply(this,arguments);
+  const kids=anyObj(o=>o.okids==='y'),mort=anyObj(o=>o.omort==='y');
+  if(!kids)h=h.replace(/Доли детей \/ маткапитал → нужны опека и нотариус(<br>)?/g,'');
+  if(!mort)h=h.replace(/Ипотека на квартире → согласование с банком(<br>)?/g,'');
+  h=h.replace(/<br>(<\/div>)/g,'$1').replace(/<div class="note risk">\s*<\/div>/g,'');return h};SCR.s0d.b.__fx20=1}}catch(e){LOG('fx20-warn',e)}
 
 // ===== C. Без повторных вопросов: уже данный ответ — одной строкой «… · изменить»
 function lblOf(el){let p=el.previousElementSibling;while(p&&!(p.classList&&p.classList.contains('lbl')))p=p.previousElementSibling;return p}
@@ -5296,6 +5305,8 @@ function budgetNote(){const b=document.getElementById('body');if(!b||!buys())ret
 // ===== E. «Объекты» (живые объекты = ссылки на площадки): без сбоев
 // «Передать избранное агенту Ситиуса» падал с ReferenceError (F вне функции) — кнопка молча не работала.
 try{if(SCR.fav&&!SCR.fav.b.__fx20){const fb=SCR.fav.b;SCR.fav.b=function(){return fb.apply(this,arguments).replace(/'\+F\.length\+'/g,"'+(A.flist||[]).length+'")};SCR.fav.b.__fx20=1}}catch(e){LOG('fx20-fav',e)}
+// Блок «Подходящие объявления · в приложении» с выдуманными объявлениями (демо-данные прототипа) убран со всех экранов и целей — решение владельца 23.11 20:43 МСК.
+try{demoAds=function(){return ''}}catch(e){LOG('fx20-demo',e)}
 const OBJ=['live','links','dist','fav','kom','favq'];
 function objNote(){const b=document.getElementById('body');if(!b||!['live','links'].includes(cur)||b.querySelector('.fx20-ext'))return;
   if(!b.querySelector('a[href^="http"]'))return;
