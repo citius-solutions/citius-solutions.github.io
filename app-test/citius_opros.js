@@ -335,9 +335,27 @@
       '</div>';
   }
 
+  function successCopy(when, id) {
+    var w = String(when || '').trim();
+    var t = (!w || /^сейчас$/i.test(w)) ? 'Мы скоро вам перезвоним.' : 'Мы скоро вам перезвоним · ' + w + '.';
+    if (id) t += ' Номер заявки ' + id + '.';
+    return t;
+  }
+  function showSuccessOverlay(when, id) {
+    if (typeof sitiusSuccess !== 'function') return;
+    var ov = sitiusSuccess({
+      title: 'Заявка принята',
+      text: successCopy(when, id),
+      btn: state && state.mode === 'modal' ? 'Закрыть' : 'Хорошо',
+      onClose: function () { if (state && state.mode === 'modal') close(); }
+    });
+    if (ov && ov.style) ov.style.zIndex = '100000';
+  }
   function stepDone(kind, payload) {
     if (kind === 'ok') {
-      return '<div class="opros-card"><p class="opros-ok">Заявка принята' + (payload && payload.id ? ' · номер ' + esc(payload.id) : '') + '. Сотрудник Ситиуса позвонит в указанное вами время.</p></div>';
+      var when = (payload && payload.when) || (state.lastLead && state.lastLead.when) || '';
+      var id = payload && payload.id || '';
+      return '<div class="opros-card" style="text-align:center"><p class="opros-ok" style="font-family:\'Playfair Display\',Georgia,serif;font-size:21px;margin-bottom:8px">Заявка принята</p><p class="opros-ok">' + esc(successCopy(when, id)) + '</p></div>';
     }
     var text = payload && payload.text || '';
     var why = payload && payload.why || 'Не получилось отправить заявку через интернет.';
@@ -548,8 +566,12 @@
     sendLeadCompat(lead).then(function (res) {
       state.busy = false;
       if (res && res.ok) {
+        var when = (state.lastLead && state.lastLead.when) || timeLabel(state);
         state.view = 'ok';
-        state.result = { id: res.id || '' };
+        state.result = { id: res.id || '', when: when };
+        render();
+        showSuccessOverlay(when, res.id || '');
+        return;
       } else {
         var why = (res && res.err === 'no_url')
           ? 'Сейчас заявку через интернет отправить нельзя: сервер ещё не подключен.'
