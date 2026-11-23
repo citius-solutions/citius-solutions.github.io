@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:55';
+var APPV='23.11.2026 17:06';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3968,9 +3968,17 @@ document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-b.out{min-hei
 (function(){
 const HI_SP='sitius-splash';
 const HI_IMG=(function(){
-  try{if(location.protocol==='file:')return '/workspace/sitius/app_spec/film_poster_hero_v2.jpg'}catch(e){}
-  try{return new URL('film_poster_hero_v2.jpg', location.href.replace(/[^/]*$/, '')).href}catch(e){}
-  return 'https://www.citius-solution.ru/app-test/film_poster_hero_v2.jpg';
+  const f='film_poster_hero_v2.jpg';
+  try{if(location.protocol==='file:')return '/workspace/sitius/app_spec/'+f}catch(e){}
+  try{
+    const u=new URL(location.href);
+    let path=u.pathname||'/';
+    const last=path.split('/').pop();
+    if(last&&/\.[a-zA-Z0-9]+$/.test(last))path=path.slice(0,path.length-last.length);
+    else if(!path.endsWith('/'))path+='/';
+    return new URL(f, u.origin+path).href;
+  }catch(e){}
+  return 'https://www.citius-solution.ru/app-test/'+f;
 })();
 const HI_GOALS=[
   ['sell','Продать',''],
@@ -4006,7 +4014,62 @@ window.helloClose=function(){
   const o=document.getElementById('helloov');
   if(o)o.remove();
 };
-window.helloGo=function(){helloClose()};
+function hiNavScr(id){
+  return !id||id==='about'||id==='sec'||id==='live'||id==='work'||id==='notary'||id==='links'||id==='dist'||id==='fav'||id==='kom'||id==='favq';
+}
+function hiResumeCur(){
+  const ok=function(id){return !!(id&&typeof SCR==='object'&&SCR[id]&&!hiNavScr(id))};
+  if(ok(window.__restored&&window.__restored.cur))return window.__restored.cur;
+  // hist из прогресса важнее, чем текущий cur: до boot show() cur ещё дефолтный 's0a'
+  try{
+    if(typeof hist!=='undefined'&&hist&&hist.length){
+      for(let i=hist.length-1;i>=0;i--){if(ok(hist[i]))return hist[i]}
+    }
+  }catch(e){}
+  try{
+    const k=(typeof SVK==='string'&&SVK)||'sitius-progress';
+    const raw=JSON.parse(localStorage.getItem(k)||'null');
+    if(raw&&ok(raw.cur))return raw.cur;
+    if(raw&&raw.hist){for(let i=raw.hist.length-1;i>=0;i--){if(ok(raw.hist[i]))return raw.hist[i]}}
+  }catch(e){}
+  if(ok(typeof cur==='string'?cur:''))return cur;
+  return 's0a';
+}
+function hiSanitizeRestored(){
+  try{if(window.__restored&&hiNavScr(window.__restored.cur))window.__restored.cur=hiResumeCur()}catch(e){}
+}
+function hiWrapSave(){
+  if(typeof saveSt!=='function'||saveSt.__hiNav)return;
+  const sv=saveSt;
+  saveSt=function(){
+    if(!hiNavScr(typeof cur==='string'?cur:''))return sv.apply(this,arguments);
+    let keep=null;
+    try{
+      const k=(typeof SVK==='string'&&SVK)||'sitius-progress';
+      const raw=JSON.parse(localStorage.getItem(k)||'null');
+      if(raw&&raw.cur&&!hiNavScr(raw.cur)&&typeof SCR==='object'&&SCR[raw.cur])keep=raw.cur;
+    }catch(e){}
+    if(!keep){try{if(typeof hist!=='undefined'&&hist){for(let i=hist.length-1;i>=0;i--){if(hist[i]&&!hiNavScr(hist[i])&&typeof SCR==='object'&&SCR[hist[i]]){keep=hist[i];break}}}}catch(e){}}
+    if(!keep)keep='s0a';
+    const real=cur;
+    try{cur=keep;return sv.apply(this,arguments)}finally{cur=real}
+  };
+  saveSt.__hiNav=1;
+}
+window.helloGo=function(e){
+  try{if(e&&e.preventDefault){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation()}}catch(x){}
+  if(window.__hiGoing)return;window.__hiGoing=1;
+  const id=hiResumeCur();
+  const ov=document.getElementById('helloov');
+  if(ov){ov.style.opacity='0';ov.setAttribute('aria-hidden','true')}
+  // не снимаем оверлей сразу: иначе тот же клик (особенно WebKit/iOS) попадает в #tb-about
+  setTimeout(function(){
+    try{helloClose()}catch(x){}
+    try{if(typeof show==='function')show(id,true)}catch(x){}
+    window.__hiGoing=0;
+  },350);
+};
+
 window.helloNew=function(){
   window.__noSave=1;
   if(typeof wipeProgress==='function')wipeProgress();
@@ -4030,10 +4093,10 @@ window.helloGoal=function(g){
 function hiHtml(){
   const prog=hiHasProgress();
   const goals=HI_GOALS.map(([v,t,w])=>`<button type="button" class="hi-g${w?' '+w:''}" onclick="helloGoal('${v}')">${t}</button>`).join('');
-  const resume=prog?`<button type="button" class="hi-go" id="hello-go" onclick="helloGo()">Продолжить</button>
+  const resume=prog?`<button type="button" class="hi-go" id="hello-go">Продолжить</button>
     <button type="button" class="hi-nw" onclick="helloNew()">Начать заново</button>
     <p class="hi-res">На этом устройстве есть сохранённые ответы. «Продолжить» откроет то место, где вы остановились.</p>`:'';
-  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="" width="1080" height="452"></div></div>
+  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="" width="1080" height="452" decoding="async" fetchpriority="high"></div></div>
     <div class="hi-copy">
       <p class="hi-name">Ситиус Недвижимость</p>
       <p class="hi-line">Недвижимость в Москве и Санкт-Петербурге · премиальное качество на каждом этапе сделки</p>
@@ -4055,10 +4118,10 @@ function hiCss(){
   if(document.getElementById('hi-css'))return;
   document.head.insertAdjacentHTML('beforeend',`<style id="hi-css">
 #phone>#helloov#helloov,#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;width:100%;max-width:100%;height:100%;max-height:100%;box-sizing:border-box;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:Montserrat,system-ui,sans-serif;grid-column:1/-1;grid-row:1/-1;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-#phone:has(#helloov)>.top,#phone:has(#helloov)>#nav,#phone:has(#helloov)>#helpbtn,#phone:has(#helloov)>.tab{visibility:hidden}
-#helloov .hi-pic{flex:1 0 auto;width:100%;max-width:100%;min-width:0;min-height:max(220px,30vh);position:relative;overflow:hidden;background:#152033}
-#helloov .hi-pic-in{position:absolute;inset:0;width:100%;height:100%;max-width:100%;min-height:0;overflow:hidden;background:#152033}
-#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:28% 46%}
+#phone:has(#helloov)>.top,#phone:has(#helloov)>#nav,#phone:has(#helloov)>#helpbtn,#phone:has(#helloov)>.tab{visibility:hidden;pointer-events:none}
+#helloov .hi-pic{flex:1 1 auto;width:100%;max-width:100%;min-width:0;min-height:220px;min-height:max(220px,30vh);position:relative;overflow:hidden;background:#152033}
+#helloov .hi-pic-in{position:relative;display:block;width:100%;height:100%;min-height:inherit;overflow:hidden;background:#152033}
+#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:28% 46%;border:0}
 #helloov .hi-copy{flex:0 0 auto;padding:12px 16px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));text-align:center;box-sizing:border-box;width:100%;max-width:100%}
 #helloov .hi-name{margin:0 0 6px;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:22px;line-height:1.3;color:#fbf8f1}
 #helloov .hi-line{margin:0 0 12px;font-size:12.5px;line-height:1.45;color:#e8dcc4;display:block;overflow:hidden;max-height:calc(1.45em * 3)}
@@ -4077,6 +4140,11 @@ function hiCss(){
 #helloov .hi-nw{display:block;width:100%;min-height:40px;margin:0;padding:8px;border:1.5px solid rgba(247,243,234,.45);border-radius:12px;background:transparent;color:#fbf8f1;font-size:15px;line-height:1.3;cursor:pointer;font-family:Montserrat,system-ui,sans-serif;flex:0 0 auto;box-sizing:border-box}
 #helloov .hi-res{margin:0;font-size:11.5px;line-height:1.45;color:#e8dcc4;text-align:center;flex:0 0 auto}
 #helloov .hi-g:focus-visible,#helloov .hi-go:focus-visible,#helloov .hi-nw:focus-visible,#helloov .hi-more:focus-visible{outline:2px solid #fbf8f1;outline-offset:2px}
+@media (orientation:landscape) and (min-width:700px){
+  #helloov .hi-pic{flex:1 0 36vh;min-height:260px;min-height:max(260px,36vh)}
+  #helloov .hi-copy{padding-top:8px;padding-bottom:4px}
+  #helloov .hi-start{padding-top:4px;gap:6px}
+}
 @media (min-width:700px){
   #helloov .hi-pic{min-height:max(220px,30vh)}
   #helloov .hi-name{font-size:28px;line-height:1.25}
@@ -4109,15 +4177,22 @@ function hiShow(){
   ph.appendChild(o);
   hiDropCover();
   const go=o.querySelector('#hello-go');
-  if(go)try{go.focus({preventScroll:true})}catch(e){}
+  if(go){
+    go.addEventListener('click',helloGo,true);
+    try{go.focus({preventScroll:true})}catch(e){}
+  }
 }
 
 function hiBoot(){
+  hiWrapSave();
+  hiSanitizeRestored();
   hiDropSplash();
   hiKillResume();
   if(hiSkip()){hiDropCover();return}
   hiShow();
 }
+hiWrapSave();
+hiSanitizeRestored();
 hiDropSplash();
 if(!hiSkip()){
   try{hiCss();if(document.getElementById('phone'))hiShow()}catch(e){}
@@ -4452,6 +4527,228 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-wide-css">
   #phone>#helpbtn{max-width:920px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}
 }
 </style>`);
+})();
+// ---------- n29 (23.11) · подсказки адреса: список поверх экрана (не прячется в #body/#phone),
+// с 2–3 символов; Яндекс Suggest (без ключа, CORS) + запасной Photon (komoot).
+// Не правит p2_addr.js / p12 / p15 / p17: отдельная инъекция.
+(function(){
+if(typeof locType!=='function')return;
+
+function adrSlot(k){
+  if(k&&k[0]==='s'){const i=+k.slice(1)||0;return i?OB(i):A}
+  A.adx=A.adx||{};return (A.adx[k]=A.adx[k]||{})
+}
+adrKey=function(k){return !!(k&&'sgbx'.indexOf(k[0])>=0)};
+adrObj=adrSlot;
+
+function adrTmo(p,ms){return new Promise(function(ok,bad){const t=setTimeout(function(){bad(new Error('tmo'))},ms||2500);p.then(function(v){clearTimeout(t);ok(v)},function(e){clearTimeout(t);bad(e)})})}
+function yaOk(kind){
+  const k=String(kind||'').toLowerCase();
+  if(/(restaurant|cafe|bar|shop|mall|hotel|pharmacy|post office|office|landmark|museum|hotels|malls|ticket)/.test(k)&&!/\b(house|street|locality)\b/.test(k))return false;
+  return /house|street|locality|district|metro|area|province|village|suburb|other/.test(k)
+}
+function yaParse(it){
+  if(!it||!yaOk(it.kind)||!isFinite(it.lon)||!isFinite(it.lat))return null;
+  const name=String(it.name||''),short=String(it.name_short||'');
+  const parts=name.split(',').map(function(s){return s.trim()}).filter(Boolean);
+  let city='',state='';
+  for(let i=0;i<parts.length;i++){
+    const p=parts[i],c=typeof cityFind==='function'?cityFind(p):null;
+    if(c){city=city||c.n;state=state||c.r;continue}
+    const r=typeof rgFind==='function'?rgFind(p):null;
+    if(r){state=state||r;if(r==='Москва'||r==='Санкт-Петербург'||r==='Севастополь')city=city||r}
+  }
+  let t='';
+  if(short&&short!==name&&!(typeof cityFind==='function'&&cityFind(short)))t=short;
+  if(!t){
+    const skip=/район|округ|поселение|область|край|респ|городской округ/i;
+    t=parts.filter(function(p){return lnorm(p)!==lnorm(city)&&lnorm(p)!==lnorm(state)&&!skip.test(p)&&(typeof rgFind!=='function'||!rgFind(p))}).join(', ');
+    const m=t.match(/^(\d+[^\s,]*),\s*(.+)$/);if(m)t=m[2]+', '+m[1]
+  }
+  if(!t)return null;
+  if(!city)city=state||'';
+  if(!city)return null;
+  return {t:t,lon:+it.lon,lat:+it.lat,city:city,state:state,sub:''}
+}
+function adrFetchYa(city,q,lim,reg){
+  const b=(typeof ADR_BIAS==='object'&&ADR_BIAS[reg||city])||[30.31,59.94];
+  const part=city?city+', '+q:q;
+  const u='https://suggest-maps.yandex.ru/suggest-geo?v=8&lang=ru_RU&search_type=all&results='+(lim||8)+'&part='+encodeURIComponent(part)+'&ll='+b[0]+','+b[1]+'&spn=0.6,0.6';
+  return fetch(u).then(function(r){return r.ok?r.json():Promise.reject(new Error('ya'))}).then(function(j){
+    const items=Array.isArray(j)&&Array.isArray(j[1])?j[1]:[];
+    const seen={},L=[];
+    for(let i=0;i<items.length;i++){
+      const x=yaParse(items[i]);if(!x)continue;
+      const id=x.city+'|'+x.t;if(seen[id])continue;seen[id]=1;L.push(x)
+    }
+    return L
+  })
+}
+const adrFetchPh=typeof adrFetch==='function'?adrFetch:function(){return Promise.resolve([])};
+adrFetch=function(city,q,lim,reg){
+  return adrTmo(adrFetchYa(city,q,lim,reg),2500).then(function(L){return L&&L.length?L:adrTmo(adrFetchPh(city,q,lim,reg),2500)}).catch(function(){return adrTmo(adrFetchPh(city,q,lim,reg),2500).catch(function(){return []})})
+};
+
+let adrEl=null,adrBound=0;
+function adrBox(){
+  let b=document.getElementById('addrbox');
+  if(!b){b=document.createElement('div');b.id='addrbox';b.className='locs';b.setAttribute('role','listbox');b.setAttribute('aria-label','Подсказки адреса');document.body.appendChild(b)}
+  return b
+}
+function adrHide(){
+  const b=document.getElementById('addrbox');
+  if(b){b.innerHTML='';b.style.display='none';b.dataset.k='';}
+  adrEl=null
+}
+function adrPlace(el){
+  const b=adrBox();if(!el||!el.isConnected||!b.innerHTML){if(b&&!b.innerHTML)adrHide();return}
+  const r=el.getBoundingClientRect();
+  const vv=window.visualViewport;
+  const vh=(vv&&vv.height)||window.innerHeight,vy=(vv&&vv.offsetTop)||0;
+  const vw=(vv&&vv.width)||window.innerWidth,vx=(vv&&vv.offsetLeft)||0;
+  const below=vy+vh-r.bottom,above=r.top-vy;
+  const maxH=Math.min(260,Math.max(120,Math.max(below,above)-8));
+  const left=Math.min(Math.max(vx+8,r.left),vx+vw-Math.max(r.width,180)-8);
+  b.style.left=left+'px';
+  b.style.width=Math.max(180,Math.min(r.width,vw-16))+'px';
+  b.style.maxHeight=maxH+'px';
+  b.style.zIndex='120';
+  if(below>=140||below>=above){b.style.top=(r.bottom+3)+'px';b.style.bottom='auto'}
+  else{b.style.bottom=(window.innerHeight-r.top+3)+'px';b.style.top='auto'}
+  b.style.display='block'
+}
+function adrBind(){
+  if(adrBound)return;adrBound=1;
+  const r=function(){if(adrEl)adrPlace(adrEl)};
+  const body=document.getElementById('body');
+  if(body)body.addEventListener('scroll',r,{passive:true});
+  window.addEventListener('scroll',r,{passive:true,capture:true});
+  window.addEventListener('resize',r);
+  if(window.visualViewport){visualViewport.addEventListener('resize',r);visualViewport.addEventListener('scroll',r)}
+}
+function adrRender(el,k,html){
+  const locb=el&&el.parentNode&&el.parentNode.querySelector('.locs');
+  if(locb){locb.innerHTML='';locb.style.display='none'}
+  if(!html){adrHide();return}
+  const b=adrBox();b.dataset.k=k;b.innerHTML=html;adrEl=el;adrBind();adrPlace(el)
+}
+function adrCityHtml(S){
+  return S.map(function(c,n){return '<div class="locsug'+(n?'':' on')+'" role="option" data-n="'+hq(c.n)+'" data-r="'+hq(c.r)+'"'+(c.reg?' data-w="1"':'')+' onpointerdown="event.preventDefault();adrChoose(this)" onclick="adrChoose(this)">'+(c.reg?'<b>'+hq(c.n)+'</b> — '+rgKind(c.n):'<b>'+hq(c.n)+'</b>, '+hq(c.r))+'</div>'}).join('')
+}
+function adrAddrHtml(L,city,nc,onFirst){
+  return L.map(function(x,n){
+    const extra=[x.sub||'',(x.city&&x.city!==x.sub)?x.city:'',(x.state&&x.state!==x.city&&x.state!==x.sub)?x.state:''].filter(Boolean).join(', ');
+    return '<div class="locsug'+(onFirst&&!n?' on':'')+'" role="option" data-t="'+hq(x.t)+'" data-lon="'+x.lon+'" data-lat="'+x.lat+'" data-c="'+hq(x.city||city||'')+'" data-st="'+hq(x.state||'')+'"'+(nc?' data-nc="1"':'')+' onpointerdown="event.preventDefault();adrChoose(this)" onclick="adrChoose(this)"><b>'+hq(x.t)+'</b>'+(extra?', '+hq(extra):'')+'</div>'
+  }).join('')
+}
+window.adrChoose=function(d){
+  const box=d.parentNode,k=box&&box.dataset.k,w=k?document.querySelector('.loc[data-k="'+k+'"]'):d.closest('.loc');
+  if(!w)return;
+  const el=w.querySelector('.locin');if(!el)return;
+  if(d.dataset.t!=null){
+    const o=adrSlot(k),i=+k.slice(1)||0,reg=(typeof locGet==='function'&&locGet(k).reg)||'';
+    if(d.dataset.nc){
+      const c=d.dataset.c,pp=locParse(c);
+      const rg=pp.reg||rgFind(d.dataset.st||'')||((c==='Москва'||c==='Санкт-Петербург'||c==='Севастополь')?c:'');
+      locPut(k,'city',pp.city||c);if(rg&&rg!==reg)locPut(k,'reg',rg);locSetAsk(k,0)
+    }
+    o.addr=d.dataset.t;o.geo=[+d.dataset.lon,+d.dataset.lat];
+    el.value=(d.dataset.c?d.dataset.c+', ':'')+d.dataset.t;el.dataset.done='1';
+    adrHide();
+    if(k[0]==='s'&&((typeof locGet==='function'&&locGet(k).reg)==='Санкт-Петербург')&&isFinite(o.geo[0])&&typeof spbDistOf==='function'){
+      const dn=spbDistOf(o.geo[0],o.geo[1]);if(dn){sSetLoc(i,'sdist',dn);o.distAuto=dn}
+    }
+    locRerender();
+    if(!/\d/.test(d.dataset.t)){
+      const n=document.querySelector('.loc[data-k="'+k+'"] .locin');
+      if(n){n.value=n.value+', ';try{n.focus();n.setSelectionRange(n.value.length,n.value.length)}catch(e){}}
+    }
+    return
+  }
+  if(d.dataset.n!=null){
+    el.value=d.dataset.n;el.dataset.done='1';adrHide();
+    if(d.dataset.w)locApply(k,d.dataset.n,{city:'',reg:d.dataset.r,known:true,rest:'',whole:1});
+    else locApply(k,d.dataset.n,{city:d.dataset.n,reg:d.dataset.r,known:true,rest:''});
+    const n=document.querySelector('.loc[data-k="'+k+'"] .locin');
+    if(n){n.value=n.value.replace(/,\s*$/,'')+', ';try{n.focus();n.setSelectionRange(n.value.length,n.value.length)}catch(e){}}
+  }
+};
+
+function adrNeed(t){
+  if(t.length<2)return false;
+  if(citySug(t).some(function(c){return lnorm(c.n)===lnorm(t)}))return false;
+  if(t.length>=3)return true;
+  return /\d/.test(t)||/\s/.test(t)
+}
+
+const lt=locType;
+locType=function(el){
+  const w=el.closest('.loc'),k=w&&w.dataset.k;
+  if(!adrKey(k))return lt(el);
+  const v=el.value,ci=v.indexOf(','),o=adrSlot(k),hn=w.querySelector('.lochint');
+  if(hn)hn.innerHTML='';
+  adrBind();
+  if(ci<0){
+    o.addr='';
+    try{locSetWhole(k,0)}catch(e){}
+    locPut(k,'city',v);
+    const t=v.trim(),S=typeof locSugAll==='function'?locSugAll(v):citySug(v),reg=(typeof locGet==='function'&&locGet(k).reg)||'';
+    adrRender(el,k,adrCityHtml(S));
+    if(!adrNeed(t))return;
+    clearTimeout(adrT);const my=++adrSeq,S0=adrBox().innerHTML;
+    adrT=setTimeout(function(){
+      adrFetch('',t,10,reg).then(function(L){
+        if(my!==adrSeq||!el.isConnected)return;
+        const seen={};L=(L||[]).filter(function(x){return x.t&&x.city&&!seen[x.city+'|'+x.t]&&(seen[x.city+'|'+x.t]=1)}).slice(0,6);
+        if(!L.length)return;
+        const A2=adrAddrHtml(L,'',1,true);
+        const cities=S0.replace(/ class="locsug on"/g,' class="locsug"');
+        adrRender(el,k,A2+cities)
+      }).catch(function(){
+        if(my!==adrSeq)return;
+        if(hn)hn.innerHTML='Подсказки адресов сейчас не загрузились — впишите адрес полностью.'
+      })
+    },280);
+    return
+  }
+  const c=v.slice(0,ci).trim(),rest=v.slice(ci+1).trim();
+  const p=locParse(c);
+  if(p.city||c)locPut(k,'city',p.city||c);
+  const i=+k.slice(1)||0,curReg=(typeof locGet==='function'&&locGet(k).reg)||'';
+  if(p.reg&&p.reg!==curReg)locPut(k,'reg',p.reg);
+  o.addr=rest;o.geo=null;
+  if(rest.length<2){adrRender(el,k,'');return}
+  clearTimeout(adrT);const my=++adrSeq;
+  adrT=setTimeout(function(){
+    adrFetch(p.city||c,rest,8,p.reg||curReg).then(function(L){
+      if(my!==adrSeq||!el.isConnected)return;
+      const seen={};L=(L||[]).filter(function(x){return x.t&&!seen[x.t]&&(seen[x.t]=1)}).slice(0,6);
+      adrRender(el,k,L.length?adrAddrHtml(L,p.city||c,0,true):'')
+    }).catch(function(){
+      if(my!==adrSeq)return;adrRender(el,k,'');
+      if(hn)hn.innerHTML='Подсказки улиц сейчас не загрузились — впишите адрес полностью.'
+    })
+  },280)
+};
+
+const lc=locClose;
+locClose=function(el){adrHide();return lc.apply(this,arguments)};
+const lk=locKey;
+locKey=function(e,el){
+  const box=document.getElementById('addrbox');
+  const I=box&&box.style.display!=='none'?[...box.querySelectorAll('.locsug')]:[];
+  if(I.length){
+    let n=I.findIndex(function(x){return x.classList.contains('on')});
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();I.forEach(function(x){x.classList.remove('on')});n=(n+(e.key==='ArrowDown'?1:-1)+I.length)%I.length;I[n].classList.add('on');try{I[n].scrollIntoView({block:'nearest'})}catch(err){}return}
+    if(e.key==='Enter'){e.preventDefault();adrChoose(I[Math.max(0,n)]);return}
+    if(e.key==='Escape'){e.preventDefault();adrHide();return}
+  }
+  return lk.apply(this,arguments)
+};
+
+if(!document.getElementById('n29-addr-css')){
+  document.head.insertAdjacentHTML('beforeend','<style id="n29-addr-css">#addrbox.locs{display:none;position:fixed;z-index:120;margin:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:min(260px,42vh)}#addrbox .locsug{min-height:44px;box-sizing:border-box}</style>')
+}
 })();
 // ===== n29 END
 

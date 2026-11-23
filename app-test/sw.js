@@ -1,5 +1,5 @@
 // Ситиус · Сделка без агента — работа без интернета. Версия кэша меняется при каждой публикации.
-const V='sitius-app-c4704d533d56';
+const V='sitius-app-5ec23acb804e';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(K=>Promise.all(K.filter(k=>k.startsWith('sitius-app-')&&k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
