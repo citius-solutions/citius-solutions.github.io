@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 18:27';
+var APPV='23.11.2026 18:36';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3256,124 +3256,76 @@ SCR.plan={st:-3,t:'Итог: ваш план продажи',i:'Объект, ц
  <div class="hint" style="margin-top:5px">Откроется окно печати — выберите «Сохранить как PDF».</div>${cBtns('итог: план продажи')}`},next:()=>'path'};
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);if(!sells())return h;const b=`<button class="btn primary planbtn" style="width:100%;padding:8px;margin-bottom:8px" onclick="go('plan')">Итог: ваш план продажи</button>`;const k=h.indexOf('<div class="row" style="margin-bottom:7px">');return k>=0?h.slice(0,k)+b+h.slice(k):b+h}}
 {const b0=SCR.s10c.b;SCR.s10c.b=function(){const h=b0.apply(this,arguments);return sells()?h+`<button class="btn ghost planbtn" style="width:100%;padding:8px;margin-top:8px" onclick="go('plan')">Итог: ваш план продажи</button>`:h}}
-// ---------- n29 · графики оценки: 1) цены похожих от дешёвых к дорогим с отметками «Рыночная» и «Ваша желаемая»; 2) цена и срок продажи
+// ---------- n29 · графики оценки v3: рыночная и желаемая цена, разница на графике (скобка + анимация)
 document.head.insertAdjacentHTML('beforeend',`<style>
 .chart{margin:8px 0 6px}.chart svg{width:100%;height:auto;display:block;overflow:visible;color:inherit}
-.chart .ax{stroke:currentColor;opacity:.25;stroke-width:1}.chart .tx{fill:currentColor;opacity:.72;font-size:10px;font-family:Montserrat,sans-serif}
-.chart .ln{fill:none;stroke:#c9a46a;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:chdraw 1.3s ease-out forwards;animation-delay:calc(0s - var(--el,0s))}
-.chart .ln.sch{stroke-dasharray:1;opacity:.75}
-.chart .pt{fill:#c9a46a;opacity:0;animation:chfade .3s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
-.chart .mk{opacity:0;animation:chfade .45s ease-out forwards;animation-delay:calc(1.15s - var(--el,0s))}
-.chart .mk.m circle{fill:#c9a46a;stroke:#fff;stroke-width:1.5}.chart .mk.o circle{fill:#d9735b;stroke:#fff;stroke-width:1.5}
-.chart .mk.m text{fill:#b08a4e;font-weight:600}.chart .mk.o text{fill:#d9735b;font-weight:600}.chart .mk text{font-size:10.5px;font-family:Montserrat,sans-serif}
-.chart .gd{stroke-dasharray:3 3;stroke-width:1;opacity:.6}.chart .mk.m .gd{stroke:#c9a46a}.chart .mk.o .gd{stroke:#d9735b}
-[data-theme=dark] .chart .mk.m text{fill:#e0c48f}
-.chart.chno .ln{animation:none;stroke-dashoffset:0}.chart.chno .pt,.chart.chno .mk{animation:none;opacity:1}
-@keyframes chdraw{to{stroke-dashoffset:0}}@keyframes chfade{to{opacity:1}}
-@media (prefers-reduced-motion:reduce){.chart .ln{animation:none;stroke-dashoffset:0}.chart .pt,.chart .mk{animation:none;opacity:1}}
+.chart .ax{stroke:currentColor;opacity:.25;stroke-width:1}
+.chart .tx{fill:currentColor;opacity:.72;font-size:10px;font-family:Montserrat,sans-serif}
+.chart .ch-bar{transform-box:fill-box;transform-origin:center bottom}
+.chart .ch-bar.m{fill:#c9a46a}.chart .ch-bar.o{fill:#d9735b}
+.chart .ch-amt{font:600 11px Montserrat,sans-serif}.chart .ch-amt.m{fill:#b08a4e}.chart .ch-amt.o{fill:#d9735b}
+[data-theme=dark] .chart .ch-amt.m{fill:#e0c48f}
+ .chart .ch-br{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chart .ch-br.hi{stroke:#d9735b}.chart .ch-br.lo{stroke:#5a9a72}.chart .ch-br.eq{stroke:currentColor;opacity:.55}
+.chart .ch-dl{font:600 10.5px Montserrat,sans-serif}.chart .ch-dl.hi{fill:#d9735b}.chart .ch-dl.lo{fill:#5a9a72}
+.chart .ch-dl.eq{fill:currentColor;opacity:.8}[data-theme=dark] .chart .ch-dl.lo{fill:#7ec49a}
+.ch-term{margin:2px 0 6px;font-size:12.5px;line-height:1.4;opacity:.9}
+.chart.chv:not(.ch-done) .ch-bar{transform:scaleY(0)}
+.chart.chv.ch-in:not(.ch-done) .ch-bar{transform:scaleY(1);transition:transform .75s ease}
+.chart.chv.ch-done .ch-bar,.chart.chv.chno .ch-bar{transform:scaleY(1);transition:none}
+.chart.chv:not(.ch-done) .ch-br{stroke-dasharray:1;stroke-dashoffset:1}
+.chart.chv.ch-in:not(.ch-done) .ch-br{animation:chdraw .45s ease-out .7s both}
+.chart.chv.ch-done .ch-br,.chart.chv.chno .ch-br{stroke-dashoffset:0;animation:none}
+.chart.chv:not(.ch-done) .ch-amt,.chart.chv:not(.ch-done) .ch-dl{opacity:0}
+.chart.chv.ch-in:not(.ch-done) .ch-amt{animation:chfade .35s ease-out .35s both}
+.chart.chv.ch-in:not(.ch-done) .ch-dl{animation:chfade .35s ease-out .85s both}
+.chart.chv.ch-done .ch-amt,.chart.chv.ch-done .ch-dl,.chart.chv.chno .ch-amt,.chart.chv.chno .ch-dl{opacity:1;animation:none}
+@keyframes chdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}@keyframes chfade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+ .chart.chv .ch-bar,.chart.chv:not(.ch-in):not(.ch-done) .ch-bar{transform:scaleY(1);transition:none}
+ .chart.chv .ch-br,.chart.chv.ch-in:not(.ch-done) .ch-br{animation:none;stroke-dashoffset:0}
+ .chart.chv .ch-amt,.chart.chv .ch-dl,.chart.chv.ch-in:not(.ch-done) .ch-amt,.chart.chv.ch-in:not(.ch-done) .ch-dl{animation:none;opacity:1}
+}
 </style>`);
-const CH_LAST={};
-// анимация один раз на показ экрана; повторная отрисовка во время анимации продолжает её с того же места
-function chCls(id,key){key=cur+'|'+key;const now=Date.now(),L=CH_LAST[id];if(!L||L.k!==key||L.c!==CH_VIS)CH_LAST[id]={k:key,t:now,c:CH_VIS};const el=(now-CH_LAST[id].t)/1000;return el>1.8?'chart chno"':`chart" style="--el:${el.toFixed(2)}s`}
-let CH_VIS=0;{const g0=go;go=function(){CH_VIS++;return g0.apply(this,arguments)}}
+const CH_DONE={};
 function chM(v){return v>=1e6?(Math.round(v/1e5)/10).toLocaleString('ru-RU')+' млн':Math.round(v/1e3).toLocaleString('ru-RU')+' тыс.'}
-// цены похожих, приведённые к площади вашего объекта (если площади известны)
+function chRub(v){const a=Math.abs(v);return (a>=1e6?(Math.round(a/1e5)/10).toLocaleString('ru-RU')+' млн':a>=1e3?Math.round(a/1e3).toLocaleString('ru-RU')+' тыс.':Math.round(a).toLocaleString('ru-RU'))+' ₽'}
+function chReduced(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
 function anaVals(j){const o=OB(j),ar=arN(o.area);return vRows(j).filter(r=>num(r.p)>0).map(r=>{const p=num(r.p),a=arN(r.a);return {v:ar&&a?p/a*ar:p,raw:p,d:num(r.d)||0}}).sort((x,y)=>x.v-y.v)}
-function chMark(cls,x,y,lab,up,W){const anc=x<W*.22?'start':x>W*.78?'end':'middle';const ty=up?y-9:y+17;
- return `<g class="mk ${cls}"><line class="gd" x1="${x}" y1="${y}" x2="${x}" y2="${up?y-6:y+6}"/><circle cx="${x}" cy="${y}" r="5"/><text x="${x}" y="${ty}" text-anchor="${anc}">${hq(lab)}</text></g>`}
-function chartPrices(j){const e=vEst(j),V=anaVals(j);if(V.length<2)return V.length?`<div class="hint" style="margin:6px 0">График цен появится, когда будет 2 и больше похожих объявлений.</div>`:'';
- const W=320,H=150,L=8,R=8,T=26,B=24;const vals=V.map(x=>x.v);const sp=(vals[V.length-1]-vals[0])||vals[0]*.1;const oHi=e.own>vals[V.length-1]+sp*.8,oLo=e.own&&e.own<vals[0]-sp*.8;const all=vals.concat([e.mkt||0,oHi||oLo?0:e.own||0]).filter(x=>x>0);
- let mn=Math.min(...all),mx=Math.max(...all);const pd=(mx-mn)*.1||mx*.05;mn-=pd;mx+=pd;
- const n=V.length,X=i=>L+i*(W-L-R)/(n-1),Y=v=>T+(H-T-B)*(1-(v-mn)/(mx-mn));
- const d=V.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
- const xOf=v=>{if(v<=vals[0])return X(0);if(v>=vals[n-1])return X(n-1);for(let i=0;i<n-1;i++)if(v<=vals[i+1]){const t=vals[i+1]>vals[i]?(v-vals[i])/(vals[i+1]-vals[i]):.5;return X(i+t)}return X(n-1)};
- let mk='';if(e.mkt)mk+=chMark('m',xOf(e.mkt),Y(e.mkt),'Рыночная ~'+chM(e.mkt),true,W);
- if(e.own)mk+=oHi?chMark('o',X(n-1),T-14,'↑ Ваша желаемая '+chM(e.own)+' — выше всех похожих',false,W):oLo?chMark('o',X(0),H-B,'↓ Ваша желаемая '+chM(e.own)+' — ниже всех похожих',true,W):chMark('o',xOf(e.own),Y(e.own),'Ваша желаемая '+chM(e.own),false,W);
- const ar=arN(OB(j).area),norm=ar&&V.some(x=>x.v!==x.raw);
- return `<div class="f"><div class="lbl">Цены похожих — от дешёвых к дорогим</div><div class="${chCls('p'+j,d)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График: ${n} цен похожих объявлений от ${chM(vals[0])} до ${chM(vals[n-1])}${e.mkt?', рыночная '+chM(e.mkt):''}${e.own?', ваша желаемая '+chM(e.own):''}">
- <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-4}">${chM(vals[0])}</text><text class="tx" x="${W-R}" y="${H-4}" text-anchor="end">${chM(vals[n-1])}</text>
- <path class="ln" pathLength="1" d="${d}"/>${V.map((p,i)=>`<circle class="pt" r="3" cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" style="--d:${(1.1*i/(n-1)).toFixed(2)}s"/>`).join('')}${mk}</svg></div>
- <div class="hint">${n} объявлений${norm?', цены пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}. Рыночная — середина этих цен.</div></div>`}
-// цена и срок: по «дней в продаже» у похожих (с площадки), иначе — ориентировочная схема без цифр срока
 function linFit(P){const n=P.length,mx=P.reduce((t,p)=>t+p.x,0)/n,my=P.reduce((t,p)=>t+p.y,0)/n;let sxy=0,sxx=0;P.forEach(p=>{sxy+=(p.x-mx)*(p.y-my);sxx+=(p.x-mx)**2});const b=sxx?sxy/sxx:0;return {a:my-b*mx,b}}
-function chartTerm(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).filter(x=>x.d>0);const W=320,H=160,L=8,R=8,T=26,B=28;
- if(V.length>=3){const P=V.map(x=>({x:x.d,y:x.v})),f=linFit(P);const pyM=Math.max(...P.map(p=>p.y)),pym=Math.min(...P.map(p=>p.y));const oOut=e.own&&(e.own>pyM+(pyM-pym)*.8||e.own<pym-(pyM-pym)*.8);const ys=P.map(p=>p.y).concat([e.mkt,oOut?0:e.own||0]).filter(x=>x>0);let ymn=Math.min(...ys),ymx=Math.max(...ys);const pd=(ymx-ymn)*.1||ymx*.05;ymn-=pd;ymx+=pd;
-  const ok=f.b>0;const dOf=v=>ok?Math.max(0,(v-f.a)/f.b):0;const dm=dOf(e.mkt),dw=e.own?dOf(e.own):0;
-  const pmx=Math.max(...P.map(p=>p.x));const far=ok&&dw>pmx*1.5;let xmx=Math.max(pmx,ok?dm:0,ok&&!far?dw:0)*1.08||1;const X=d=>L+(W-L-R)*d/xmx,Y=v=>T+(H-T-B)*(1-(v-ymn)/(ymx-ymn));
-  const x0=Math.min(...P.map(p=>p.x));const d=ok?`M${X(x0).toFixed(1)} ${Y(f.a+f.b*x0).toFixed(1)} L${X(xmx).toFixed(1)} ${Y(f.a+f.b*xmx).toFixed(1)}`:'M'+P.slice().sort((a,b)=>a.x-b.x).map(p=>X(p.x).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' L');
-  let mk='';if(ok){mk+=chMark('m',X(dm),Y(e.mkt),'Рыночная · ~'+Math.round(dm)+' дн.',true,W);if(e.own)mk+=far||oOut?(oOut&&e.own<pym?chMark('o',X(0),H-B,'↓ Ваша желаемая · ниже всех похожих',true,W):chMark('o',X(xmx),oOut?T-14:Y(e.own),(oOut?'↑ ':'')+'Ваша желаемая · дольше, чем у всех похожих',false,W)):chMark('o',X(dw),Y(e.own),'Ваша желаемая · ~'+Math.round(dw)+' дн.',false,W)}
-  return `<div class="f"><div class="lbl">Цена и срок продажи · по вашим объявлениям</div><div class="${chCls('t'+j,d+dm+dw)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График цены и срока продажи по ${P.length} объявлениям">
-  <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">0 дн.</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">дней в продаже →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">${Math.round(xmx)} дн.</text>
-  <path class="ln" pathLength="1" d="${d}"/>${P.map((p,i)=>`<circle class="pt" r="3" cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" style="--d:${(.2+.9*i/P.length).toFixed(2)}s"/>`).join('')}${mk}</svg></div>
-  <div class="hint">Точки — ${P.length} объявлений: цена и сколько дней объявление уже висит на площадке (вы указали). Это не срок продажи целиком, а нижняя граница: объявление ещё не продано. ${ok?'Линия — прямая по этим точкам; дни у отметок — ориентир, не обещание.':'По этим объявлениям связи цены и срока не видно — срок у отметок не считаем.'}</div></div>`}
- // схема: точных данных о сроке нет
- const own=e.own||0,ys=[e.mkt*.9,e.mkt*1.1,own].filter(x=>x>0);const ymn=Math.min(...ys)*.97,ymx=Math.max(...ys)*1.03;const X=t=>L+(W-L-R)*t,Y=v=>T+(H-T-B)*(1-(v-ymn)/(ymx-ymn));
- const tOf=v=>Math.max(0,Math.min(1,(v-ymn)/(ymx-ymn)));const pts=[];for(let i=0;i<=20;i++){const t=i/20;pts.push((i?'L':'M')+X(t).toFixed(1)+' '+Y(ymn+(ymx-ymn)*(t*t*.35+t*.65)).toFixed(1))}
- const tInv=v=>{const y=tOf(v);const a=.35,b=.65;return (-b+Math.sqrt(b*b+4*a*y))/(2*a)};const d=pts.join(' ');
- let mk=chMark('m',X(tInv(e.mkt)),Y(e.mkt),'Рыночная · показы 4–12 нед. ⚠',true,W);
- if(own){const o=e.over||0;mk+=chMark('o',X(tInv(own)),Y(own),'Ваша желаемая · '+(o>=5?'дольше':o<=-5?'быстрее':'примерно так же'),false,W)}
- return `<div class="f"><div class="lbl">Цена и срок продажи · ориентировочная оценка</div><div class="${chCls('t'+j,d+own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Схема: чем выше цена относительно рынка, тем дольше продажа">
- <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">быстрее</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">срок продажи →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">дольше</text>
- <path class="ln sch" pathLength="1" d="${d}"/>${mk}</svg></div>
- <div class="hint">Это схема, а не расчёт: данных о сроке продажи похожих объявлений у Аппа нет. Принцип — цена ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений (видно на странице объявления) — график построим по ним.</div></div>`}
+function chParts(diff,pc,mid,sign0){if(!mid&&Math.abs(pc)<=1)return {cls:'eq',l1:'примерно',l2:'по рынку'};const pos=(sign0!=null?sign0:diff)>=0;const sign=pos?'+':'−',cls=pos?'hi':'lo',dir=pos?'выше рынка':'ниже рынка';return {cls,l1:sign+chRub(diff),l2:'('+sign+Math.abs(pc)+' %) '+dir}}
+function chPlay(el){if(el.classList.contains('ch-done')||el.classList.contains('chno'))return;el.classList.add('ch-in');const n1=el.querySelector('.ch-n1'),n2=el.querySelector('.ch-n2');const diff=+el.dataset.diff||0,pc=+el.dataset.pc||0,fin=chParts(diff,pc);const key=el.dataset.ck||'';const done=()=>{if(n1)n1.textContent=fin.l1;if(n2)n2.textContent=fin.l2;el.classList.add('ch-done');if(key)CH_DONE[key]=1};if(!n1||chReduced()||Math.abs(pc)<=1){done();return}
+ const t0=performance.now(),delay=700,dur=550;function tick(t){const k=Math.min(1,Math.max(0,(t-t0-delay)/dur)),e=1-Math.pow(1-k,3);const p=chParts(Math.max(0,Math.abs(diff)*e),Math.round(Math.abs(pc)*e),1,diff);n1.textContent=p.l1;n2.textContent=p.l2;if(k<1)requestAnimationFrame(tick);else done()}requestAnimationFrame(tick)}
+function chBind(){document.querySelectorAll('.chart.chv:not([data-chb])').forEach(el=>{el.setAttribute('data-chb','1');if(chReduced()||el.classList.contains('chno')||el.classList.contains('ch-done')){el.classList.add('ch-done');const n1=el.querySelector('.ch-n1'),n2=el.querySelector('.ch-n2'),p=chParts(+el.dataset.diff||0,+el.dataset.pc||0);if(n1)n1.textContent=p.l1;if(n2)n2.textContent=p.l2;return}
+ const io=new IntersectionObserver(ents=>{if(ents.some(e=>e.isIntersecting)){io.disconnect();chPlay(el)}},{threshold:.2,rootMargin:'40px'});io.observe(el)})}
+{const _sh=show;show=function(){const r=_sh.apply(this,arguments);try{chBind()}catch(e){}return r}}
+function chartPrices(j){const e=vEst(j),mkt=e.mkt||0,own=e.own||0;if(!mkt&&!own)return '';
+ const W=320,H=222,T=54,B=44,barW=54,gap=70;const both=!!(mkt&&own),mx=Math.max(mkt,own,1),plot=H-T-B,base=H-B;
+ const Y=v=>base-(v/mx)*plot;const yM=mkt?Y(mkt):base,yO=own?Y(own):base;
+ const total=both?barW*2+gap:barW,left=(W-total)/2;
+ const xM=mkt?left:0,xO=own?(both?left+barW+gap:left):0,cx=x=>x+barW/2;
+ const key=cur+'|p'+j+'|'+mkt+'|'+own,played=CH_DONE[key]||chReduced();
+ const bars=(mkt?`<rect class="ch-bar m" x="${xM}" y="${yM.toFixed(1)}" width="${barW}" height="${Math.max(2,base-yM).toFixed(1)}" rx="6"/>`:'')+(own?`<rect class="ch-bar o" x="${xO}" y="${yO.toFixed(1)}" width="${barW}" height="${Math.max(2,base-yO).toFixed(1)}" rx="6"/>`:'');
+ const amts=(mkt?`<text class="ch-amt m" x="${cx(xM)}" y="${(yM-8).toFixed(1)}" text-anchor="middle">~${hq(chM(mkt))} ₽</text>`:'')+(own?`<text class="ch-amt o" x="${cx(xO)}" y="${(yO-8).toFixed(1)}" text-anchor="middle">${hq(chM(own))} ₽</text>`:'');
+ const names=(mkt?`<text class="tx" x="${cx(xM)}" y="${H-22}" text-anchor="middle">Рыночная</text>`:'')+(own?`<text class="tx" x="${cx(xO)}" y="${H-22}" text-anchor="middle">Ваша желаемая</text>`:'');
+ let br='',diff=0,pc=0,aria='';
+ if(both){diff=own-mkt;pc=e.over;const p=chParts(diff,pc);const ix1=xM+barW+6,ix2=xO-6,mxX=(ix1+ix2)/2,lx=(xM+xO+barW)/2;
+  br=`<path class="ch-br ${p.cls}" pathLength="1" d="M${ix1.toFixed(1)} ${yM.toFixed(1)} H${mxX.toFixed(1)} V${yO.toFixed(1)} H${ix2.toFixed(1)}"/><text class="ch-dl ${p.cls}" x="${lx.toFixed(1)}" y="16" text-anchor="middle"><tspan class="ch-n1" x="${lx.toFixed(1)}" dy="0">${hq(p.l1)}</tspan><tspan class="ch-n2" x="${lx.toFixed(1)}" dy="13">${hq(p.l2)}</tspan></text>`;
+  aria=p.cls==='eq'?'Примерно по рынку':((diff>0?'На ':'На −')+chRub(diff)+' ('+(diff>0?'+':'−')+Math.abs(pc)+' %) '+(diff>0?'выше рынка':'ниже рынка'))}
+ const V=anaVals(j),vals=V.map(x=>x.v),ar=arN(OB(j).area),norm=ar&&V.some(x=>x.v!==x.raw);
+ let hint='';if(e.src==='an'&&vals.length)hint=`Рыночная — середина цен похожих объявлений (${vals.length} шт., от ${chM(vals[0])} до ${chM(vals[vals.length-1])})${norm?', пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}.`;
+ else if(e.src==='dist')hint=srcLine(e);
+ const ax1=(both?xM:(mkt?xM:xO))-8,ax2=(both?xO:(mkt?xM:xO))+barW+8;
+ return `<div class="f"><div class="lbl">Рыночная и ваша желаемая цена</div><div class="${played?'chart chv ch-done chno':'chart chv'}" data-diff="${diff}" data-pc="${pc}" data-ck="${hq(key)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${hq((mkt?'Рыночная ~'+chM(mkt)+' ₽':'')+(mkt&&own?', ':'')+(own?'ваша желаемая '+chM(own)+' ₽':'')+(aria?'. '+aria:''))}">
+ <line class="ax" x1="${ax1}" y1="${base}" x2="${ax2}" y2="${base}"/>${bars}${amts}${names}${br}</svg></div>
+ ${hint?`<div class="hint">${hint}</div>`:''}</div>`}
+function chartTerm(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).filter(x=>x.d>0);
+ if(V.length>=3){const P=V.map(x=>({x:x.d,y:x.v})),f=linFit(P),ok=f.b>0;const dOf=v=>ok?Math.max(0,(v-f.a)/f.b):0;const dm=Math.round(dOf(e.mkt)),dw=e.own?Math.round(dOf(e.own)):0;
+  if(ok)return `<div class="ch-term">Ориентир срока: рыночная ~${dm} дн.${e.own?', ваша желаемая ~'+dw+' дн.':''}</div><div class="hint">Это нижняя граница: объявления ещё не проданы, дни — ориентир, не обещание. По ${P.length} объявлениям, у которых вы указали «дней в продаже».</div>`;
+  return `<div class="hint" style="margin:6px 0 2px">По ${P.length} объявлениям, у которых вы указали «дней в продаже», связи цены и срока не видно — срок отдельно не считаем.</div>`}
+ return `<div class="hint" style="margin:6px 0 2px">Данных о сроке продажи похожих объявлений у Аппа нет. Ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений — посчитаем ориентир по ним.</div>`}
 {const b1=SCR.s1a.b;SCR.s1a.b=function(){const h=b1.apply(this,arguments);const j=vCur();const c=chartPrices(j);if(!c)return h;const k='<div class="f"><div class="lbl">Похожие объявления</div>';return h.includes(k)?h.replace(k,c+k):h+c}}
 {const b2=SCR.s1b.b;SCR.s1b.b=function(){const h=b2.apply(this,arguments);const j=vCur();return h+chartPrices(j)+chartTerm(j)}}
-// ---------- n29 v2 (23.11 14:51): две отдельные линии «Рыночная» и «Ваша желаемая», разные цвета, легенда с суммами; похожие — бледным фоном
-document.head.insertAdjacentHTML('beforeend',`<style>
-.chart .bg{fill:none;stroke:currentColor;stroke-opacity:.28;stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;animation:chdraw 1s ease-out forwards;animation-delay:calc(0s - var(--el,0s))}
-.chart .bgp{fill:currentColor;fill-opacity:.35;opacity:0;animation:chfade .3s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
-.chart .hl{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:chdraw 1s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
-.chart .hl.m{stroke:#c9a46a}.chart .hl.o{stroke:#d9735b}.chart .hl.o.out{stroke-dasharray:.03 .02;stroke-dashoffset:0;opacity:0;animation:chfade .5s ease-out forwards;animation-delay:calc(var(--d,0s) - var(--el,0s))}
-.chart .lb{opacity:0;animation:chfade .4s ease-out forwards;animation-delay:calc(var(--d,0s) + .7s - var(--el,0s));font:600 10.5px Montserrat,sans-serif}
-.chart .lb.m{fill:#b08a4e}.chart .lb.o{fill:#d9735b}[data-theme=dark] .chart .lb.m{fill:#e0c48f}
-.chart .dt{opacity:0;animation:chfade .4s ease-out forwards;animation-delay:calc(var(--d,0s) + .8s - var(--el,0s))}.chart .dt.m{fill:#c9a46a}.chart .dt.o{fill:#d9735b}.chart .dt{stroke:#fff;stroke-width:1.5}
-.chleg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:4px 0 2px;font-size:12.5px;line-height:1.35}.chleg span{display:inline-flex;align-items:center;gap:6px}
-.chleg i{display:inline-block;width:18px;height:3px;border-radius:2px}.chleg i.m{background:#c9a46a}.chleg i.o{background:#d9735b}.chleg i.a{height:7px;width:7px;border-radius:50%;background:currentColor;opacity:.35}
-.chart.chno .bg,.chart.chno .hl{animation:none;stroke-dashoffset:0}.chart.chno .bgp,.chart.chno .lb,.chart.chno .dt,.chart.chno .hl.o.out{animation:none;opacity:1}
-@media (prefers-reduced-motion:reduce){.chart .bg,.chart .hl{animation:none;stroke-dashoffset:0}.chart .bgp,.chart .lb,.chart .dt,.chart .hl.o.out{animation:none;opacity:1}}
-</style>`);
-// горизонтальная линия уровня цены + подпись над/под ней
-function chH(cls,x1,x2,y,lab,d,up,out){return `<path class="hl ${cls}${out?' out':''}" pathLength="1" style="--d:${d}s" d="M${x1.toFixed(1)} ${y.toFixed(1)} L${x2.toFixed(1)} ${y.toFixed(1)}"/><text class="lb ${cls}" style="--d:${d}s" x="${x2.toFixed(1)}" y="${(up?y-6:y+14).toFixed(1)}" text-anchor="end">${hq(lab)}</text>`}
-function chLeg(e,nA,extra){const pc=e.own&&e.mkt?Math.round((e.own/e.mkt-1)*100):null;
- return `<div class="chleg">${e.mkt?`<span><i class="m"></i>Рыночная ~${chM(e.mkt)}${extra&&extra.m?' · '+extra.m:''}</span>`:''}${e.own?`<span><i class="o"></i>Ваша желаемая ${chM(e.own)}${pc!==null&&pc!==0?' ('+(pc>0?'+':'')+pc+' %)':''}${extra&&extra.o?' · '+extra.o:''}</span>`:''}${nA?`<span><i class="a"></i>Похожие объявления (${nA})</span>`:''}</div>`}
-// шкала: включает рыночную и желаемую; если желаемая слишком далеко — линия у края с подписью «выше шкалы»
-function chScale(vals,e){const lo0=Math.min(...vals),hi0=Math.max(...vals);const sp=(hi0-lo0)||hi0*.1;let mn=Math.min(lo0,e.mkt||lo0),mx=Math.max(hi0,e.mkt||hi0);let out='';
- if(e.own){if(e.own>mx+sp*2.5)out='hi';else if(e.own<mn-sp*2.5)out='lo';else{mn=Math.min(mn,e.own);mx=Math.max(mx,e.own)}}const pd=(mx-mn)*.12||mx*.05;return {mn:mn-pd,mx:mx+pd,out}}
-chartPrices=function(j){const e=vEst(j),V=anaVals(j);if(V.length<2)return V.length?`<div class="hint" style="margin:6px 0">График цен появится, когда будет 2 и больше похожих объявлений.</div>`:'';
- const W=320,H=170,L=8,R=8,T=22,B=24;const vals=V.map(x=>x.v),n=V.length;const S=chScale(vals,e);
- const X=i=>L+i*(W-L-R)/(n-1),Y=v=>T+(H-T-B)*(1-(v-S.mn)/(S.mx-S.mn));
- const d=V.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
- const yM=e.mkt?Y(e.mkt):0,yO=e.own?(S.out==='hi'?T-6:S.out==='lo'?H-B+2:Y(e.own)):0;const near=e.mkt&&e.own&&Math.abs(yM-yO)<16;
- let g=`<path class="bg" pathLength="1" d="${d}"/>${V.map((p,i)=>`<circle class="bgp" r="3" cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" style="--d:${(.8*i/(n-1)).toFixed(2)}s"/>`).join('')}`;
- if(e.mkt)g+=chH('m',L,W-R,yM,'Рыночная ~'+chM(e.mkt),.6,!(near&&yM>yO));
- if(e.own)g+=chH('o',L,W-R,yO,(S.out==='hi'?'↑ выше шкалы · ':S.out==='lo'?'↓ ниже шкалы · ':'')+'Ваша желаемая '+chM(e.own),1,S.out==='lo'?true:near?yO<yM:S.out==='hi'?false:yO<yM,S.out);
- const ar=arN(OB(j).area),norm=ar&&V.some(x=>x.v!==x.raw);
- return `<div class="f"><div class="lbl">Цены похожих и ваша цена</div><div class="${chCls('p'+j,d+e.own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График: ${n} цен похожих от ${chM(vals[0])} до ${chM(vals[n-1])}${e.mkt?', рыночная '+chM(e.mkt):''}${e.own?', ваша желаемая '+chM(e.own):''}">
- <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-4}">дешевле</text><text class="tx" x="${W/2}" y="${H-4}" text-anchor="middle">похожие по цене →</text><text class="tx" x="${W-R}" y="${H-4}" text-anchor="end">дороже</text>${g}</svg></div>
- ${chLeg(e,n)}<div class="hint">Похожие — от ${chM(vals[0])} до ${chM(vals[n-1])}${norm?', пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}. Рыночная — середина этих цен.${S.out==='hi'?' Ваша цена намного выше всех похожих — линия у верхнего края, шкала не растянута.':S.out==='lo'?' Ваша цена намного ниже всех похожих — линия у нижнего края.':''}</div></div>`};
-chartTerm=function(j){const e=vEst(j);if(!e.mkt)return '';const V=anaVals(j).filter(x=>x.d>0);const W=320,H=170,L=8,R=8,T=22,B=28;
- if(V.length>=3){const P=V.map(x=>({x:x.d,y:x.v})),f=linFit(P),ok=f.b>0;const S=chScale(P.map(p=>p.y),e);const pmx=Math.max(...P.map(p=>p.x)),x0=Math.min(...P.map(p=>p.x));
-  const dOf=v=>ok?Math.max(0,(v-f.a)/f.b):0;const dm=dOf(e.mkt),dw=e.own?dOf(e.own):0;const far=ok&&e.own&&(S.out==='hi'||dw>pmx*1.5);const xmx=Math.max(pmx,ok?dm:0,ok&&!far?dw:0)*1.08||1;
-  const X=dd=>L+(W-L-R)*Math.min(dd,xmx)/xmx,Y=v=>T+(H-T-B)*(1-(v-S.mn)/(S.mx-S.mn));
-  const d=ok?`M${X(x0).toFixed(1)} ${Y(f.a+f.b*x0).toFixed(1)} L${X(xmx).toFixed(1)} ${Y(f.a+f.b*xmx).toFixed(1)}`:'M'+P.slice().sort((a,b)=>a.x-b.x).map(p=>X(p.x).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' L');
-  const yM=Y(e.mkt),yO=e.own?(S.out==='hi'?T-6:S.out==='lo'?H-B+2:Y(e.own)):0;const near=e.own&&Math.abs(yM-yO)<16;
-  let g=`<path class="bg" pathLength="1" d="${d}"/>${P.map((p,i)=>`<circle class="bgp" r="3" cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" style="--d:${(.7*i/P.length).toFixed(2)}s"/>`).join('')}`;
-  const tm=ok?'~'+Math.round(dm)+' дн.':'',to=!e.own?'':!ok?'':far?'дольше всех похожих':'~'+Math.round(dw)+' дн.';
-  g+=chH('m',L,W-R,yM,'Рыночная'+(tm?' · '+tm:''),.6,!(near&&yM>yO));if(ok)g+=`<circle class="dt m" r="5" style="--d:.6s" cx="${X(dm).toFixed(1)}" cy="${yM.toFixed(1)}"/>`;
-  if(e.own){g+=chH('o',L,W-R,yO,(S.out==='hi'?'↑ выше шкалы · ':'')+'Ваша желаемая'+(to?' · '+to:''),1,S.out==='lo'?true:near?yO<yM:S.out==='hi'?false:yO<yM,S.out);if(ok)g+=`<circle class="dt o" r="5" style="--d:1s" cx="${X(far?xmx:dw).toFixed(1)}" cy="${yO.toFixed(1)}"/>`}
-  return `<div class="f"><div class="lbl">Цена и срок продажи · по вашим объявлениям</div><div class="${chCls('t'+j,d+dm+dw+e.own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График цены и срока по ${P.length} объявлениям">
-  <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">0 дн.</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">дней в продаже →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">${Math.round(xmx)} дн.</text>${g}</svg></div>
-  ${chLeg(e,P.length,{m:tm,o:to})}<div class="hint">Точки — ${P.length} объявлений: цена и сколько дней объявление уже висит (вы указали). Это нижняя граница срока: объявление ещё не продано. ${ok?'Бледная линия — прямая по точкам; точка на цветной линии — где ваша цена пересекает её. Дни — ориентир, не обещание.':'По этим объявлениям связи цены и срока не видно — срок не считаем.'}</div></div>`}
- // схема без данных о сроке
- const own=e.own||0,o=e.over||0;const S=chScale([e.mkt*.9,e.mkt*1.1],e);const X=t=>L+(W-L-R)*t,Y=v=>T+(H-T-B)*(1-(v-S.mn)/(S.mx-S.mn));
- const cv=t=>S.mn+(S.mx-S.mn)*(t*t*.35+t*.65),tInv=v=>{const y=Math.max(0,Math.min(1,(v-S.mn)/(S.mx-S.mn)));return (-.65+Math.sqrt(.4225+1.4*y))/.7};
- const pts=[];for(let i=0;i<=20;i++){const t=i/20;pts.push((i?'L':'M')+X(t).toFixed(1)+' '+Y(cv(t)).toFixed(1))}const d=pts.join(' ');
- const yM=Y(e.mkt),yO=own?(S.out==='hi'?T-6:S.out==='lo'?H-B+2:Y(own)):0;const near=own&&Math.abs(yM-yO)<16;const to=!own?'':o>=5?'дольше':o<=-5?'быстрее':'примерно так же';
- let g=`<path class="bg" pathLength="1" d="${d}"/>`+chH('m',L,W-R,yM,'Рыночная · показы 4–12 нед. ⚠',.6,!(near&&yM>yO))+`<circle class="dt m" r="5" style="--d:.6s" cx="${X(tInv(e.mkt)).toFixed(1)}" cy="${yM.toFixed(1)}"/>`;
- if(own)g+=chH('o',L,W-R,yO,(S.out==='hi'?'↑ выше шкалы · ':'')+'Ваша желаемая · '+to,1,S.out==='lo'?true:near?yO<yM:S.out==='hi'?false:yO<yM,S.out)+`<circle class="dt o" r="5" style="--d:1s" cx="${X(S.out==='hi'?1:S.out==='lo'?0:tInv(own)).toFixed(1)}" cy="${yO.toFixed(1)}"/>`;
- return `<div class="f"><div class="lbl">Цена и срок продажи · ориентировочная оценка</div><div class="${chCls('t'+j,d+own)}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Схема: чем выше цена относительно рынка, тем дольше продажа">
- <line class="ax" x1="${L}" y1="${H-B+6}" x2="${W-R}" y2="${H-B+6}"/><text class="tx" x="${L}" y="${H-6}">быстрее</text><text class="tx" x="${W/2}" y="${H-6}" text-anchor="middle">срок продажи →</text><text class="tx" x="${W-R}" y="${H-6}" text-anchor="end">дольше</text>${g}</svg></div>
- ${chLeg(e,0,{m:'показы 4–12 нед. ⚠',o:to})}<div class="hint">Это схема, а не расчёт: данных о сроке продажи похожих объявлений у Аппа нет. Бледная кривая — принцип: ниже рынка обычно продаётся быстрее, выше — дольше. 4–12 недель — общий ориентир Аппа для показов, требует проверки ⚠. Укажите «дней в продаже» у 3 и больше объявлений — график построим по ним.</div></div>`};
 // ---------- n29 (23.11 15:10) · итоговый план по цели: продажа, покупка, новостройка, обмен (продать и купить), доля, расселение
 function planKind(){const g=A.goal;if(objTotal&&objTotal()>=5)return 'rass';return g==='sell'?'sell':g==='buy'?'buy':g==='new'?'new':g==='alt'?'alt':g==='share'?'share':''}
 const PLAN_TT={sell:'План продажи',buy:'План покупки',new:'План покупки новостройки',alt:'План обмена: продать и купить',share:'План сделки с долей',rass:'План расселения'};
@@ -4883,29 +4835,60 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-c19-css">
   #phone.c19-s0 #body>.f,#phone.c19-s0 #body>.c19-card{max-width:640px}
 }
 
-/* планшет/ПК высокие: карточка по центру, кнопки не на всю ширину */
+/* ПК высокие (≥821px): одна композиция ~1124px по центру, панель сразу под карточками */
 @media (min-width:700px) and (min-height:821px){
-  #phone:not(:has(#helloov)) #body{display:flex;flex-direction:column;align-items:center}
+  #phone>*:not(#splash){zoom:1!important}
+  #phone:not(:has(#helloov))>#body{
+    display:flex;flex-direction:column;align-items:stretch;
+    flex:0 1 auto!important;min-height:0;max-height:calc(100% - 230px);overflow-y:auto;
+    width:100%;max-width:1124px;margin-left:auto;margin-right:auto;
+    padding:16px 0 8px!important;box-sizing:border-box
+  }
   #phone:not(:has(#helloov)) #body>.f,
   #phone:not(:has(#helloov)) #body>.c19-add,
   #phone:not(:has(#helloov)) #body>.card,
-  #phone:not(:has(#helloov)) #body>.c19-side{width:100%;max-width:560px;box-sizing:border-box}
-  #phone.c19-s0:not(:has(#helloov)) #body>.f{max-width:560px}
-  #phone:not(:has(#helloov))>#nav{justify-content:center;gap:12px}
-  #phone:not(:has(#helloov))>#nav .btn{flex:0 1 220px;min-width:128px;max-width:220px;width:auto}
-  #phone:not(:has(#helloov))>#helpbtn{margin:0 auto 8px!important}
-  #phone>.tab{max-width:720px;width:100%;margin-left:auto;margin-right:auto}
-  #phone>.tab>span{font-size:10px}
-  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:24px;margin:6px 0 4px}
+  #phone:not(:has(#helloov)) #body>.c19-side{width:100%;max-width:none;box-sizing:border-box}
+  #phone:not(:has(#helloov))>#nav{
+    flex:none!important;width:100%;max-width:1124px;margin:0 auto;padding:8px 0 4px!important;
+    justify-content:flex-start;gap:12px;box-sizing:border-box;background:transparent
+  }
+  #phone:not(:has(#helloov))>#nav .btn{flex:0 1 200px;min-width:140px;max-width:240px;width:auto;font-size:16px;min-height:44px}
+  #phone:not(:has(#helloov))>#helpbtn{
+    flex:none!important;width:auto!important;max-width:none!important;
+    align-self:flex-start!important;
+    margin:4px auto 10px max(24px,calc((100% - 1124px) / 2))!important;
+    background:transparent
+  }
+  #phone>.tab{
+    flex:none!important;width:100%;max-width:1124px;height:56px;
+    margin-left:auto;margin-right:auto;box-sizing:border-box;background:transparent
+  }
+  #phone>.tab>span,#phone>.tab>span.c19t,#phone>.tab>span .c19-tl{font-size:13px!important}
+  #phone>.tab>span .c19-ico{width:18px;height:18px}
+  #phone:not(:has(#helloov))>#helpbtn{font-size:14px;padding:8px 16px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top{
+    padding-left:max(24px,calc((100% - 1124px) / 2))!important;
+    padding-right:max(88px,calc((100% - 1124px) / 2 + 64px))!important
+  }
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:32px;margin:6px 0 4px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top .brand{font-size:12px}
+  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top .step{font-size:13px;opacity:.9}
+  #thbtn{right:max(16px,calc((100% - 1124px) / 2))!important}
+  #devbtn{right:max(56px,calc((100% - 1124px) / 2 + 40px))!important}
+  #body,#c19-main{font-size:16px}
+  #body .lbl{font-size:18px}
+  #body .chips span{font-size:16px;padding:10px 14px}
+  #body .locin,#body input{font-size:16px}
+  #phone:not(:has(#helloov)) #body>.f,#c19-main>.f{margin-bottom:12px}
 }
 @media (min-width:1100px) and (min-height:821px){
-  #phone.c19-s0:not(:has(#helloov)) #body{display:flex;flex-direction:row;justify-content:center;align-items:flex-start;gap:32px;padding-left:24px;padding-right:24px}
-  #c19-main{flex:0 1 560px;width:100%;max-width:560px;min-width:0}
-  #c19-main>.f,#c19-main>.card,#c19-main>.c19-add{width:100%;max-width:none;margin-bottom:12px;box-sizing:border-box}
-  #phone.c19-s0 #c19-side{display:block;flex:0 0 280px;width:280px;max-width:280px;position:sticky;top:8px;background:rgba(201,164,106,.08);border:1px solid rgba(201,164,106,.35);border-radius:12px;padding:14px 14px 12px;box-sizing:border-box}
-  #phone.c19-s0 #c19-side .c19-sh{font-family:"Playfair Display",Georgia,serif;font-size:16px;color:#d4b57e;margin:0 0 8px;font-weight:600}
-  #phone.c19-s0 #c19-side p{margin:0 0 8px;font-size:13px;line-height:1.45;opacity:.9}
-  #phone.c19-s0 #c19-side ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55}
+  #phone.c19-s0:not(:has(#helloov)) #body{display:flex;flex-direction:row;justify-content:flex-start;align-items:flex-start;gap:24px}
+  #c19-main{flex:0 0 780px;width:780px;max-width:780px!important;min-width:0;margin:0!important}
+  #c19-main>.f,#c19-main>.card,#c19-main>.c19-add{width:100%;max-width:none!important;margin-bottom:12px;box-sizing:border-box}
+  #phone.c19-s0 #c19-side{display:block;flex:0 0 320px;width:320px;max-width:320px!important;margin:0!important;position:sticky;top:8px;background:rgba(201,164,106,.08);border:1px solid rgba(201,164,106,.35);border-radius:12px;padding:16px 16px 14px;box-sizing:border-box;font-size:15px}
+  #phone.c19-s0 #c19-side .c19-sh{font-family:"Playfair Display",Georgia,serif;font-size:18px;color:#d4b57e;margin:0 0 8px;font-weight:600}
+  #phone.c19-s0 #c19-side p{margin:0 0 8px;font-size:15px;line-height:1.5;opacity:.9}
+  #phone.c19-s0 #c19-side ol{margin:0;padding-left:18px;font-size:15px;line-height:1.55}
   [data-theme=light] #phone.c19-s0 #c19-side{background:#fff;border-color:#e6dccb}
   [data-theme=light] #phone.c19-s0 #c19-side .c19-sh{color:#2a3f5f}
 }
@@ -4953,21 +4936,6 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-c19-css">
   #phone>.tab>span .c19-tl{font-size:12.5px!important}
 }
 
-/* ПК: #body сжимается и прокручивается, снизу запас, чтобы карточка не пряталась под «Назад/Далее/Помощь» (в т.ч. при zoom) */
-@media (min-width:700px) and (min-height:821px){
-  /* zoom на каждом ребёнке #phone даёт наезд нижней панели на карточки — выключаем, размер держим шрифтом */
-  #phone>*:not(#splash){zoom:1!important}
-  #phone:not(:has(#helloov)) #body{min-height:0;flex:1 1 0;overflow-y:auto;padding-bottom:24px;box-sizing:border-box}
-  #phone:not(:has(#helloov)) #body>.f,#c19-main>.f{margin-bottom:12px}
-  #body .chips span{font-size:18px;padding:10px 14px}
-  #body .lbl{font-size:17px}
-  #body .locin,#body input{font-size:16px}
-  #phone>#nav .btn{font-size:16px;min-height:44px}
-  #phone:not(:has(#helloov)):not(:has(#hellocover))>.top h1{font-size:28px}
-  #phone>.tab>span,#phone>.tab>span.c19t,#phone>.tab>span .c19-tl{font-size:11px}
-  #phone:not(:has(#helloov))>#nav,#phone:not(:has(#helloov))>#helpbtn,#phone:not(:has(#helloov))>.tab{position:relative;z-index:8;background:#1e2f4a}
-  [data-theme=light] #phone:not(:has(#helloov))>#nav,[data-theme=light] #phone:not(:has(#helloov))>#helpbtn,[data-theme=light] #phone:not(:has(#helloov))>.tab{background:#f7f3ea}
-}
 </style>`);
 
 function wrapHint(el){
@@ -5175,6 +5143,7 @@ function afterShow(){
   compactHelp();
   compactTabs();
   setTimeout(compactTabs,0);
+  try{if(typeof auBtnPlace==='function')auBtnPlace()}catch(e){}
   const body=document.getElementById('body');
   if(body)shortPh(body);
   foldAgx();
