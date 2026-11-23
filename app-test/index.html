@@ -852,8 +852,14 @@ $('helpbtn').onclick=openHelp;
 {const h0=new URLSearchParams(location.hash.slice(1)).get('theme');if(h0==='light'||h0==='dark')thForce=h0;}
 {const sp=$('splash');const hp=new URLSearchParams(location.hash.slice(1));
  const seen=(function(){try{return sessionStorage.getItem('sitius-splash')==='1'}catch(e){return false}})();
- if(hp.has('nosplash')||location.hash.includes('nosplash')||(seen&&!hp.has('splashhold'))){try{sessionStorage.setItem('sitius-splash','1')}catch(e){}sp.remove()}
- else{const hide=()=>{if(!sp.isConnected||sp.classList.contains('out'))return;sp.classList.add('out');try{sessionStorage.setItem('sitius-splash','1')}catch(e){}setTimeout(()=>sp.remove(),600)};
+ const skipHash=hp.has('nosplash')||location.hash.includes('nosplash')||hp.has('nowelcome')||hp.has('demo');
+ const cover=function(){if(skipHash||document.getElementById('helloov')||document.getElementById('hellocover'))return;
+  const c=document.createElement('div');c.id='hellocover';c.setAttribute('aria-hidden','true');
+  c.style.cssText='position:absolute;inset:0;z-index:48;background:#1e2f4a;zoom:1!important;width:100%;height:100%;pointer-events:none';
+  (document.getElementById('phone')||document.body).appendChild(c)};
+ if(skipHash){sp.remove()}
+ else if(seen&&!hp.has('splashhold')){try{sessionStorage.setItem('sitius-splash','1')}catch(e){}cover();sp.remove()}
+ else{cover();const hide=()=>{if(!sp.isConnected||sp.classList.contains('out'))return;sp.classList.add('out');try{sessionStorage.setItem('sitius-splash','1')}catch(e){}setTimeout(()=>sp.remove(),600)};
   sp.onclick=hide;sp.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')hide()};setTimeout(hide,hp.has('splashhold')?600000:4000)}}
 $('thbtn').onclick=()=>thSet(thNow()==='dark'?'light':'dark');thApply();
 // ===== правки 16.11.2026: несколько объектов, доли, налог по долям, навигация, сохранение, пояснения
@@ -2396,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:33';
+var APPV='23.11.2026 16:39';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3525,6 +3531,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 // Требует: leads_client.js (LEADS_URL), vendor/qrcode.min.js (глобальная qrcode), из Аппа — DEAL_APP, DEAL_KEYS, dealCheck, dealApply, saveSt.
 // Ключ входа хранится в 'citius-auth' (НЕ 'sitius-…'): не попадает в «Файл сделки» и не стирается «Начать заново».
 const AUTH_K='citius-auth';
+const IDLE_MIN=30;   // автовыход после стольких минут без активности (вход хранится между перезагрузками и вкладками)
+const IDLE_K='citius-last-act';   // отметка последней активности, общая для всех вкладок
 function apiCall(action,body,ms){if(!LEADS_URL)return Promise.resolve({ok:false,err:'no_url'});
  const ctl=typeof AbortController!=='undefined'?new AbortController():null,tm=setTimeout(()=>ctl&&ctl.abort(),ms||20000);
  return fetch(LEADS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},body||{})),redirect:'follow',signal:ctl&&ctl.signal})
@@ -3955,7 +3963,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
  try{if(typeof sitiusSuccess==='function')sitiusSuccess({title:'Вы вышли',text:'Ответы на этом устройстве остались. Чтобы снова сохранять их в облаке, нажмите «Войти».',btn:'Хорошо'})}catch(e){}return x}}
 document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-b.out{min-height:48px;background:transparent;border:2px solid #c9a46a;color:#8a6a2f;font-weight:700;justify-content:center}#cmpsheet .cs-b.out .cs-oi{font-weight:400;margin-right:6px;font-size:18px}#cmpsheet .cs-b.out:hover{background:rgba(201,164,106,.12)}</style>');
 // ---------- n29 (23.11) · встречающий главный экран после заставки: картина, кто мы, цифры, «С чего начнём?»; при прогрессе — «Продолжить» здесь же (вместо отдельного окна n28)
-// Заставка — один раз за сессию (sessionStorage sitius-splash). #nosplash / #nowelcome / #demo / автообновление — экран не показываем, чтобы не ломать walk*-тесты
+// Заставка — один раз за сессию (sessionStorage sitius-splash). Главный экран рисуется под заставкой, чтобы после неё не мелькал экран заявки.
+// #nosplash / #nowelcome / #demo / автообновление — экран не показываем, чтобы не ломать walk*-тесты
 (function(){
 const HI_SP='sitius-splash';
 const HI_IMG=(function(){
@@ -3981,6 +3990,7 @@ function hiSkip(){
 }
 function hiHasProgress(){return !!(window.__restored&&window.__restored.cur)}
 function hiKillResume(){const o=document.getElementById('resumeov');if(o)o.remove()}
+function hiDropCover(){const c=document.getElementById('hellocover');if(c)c.remove()}
 function hiDropSplash(){
   const sp=document.getElementById('splash');
   if(!sp)return;
@@ -4023,7 +4033,7 @@ function hiHtml(){
   const resume=prog?`<button type="button" class="hi-go" id="hello-go" onclick="helloGo()">Продолжить</button>
     <button type="button" class="hi-nw" onclick="helloNew()">Начать заново</button>
     <p class="hi-res">На этом устройстве есть сохранённые ответы. «Продолжить» откроет то место, где вы остановились.</p>`:'';
-  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="Ситиус Недвижимость" width="1080" height="608"></div></div>
+  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="" width="1080" height="420"></div></div>
     <div class="hi-copy">
       <p class="hi-name">Ситиус Недвижимость</p>
       <p class="hi-line">Недвижимость в Москве и Санкт-Петербурге · премиальное качество на каждом этапе сделки</p>
@@ -4044,95 +4054,98 @@ function hiHtml(){
 function hiCss(){
   if(document.getElementById('hi-css'))return;
   document.head.insertAdjacentHTML('beforeend',`<style id="hi-css">
-#phone>#helloov#helloov,#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;width:100%;max-width:100%;height:100%;max-height:100%;box-sizing:border-box;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;overflow:hidden;font-family:Montserrat,system-ui,sans-serif;grid-column:1/-1;grid-row:1/-1}
-#helloov .hi-pic{flex:0 0 auto;width:100%;max-width:100%;min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#152033}
-#helloov .hi-pic-in{width:min(100%,calc(min(30vh,280px)*16/9));max-width:100%;aspect-ratio:16/9;max-height:min(30vh,280px);height:auto;overflow:hidden;position:relative;background:#152033}
-#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:100%;object-fit:cover;object-position:center center}
-#helloov .hi-copy{flex:0 0 auto;padding:10px 16px 6px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));text-align:center;box-sizing:border-box;width:100%;max-width:100%}
-#helloov .hi-name{margin:0 0 4px;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:22px;line-height:1.2;color:#fbf8f1}
-#helloov .hi-line{margin:0 0 10px;font-size:12.5px;line-height:1.35;color:#e8dcc4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-#helloov .hi-stats{display:flex;margin:0 0 8px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden;background:rgba(18,28,45,.45)}
-#helloov .hi-stats>div{flex:1;min-width:0;text-align:center;padding:8px 4px 7px;border-left:1px solid rgba(201,164,106,.35)}
+#phone>#helloov#helloov,#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;width:100%;max-width:100%;height:100%;max-height:100%;box-sizing:border-box;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;overflow:hidden;font-family:Montserrat,system-ui,sans-serif;grid-column:1/-1;grid-row:1/-1;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#phone:has(#helloov)>.top,#phone:has(#helloov)>#nav,#phone:has(#helloov)>#helpbtn,#phone:has(#helloov)>.tab{visibility:hidden}
+#helloov .hi-pic{flex:0 1 auto;width:100%;max-width:100%;min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#152033}
+#helloov .hi-pic-in{width:min(100%,calc(min(26vh,240px)*1080/420));max-width:100%;aspect-ratio:1080/420;max-height:min(26vh,240px);height:auto;overflow:hidden;position:relative;background:#152033;flex:0 1 auto}
+#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:100%;object-fit:cover;object-position:center top}
+#helloov .hi-copy{flex:0 0 auto;padding:12px 16px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));text-align:center;box-sizing:border-box;width:100%;max-width:100%}
+#helloov .hi-name{margin:0 0 6px;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:22px;line-height:1.3;color:#fbf8f1}
+#helloov .hi-line{margin:0 0 12px;font-size:12.5px;line-height:1.45;color:#e8dcc4;display:block;overflow:hidden;max-height:calc(1.45em * 3)}
+#helloov .hi-stats{display:flex;margin:0 0 10px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden;background:rgba(18,28,45,.45)}
+#helloov .hi-stats>div{flex:1;min-width:0;overflow:hidden;text-align:center;padding:8px 6px 7px;border-left:1px solid rgba(201,164,106,.35)}
 #helloov .hi-stats>div:first-child{border-left:0}
-#helloov .hi-stats b{display:block;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:18px;line-height:1.15;color:#d4b57e}
-#helloov .hi-stats span{display:block;margin-top:3px;font-size:10px;line-height:1.25;color:rgba(247,243,234,.88)}
-#helloov .hi-more{display:inline-block;color:#d4b57e;font-size:13.5px;padding:4px 2px}
-#helloov .hi-start{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 16px max(16px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));min-height:0;box-sizing:border-box;width:100%;max-width:100%}
-#helloov .hi-q{margin:8px 0 8px;text-align:center;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:20px;line-height:1.2;color:#fbf8f1}
-#helloov .hi-goals{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:100%;box-sizing:border-box}
-#helloov .hi-g{min-height:48px;padding:10px 8px;border:0;border-radius:12px;background:linear-gradient(180deg,#d4b57e,#c9a46a);color:#1e2f4a;font-weight:700;font-size:15px;line-height:1.2;cursor:pointer;font-family:Montserrat,system-ui,sans-serif}
+#helloov .hi-stats b{display:block;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:18px;line-height:1.25;color:#d4b57e}
+#helloov .hi-stats span{display:block;margin-top:4px;font-size:10px;line-height:1.35;color:rgba(247,243,234,.88);overflow-wrap:anywhere}
+#helloov .hi-more{display:inline-block;color:#d4b57e;font-size:13.5px;line-height:1.4;padding:6px 2px}
+#helloov .hi-start{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;padding:8px 16px max(16px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-height:0;overflow:hidden;box-sizing:border-box;width:100%;max-width:100%}
+#helloov .hi-q{margin:0;text-align:center;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:20px;line-height:1.3;color:#fbf8f1;flex:0 0 auto}
+#helloov .hi-goals{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:100%;box-sizing:border-box;flex:0 0 auto}
+#helloov .hi-g{min-height:48px;padding:10px 8px;border:0;border-radius:12px;background:linear-gradient(180deg,#d4b57e,#c9a46a);color:#1e2f4a;font-weight:700;font-size:15px;line-height:1.25;cursor:pointer;font-family:Montserrat,system-ui,sans-serif}
 #helloov .hi-g.wide{grid-column:1/-1}
-#helloov .hi-go{display:block;width:100%;min-height:54px;margin:0 0 8px;padding:12px 14px;border:0;border-radius:14px;background:linear-gradient(180deg,#f0dcb0,#c9a46a);color:#1e2f4a;font-weight:700;font-size:19px;cursor:pointer;font-family:Montserrat,system-ui,sans-serif;box-shadow:0 6px 18px rgba(201,164,106,.35)}
-#helloov .hi-nw{display:block;width:100%;min-height:40px;margin:0 0 6px;padding:8px;border:1.5px solid rgba(247,243,234,.45);border-radius:12px;background:transparent;color:#fbf8f1;font-size:15px;cursor:pointer;font-family:Montserrat,system-ui,sans-serif}
-#helloov .hi-res{margin:0 0 4px;font-size:11.5px;line-height:1.35;color:#e8dcc4;text-align:center}
+#helloov .hi-go{display:block;width:100%;min-height:52px;margin:0;padding:12px 14px;border:0;border-radius:14px;background:linear-gradient(180deg,#f0dcb0,#c9a46a);color:#1e2f4a;font-weight:700;font-size:19px;line-height:1.25;cursor:pointer;font-family:Montserrat,system-ui,sans-serif;box-shadow:0 6px 18px rgba(201,164,106,.35);flex:0 0 auto;box-sizing:border-box}
+#helloov .hi-nw{display:block;width:100%;min-height:40px;margin:0;padding:8px;border:1.5px solid rgba(247,243,234,.45);border-radius:12px;background:transparent;color:#fbf8f1;font-size:15px;line-height:1.3;cursor:pointer;font-family:Montserrat,system-ui,sans-serif;flex:0 0 auto;box-sizing:border-box}
+#helloov .hi-res{margin:0;font-size:11.5px;line-height:1.45;color:#e8dcc4;text-align:center;flex:0 0 auto}
 #helloov .hi-g:focus-visible,#helloov .hi-go:focus-visible,#helloov .hi-nw:focus-visible,#helloov .hi-more:focus-visible{outline:2px solid #fbf8f1;outline-offset:2px}
+#helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(18vh,160px)*1080/420));max-height:min(18vh,160px)}
 @media (min-width:700px){
-  #helloov .hi-pic-in{width:min(100%,calc(min(32vh,320px)*16/9));max-height:min(32vh,320px)}
-  #helloov .hi-name{font-size:28px}
-  #helloov .hi-line{font-size:14px;white-space:normal;-webkit-line-clamp:unset}
-  #helloov .hi-stats b{font-size:24px}
-  #helloov .hi-stats span{font-size:11px}
+  #helloov .hi-pic-in{width:min(100%,calc(min(26vh,260px)*1080/420));max-height:min(26vh,260px)}
+  #helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(16vh,140px)*1080/420));max-height:min(16vh,140px)}
+  #helloov .hi-name{font-size:28px;line-height:1.25}
+  #helloov .hi-line{font-size:14px;line-height:1.45;max-height:none}
+  #helloov .hi-stats b{font-size:22px}
+  #helloov .hi-stats span{font-size:11px;line-height:1.35}
   #helloov .hi-q{font-size:24px}
-  #helloov .hi-g{min-height:54px;font-size:16px}
-  #helloov .hi-copy,#helloov .hi-start{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
-  #helloov .hi-start{max-width:560px;width:100%;margin:0 auto;box-sizing:border-box}
-  #helloov .hi-copy{max-width:560px;width:100%;margin:0 auto;box-sizing:border-box}
+  #helloov .hi-g{min-height:50px;font-size:16px}
+  #helloov .hi-copy,#helloov .hi-start{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+  #helloov .hi-start{max-width:560px;width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box}
+  #helloov .hi-copy{max-width:560px;width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box}
+}
+@media (max-height:900px){
+  #helloov .hi-pic-in{width:min(100%,calc(min(16vh,130px)*1080/420));max-height:min(16vh,130px)}
+  #helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(12vh,100px)*1080/420));max-height:min(12vh,100px)}
+  #helloov .hi-name{font-size:20px;margin:0 0 4px}
+  #helloov .hi-line{margin:0 0 8px;font-size:12px}
+  #helloov .hi-stats{margin:0 0 6px}
+  #helloov .hi-stats>div{padding:6px 4px}
+  #helloov .hi-start{gap:6px;justify-content:flex-start;padding-top:4px}
+  #helloov .hi-g{min-height:42px;padding:8px}
+  #helloov .hi-go{min-height:46px;font-size:17px;padding:10px}
+  #helloov .hi-nw{min-height:36px}
+  #helloov .hi-q{font-size:18px}
 }
 @media (max-height:700px){
-  #helloov .hi-pic-in{width:min(100%,calc(min(22vh,160px)*16/9));max-height:min(22vh,160px)}
-  #helloov .hi-name{font-size:20px}
-  #helloov .hi-g{min-height:44px;padding:8px}
-  #helloov .hi-go{min-height:48px;font-size:17px}
+  #helloov .hi-pic-in,#helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(10vh,80px)*1080/420));max-height:min(10vh,80px)}
+  #helloov .hi-copy{padding-top:8px;padding-bottom:4px}
+  #helloov .hi-stats b{font-size:16px}
+  #helloov .hi-g{min-height:40px;padding:6px;font-size:14px}
 }
 </style>`);
 }
 
 function hiShow(){
-  if(hiSkip()){hiKillResume();return}
-  if(document.getElementById('helloov'))return;
+  if(hiSkip()){hiKillResume();hiDropCover();return}
+  if(document.getElementById('helloov')){hiDropCover();return}
   hiKillResume();
   hiCss();
   const o=document.createElement('div');
   o.id='helloov';
+  if(hiHasProgress())o.className='hi-hasprog';
   o.setAttribute('role','dialog');
   o.setAttribute('aria-modal','true');
   o.setAttribute('aria-label','Ситиус Недвижимость');
   o.innerHTML=hiHtml();
   const ph=document.getElementById('phone')||document.body;
   ph.appendChild(o);
+  hiDropCover();
   const go=o.querySelector('#hello-go');
   if(go)try{go.focus({preventScroll:true})}catch(e){}
-}
-
-function hiWaitSplash(fn){
-  const sp=document.getElementById('splash');
-  if(!sp||!sp.isConnected){fn();return}
-  let done=0;
-  const go=()=>{if(done)return;done=1;try{hiMarkSplash()}catch(e){}fn()};
-  const obs=new MutationObserver(()=>{
-    if(!sp.isConnected)go();
-    else if(sp.classList.contains('out'))setTimeout(go,500);
-  });
-  obs.observe(sp,{attributes:true,attributeFilter:['class']});
-  if(sp.parentNode)obs.observe(sp.parentNode,{childList:true});
-  // страховка, если заставка уже уходит
-  setTimeout(()=>{if(!sp.isConnected||sp.classList.contains('out'))go()},50);
 }
 
 function hiBoot(){
   hiDropSplash();
   hiKillResume();
-  if(hiSkip())return;
-  const sp=document.getElementById('splash');
-  if(!sp||!sp.isConnected){hiShow();return}
-  hiWaitSplash(function(){hiKillResume();hiShow()});
+  if(hiSkip()){hiDropCover();return}
+  hiShow();
 }
-// сразу, пока парсится страница: если заставка уже была в этой сессии — убрать, не дожидаясь DOMContentLoaded
 hiDropSplash();
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hiBoot,0));
-else setTimeout(hiBoot,0);
+if(!hiSkip()){
+  try{hiCss();if(document.getElementById('phone'))hiShow()}catch(e){}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>hiBoot());
+else hiBoot();
 })();
-const SUP_SHOT=0;  // скриншот в заявку поддержки — только после деплоя Code.gs v2.2 (N29_V22=1)
+const SUP_SHOT=1;  // скриншот в заявку поддержки — Code.gs v2.2 задеплоен 23.11 17:38 МСК — включено по умолчанию, выключить: N29_V22=0
 // ---------- n29 (23.11) · «Сообщить о проблеме»: пункт в меню 📲 (хук SUP_ON / supView в p11_compact.js), заявка kind «🛠 Поддержка» через существующий sendLead, без редеплоя
 const SUP_ON=1;
 const SUP={txt:'',contact:'',fileName:'',shot:null,busy:0,ok:0,err:'',hadContact:0,id:''};
@@ -4316,7 +4329,7 @@ ${opros}
  openHelp=function(){const r=oh.apply(this,arguments);try{helpMiniPaint()}catch(e){}return r};
  try{const b=document.getElementById('helpbtn');if(b)b.onclick=function(e){openHelp(e)}}catch(e){}
 })();
-const PHQ=0;  // вход по телефону — только после деплоя Code.gs v2.2 (N29_PHONE=1)
+const PHQ=1;  // вход по телефону — Code.gs v2.2 задеплоен, включено по умолчанию; выключить: N29_V22=0
 // ===== Вход по номеру телефона с кодом в Telegram (владелец 17:20 МСК). Включается сборкой N29_PHONE=1 — только после деплоя Code.gs v2.2.
 // Бот не может написать первым по номеру: Апп даёт ссылку t.me/<бот>?start=ph_<nonce>, бот просит «Поделиться номером»,
 // сверяет его с введённым и присылает код. Номер уходит на сервер только для сверки (там хранится хэш), в облако с ответами не попадает.
@@ -4349,6 +4362,77 @@ if(typeof PHQ!=='undefined'&&PHQ){
  const r1=csR;csR=function(){const f=document.activeElement&&document.activeElement.id;const x=r1.apply(this,arguments);if(f==='auphone'){const e=csE(f);if(e){e.focus({preventScroll:true});try{e.setSelectionRange(e.value.length,e.value.length)}catch(z){}}}return x};
  document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-seg{display:flex;gap:0;margin:0 0 10px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden}#cmpsheet .cs-seg button{flex:1;min-height:44px;border:0;background:#fff;color:#1e2f4a;font:600 15px Montserrat,system-ui,sans-serif;cursor:pointer}#cmpsheet .cs-seg button.on{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a)}</style>');
 }
+// ---------- n29 (23.11) · вкладка «О нас» в нижней полосе рядом с «Безопасность» (не правит p8_menu.js)
+(function(){
+function aboutTabAdd(){
+  const tab=document.querySelector('#phone>.tab')||document.querySelector('.tab');
+  if(!tab||document.getElementById('tb-about'))return;
+  const s=document.createElement('span');
+  s.id='tb-about';
+  s.textContent='О нас';
+  s.setAttribute('role','button');
+  s.tabIndex=0;
+  const sec=document.getElementById('tb-sec');
+  if(sec&&sec.parentNode===tab)tab.insertBefore(s,sec.nextSibling);
+  else tab.appendChild(s);
+  const open=function(){
+    try{if(typeof helloClose==='function')helloClose()}catch(e){}
+    if(typeof go==='function')go('about');
+  };
+  s.onclick=open;
+  s.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
+}
+function aboutTabMark(){
+  const s=document.getElementById('tb-about');
+  if(s)s.className=(typeof cur==='string'&&cur==='about')?'on':'';
+}
+function aboutTabCss(){
+  if(document.getElementById('about-tab-css'))return;
+  document.head.insertAdjacentHTML('beforeend',`<style id="about-tab-css">
+.tab span{flex:1 1 0;min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box}
+#tb-about{cursor:pointer}
+</style>`);
+}
+function aboutTabBoot(){
+  aboutTabCss();
+  aboutTabAdd();
+  aboutTabMark();
+  if(typeof show==='function'&&!show.__aboutTab){
+    const sh=show;
+    show=function(){const r=sh.apply(this,arguments);try{aboutTabAdd();aboutTabMark()}catch(e){}return r};
+    show.__aboutTab=1;
+  }
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',aboutTabBoot);
+else aboutTabBoot();
+})();
+// ===== Автовыход по неактивности (владелец 17:37 МСК): вход хранится в localStorage (между перезагрузками и вкладками),
+// но если IDLE_MIN минут нет активности (клик, ввод, прокрутка, касание) — выходим, как кнопкой «Выйти» (вкл. logout на сервере).
+// Ответы на устройстве не трогаем. Проверка: по таймеру, при возврате на вкладку и при открытии сайта.
+function idleLast(){try{return +localStorage.getItem(IDLE_K)||0}catch(e){return 0}}
+function idleMark(force){if(!authOn())return;const n=Date.now(),l=idleLast();if(force||n-l>20000||n<l){try{localStorage.setItem(IDLE_K,String(n))}catch(e){}}}
+function idleExpired(){if(!authOn())return false;const a=authGet()||{},l=idleLast()||a.at||0;return !l||Date.now()-l>IDLE_MIN*60000}
+let IDLE_busy=0;
+function idleCheck(){if(IDLE_busy||!idleExpired())return false;IDLE_busy=1;
+ try{authLogout()}catch(e){}try{localStorage.removeItem(IDLE_K)}catch(e){}
+ try{AU.qr='';AU.qrl='';AU.has=0;AU.step='';AU.code='';AU.msg='';AU.err=''}catch(e){}
+ try{if(typeof csClose==='function')csClose()}catch(e){}try{auBtnSync()}catch(e){}try{if(cur==='path')show('path')}catch(e){}
+ idleShow();IDLE_busy=0;return true}
+function idleShow(){if(typeof sitiusSuccess!=='function')return;const ov=sitiusSuccess({title:'Вы вышли из-за неактивности',text:'Ответы сохранены.',btn:'Войти снова'});
+ if(!ov)return;ov.classList.add('sx-idle');const sv=ov.querySelector('svg');if(sv)sv.remove();
+ const b=ov.querySelector('.sx-b');if(b)b.onclick=()=>{ov.remove();try{auOpen()}catch(e){}}}
+// вход (почта, Telegram, телефон, QR) — новая отметка активности
+{const s0=authSet;authSet=function(o){const x=s0.apply(this,arguments);try{o?localStorage.setItem(IDLE_K,String(Date.now())):0}catch(e){}return x}}
+['pointerdown','keydown','input','touchstart','wheel'].forEach(t=>addEventListener(t,()=>{if(!idleCheck())idleMark()},{passive:true,capture:true}));
+addEventListener('scroll',()=>{if(!idleCheck())idleMark()},{passive:true,capture:true});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')idleCheck()});
+addEventListener('focus',()=>idleCheck());addEventListener('pageshow',()=>idleCheck());
+// другая вкладка вышла → обновить шапку
+addEventListener('storage',e=>{if(e.key===AUTH_K||e.key===null){try{auBtnSync()}catch(x){}}});
+setInterval(idleCheck,30000);
+// при открытии сайта: истёк — выходим; нет отметки у старого входа — ставим сейчас
+(function(){if(!authOn())return;if(!idleLast()){idleMark(1);return}idleCheck()})();
+document.head.insertAdjacentHTML('beforeend','<style>.sx-idle .sx-t{margin-top:4px}</style>');
 // ===== n29 END
 
 // ===== opros 23.11.2026 BEGIN
