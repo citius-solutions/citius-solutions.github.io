@@ -2396,7 +2396,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:27';
+var APPV='23.11.2026 16:32';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -4239,6 +4239,111 @@ function supOwnPaint(){const o=document.getElementById('supsheet');if(!o||o.styl
    r[1]+=(typeof csBtn==='function'?csBtn('🛠 Сообщить о проблеме',"csGo('sup')",'','если что-то не работает'):'')}
   }catch(e){}return r};
  csView._supHook=1})();
+// ---------- n29 (23.11 17:30 МСК) · окно «Нужна помощь человека»: компактная карточка как «Войти», минимум текста
+(function(){
+ if(document.getElementById('help-mini-css'))return;
+ document.head.insertAdjacentHTML('beforeend',`<style id="help-mini-css">
+#sheet.help-mini{position:absolute;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(18,28,45,.55);font-family:Montserrat,system-ui,-apple-system,'Segoe UI',sans-serif}
+#sheet.help-mini[style*="display: block"],#sheet.help-mini[style*="display:block"],#sheet.help-mini[style*="display:flex"],#sheet.help-mini[style*="display: flex"]{display:flex !important}
+#sheet.help-mini .in{position:relative !important;left:auto !important;right:auto !important;bottom:auto !important;top:auto !important;background:#fbf8f1 !important;color:#1e2f4a !important;width:100% !important;max-width:100% !important;max-height:70vh !important;overflow-x:hidden !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch;border:0 !important;border-radius:18px 18px 0 0 !important;padding:6px 16px calc(14px + env(safe-area-inset-bottom)) !important;box-sizing:border-box !important;box-shadow:0 -6px 30px rgba(0,0,0,.25);margin:0 !important}
+@media (min-width:600px){#sheet.help-mini{align-items:center !important}#sheet.help-mini .in{width:420px !important;max-width:420px !important;max-height:80vh !important;border-radius:18px !important;padding-bottom:16px !important}}
+#sheet.help-mini .hp-hd{display:flex;align-items:center;gap:6px;min-height:46px;position:sticky;top:-6px;background:#fbf8f1;z-index:1}
+#sheet.help-mini .hp-hd b{flex:1;text-align:center;font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:600;color:#1e2f4a}
+#sheet.help-mini .hp-x{width:36px;height:36px;border-radius:50%;border:0;background:#efe7d6;color:#1e2f4a;font-size:18px;cursor:pointer;flex:none}
+#sheet.help-mini .hp-sp{width:36px;flex:none}
+#sheet.help-mini .hp-bd{padding:4px 0 2px}
+#sheet.help-mini .hp-h{font-size:13px;color:#5a6e8a;margin:0 0 9px;line-height:1.4;text-align:center}
+#sheet.help-mini .hp-h a{color:#a8844a}
+#sheet.help-mini .hp-b{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:54px;margin:0 0 9px;padding:9px 14px;box-sizing:border-box;border-radius:14px;border:1.5px solid #c9a46a;background:#fff;color:#1e2f4a;font:600 16px/1.25 Montserrat,system-ui,sans-serif;text-decoration:none;cursor:pointer;text-align:center}
+#sheet.help-mini .hp-b.pri{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a);border-color:#c9a46a}
+#sheet.help-mini .hp-b:focus-visible,#sheet.help-mini .hp-x:focus-visible{outline:2px solid #a8844a;outline-offset:2px}
+#sheet.help-mini .hp-more{margin:4px 0 0;font-size:13px;color:#5a6e8a}
+#sheet.help-mini .hp-more>summary{cursor:pointer;color:#a8844a;padding:6px 0;list-style-position:inside}
+#sheet.help-mini .hp-opts{margin:0 0 4px}
+#sheet.help-mini .opt{border:1px solid #e6dccb;background:#fff;color:#1e2f4a;border-radius:12px;padding:6px 10px;margin:0 0 5px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;min-width:0}
+#sheet.help-mini .opt b{font-weight:600;min-width:0}#sheet.help-mini .opt>span{white-space:normal;margin-left:6px}
+#sheet.help-mini .opt .hint,#sheet.help-mini .opt>div>div.hint{display:none}
+#sheet.help-mini .note{display:none}
+#sheet.help-mini .hp-opts .btn{padding:6px 10px;font-size:13px;white-space:nowrap;flex:none}
+#sheet.help-mini .hp-links{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin:2px 0 4px}
+#sheet.help-mini .hp-links a{background:none;border:0;color:#a8844a;font-size:13px;text-decoration:underline;cursor:pointer;padding:4px 0}
+</style>`);
+})();
+
+function helpMiniClose(){const s=document.getElementById('sheet');if(s)s.style.display='none'}
+function helpMiniEsc(e){if(e.key==='Escape'){helpMiniClose();document.removeEventListener('keydown',helpMiniEsc)}}
+function helpMiniPaint(){
+ const sh=document.getElementById('sheet');if(!sh)return;
+ const inn=sh.querySelector('.in');if(!inn)return;
+ sh.classList.add('help-mini');
+ sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');sh.setAttribute('aria-labelledby','help-mini-ttl');
+ if(!sh._hpBg){sh.addEventListener('click',e=>{if(e.target===sh)helpMiniClose()});sh._hpBg=1}
+ const opts=document.getElementById('helpopts');
+ const optHold=document.createElement('div');
+ if(opts)optHold.appendChild(opts);
+ const tel=typeof TELH!=='undefined'?TELH:(typeof TEL!=='undefined'?TEL:'+7 921 572-50-85');
+ const telHref=typeof TEL!=='undefined'?TEL:'+79215725085';
+ const tgq=(typeof TGQ!=='undefined'&&TGQ&&typeof TGQ_URL!=='undefined')
+  ?`<a href="${TGQ_URL}" target="_blank" rel="noopener">Задать вопрос в Telegram ↗</a>`:'';
+ const opros=(typeof openCitiusOpros==='function')
+  ?`<button type="button" class="hp-b opros-open" onclick="helpMiniClose();openCitiusOpros()">Вопрос сотруднику</button>`:'';
+ const goCb=via=>`helpMiniClose();A.ctx='помощь: '+(typeof SCR!=='undefined'&&SCR[cur]&&SCR[cur].t||'');A.sent=0;A.cbvia='${via}';go('cb')`;
+ inn.innerHTML=`<div class="hp-hd"><span class="hp-sp"></span><b id="help-mini-ttl">Нужна помощь человека</b><button type="button" class="hp-x" onclick="helpMiniClose()" aria-label="Закрыть">✕</button></div>
+<div class="hp-bd">
+<p class="hp-h" id="helpctx">Ежедневно 09:00–21:00 · <a href="tel:${telHref}">${tel}</a></p>
+<button type="button" class="hp-b pri" onclick="${goCb('call')}">Перезвоните мне</button>
+<button type="button" class="hp-b" onclick="${goCb('tg')}">Написать в Telegram</button>
+${opros}
+<details class="hp-more"><summary>Услуги на этом шаге</summary><div class="hp-opts"></div></details>
+<div class="hp-links"><a href="https://max.ru/channel_citiusrealty" target="_blank" rel="noopener">Написать в MAX ↗</a>${tgq}</div>
+</div>`;
+ const box=inn.querySelector('.hp-opts');
+ if(box&&optHold.firstChild)box.appendChild(optHold.firstChild);
+ const det=inn.querySelector('details.hp-more');
+ if(det&&navigator.webdriver)det.open=true; // walk-тесты кликают «Заявка» в списке услуг
+ sh.style.display='flex';
+ document.addEventListener('keydown',helpMiniEsc);
+}
+
+(function(){
+ if(typeof openHelp!=='function')return;
+ const oh=openHelp;
+ openHelp=function(){const r=oh.apply(this,arguments);try{helpMiniPaint()}catch(e){}return r};
+ try{const b=document.getElementById('helpbtn');if(b)b.onclick=function(e){openHelp(e)}}catch(e){}
+})();
+const PHQ=0;  // вход по телефону — только после деплоя Code.gs v2.2 (N29_PHONE=1)
+// ===== Вход по номеру телефона с кодом в Telegram (владелец 17:20 МСК). Включается сборкой N29_PHONE=1 — только после деплоя Code.gs v2.2.
+// Бот не может написать первым по номеру: Апп даёт ссылку t.me/<бот>?start=ph_<nonce>, бот просит «Поделиться номером»,
+// сверяет его с введённым и присылает код. Номер уходит на сервер только для сверки (там хранится хэш), в облако с ответами не попадает.
+Object.assign(AU,{phone:'',phn:'',phl:'',ph:''});let AU_phstop=null;
+AUTH_ERR.bad_phone=AUTH_ERR.bad_phone||'Проверьте номер телефона.';
+function phDigits(s){let d=String(s||'').replace(/\D/g,'');if(d.length===11&&d[0]==='8')d='7'+d.slice(1);if(d.length===10&&d[0]==='9')d='7'+d;return d}
+function phFmt(s){let d=String(s||'').replace(/\D/g,'');if(!d)return '';if(d[0]==='8')d='7'+d.slice(1);if(d[0]==='9')d='7'+d;if(/^7[78]9|^788/.test(d))d='7'+d.slice(2);if(d[0]!=='7')return '+'+d.slice(0,15);d=d.slice(0,11);
+ const p=[d.slice(1,4),d.slice(4,7),d.slice(7,9),d.slice(9,11)];let r='+7';if(p[0])r+=' ('+p[0]+(p[0].length===3?')':'');if(p[1])r+=' '+p[1];if(p[2])r+='-'+p[2];if(p[3])r+='-'+p[3];return r}
+function phIn(e){const v=phFmt(e.value);e.value=v;AU.phone=v}
+function phWait(nonce,onState){let stop=false,n=0;const tick=()=>{if(stop)return;apiCall('phStatus',{nonce},10000).then(r=>{if(stop)return;
+  const st=r&&r.ok?r.state:(r&&r.err==='expired'?'expired':'');if(st&&st!=='wait'&&st!=='ask'){onState(st);if(st!=='mismatch')return}else if(st)onState(st);
+  if(++n<200&&!['sent','blocked','expired'].includes(st))setTimeout(tick,n<40?3000:6000)})};tick();return ()=>{stop=true}}
+function auPh(){const e=csE('auphone');if(e)AU.phone=e.value;const d=phDigits(AU.phone);
+ if(!/^\d{10,15}$/.test(d)||(d[0]==='7'&&d.length!==11)){AU.err='Проверьте номер телефона.';auR();return}
+ if(!A.pdauth){AU.err='Чтобы получить код, отметьте согласие на обработку персональных данных.';auR();return}
+ auRun(apiCall('phStart',{phone:d}),r=>{if(!r.ok||!r.nonce){AU.err=authErr(r);return}AU.phn=r.nonce;AU.phl=r.link;AU.ph='wait';AU.code='';AU.step='ph';
+  if(AU_phstop)AU_phstop();AU_phstop=phWait(r.nonce,st=>{AU.ph=st;if(st==='mismatch')AU.err='Номер в Telegram не совпадает с введённым. Проверьте номер и запросите код ещё раз.';
+   if(st==='blocked'){AU.err='Слишком много попыток. Запросите код ещё раз.';AU.step=''}if(st==='expired'){AU.err='Ссылка устарела. Запросите код ещё раз.';AU.step=''}auR()})})}
+function auPhV(){const e=csE('aucode');if(e)AU.code=e.value.replace(/\D/g,'');if(AU.busy)return;if(!/^\d{6}$/.test(AU.code)){AU.err=AUTH_ERR.bad_code;auR();return}
+ auRun(apiCall('verifyCode',{phnonce:AU.phn,code:AU.code}).then(authAfter),r=>{if(r&&r.ok){if(AU_phstop)AU_phstop();AU.step='';AU.phn='';AU.ph=''}auAfter(r)})}
+function auMode(m){AU.m=m;AU.err='';AU.msg='';if(m!=='phone'&&AU.step==='ph')AU.step='';csR();setTimeout(()=>{const f=csE(m==='phone'?'auphone':'auemail');f&&f.focus({preventScroll:true})},30)}
+function phSeg(){return `<div class="cs-seg" role="tablist"><button type="button" role="tab" aria-selected="${AU.m!=='phone'}" class="${AU.m!=='phone'?'on':''}" onclick="auMode('mail')">Почта</button><button type="button" role="tab" aria-selected="${AU.m==='phone'}" class="${AU.m==='phone'?'on':''}" onclick="auMode('phone')">Телефон</button></div>`}
+if(typeof PHQ!=='undefined'&&PHQ){
+ const cv=csView;csView=function(){const v=CS.v;if((v!=='login'&&v!=='mail')||authOn())return cv.apply(this,arguments);
+  const msg=`${AU.err?`<div class="cs-err" id="auerr" role="alert">${hq(AU.err)}</div>`:''}${AU.msg?`<div class="cs-ok" role="status">${hq(AU.msg)}</div>`:''}`;
+  if(AU.m!=='phone'){const r=cv.apply(this,arguments);if(AU.step!=='code')r[1]=phSeg()+r[1];return r}
+  if(AU.step!=='ph')return ['Вход',phSeg()+`<input id="auphone" class="cs-in" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (900) 000-00-00" aria-label="Номер телефона" value="${hq(AU.phone||'')}" oninput="phIn(this)" onfocus="if(!this.value){this.value='+7 ';AU.phone=this.value}" onkeydown="if(event.key==='Enter')auPh()">${csPd()}${csBtn(AU.busy?'Готовим ссылку…':'Получить код в Telegram','auPh()','pri')}${msg}`];
+  const st=AU.ph==='sent'?'<div class="cs-ok" role="status">Код пришёл в Telegram.</div>':'';
+  return ['Вход',(AU.ph==='sent'?'':csLink('Открыть Telegram ↗',hq(AU.phl),'нажмите «Старт» и «Поделиться номером»').replace('class="cs-b"','class="cs-b pri"'))+`<input id="aucode" class="cs-in cs-code" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="Код из Telegram" aria-label="Код из Telegram" value="${hq(AU.code||'')}" oninput="AU.code=this.value.replace(/\\D/g,'');if(AU.code.length===6)auPhV()">${csBtn(AU.busy?'Проверяем…':'Войти','auPhV()',AU.ph==='sent'?'pri':'')}${st}${msg}<div class="cs-row cs-c"><button type="button" class="cs-lnk" onclick="AU.step='';AU.code='';if(AU_phstop)AU_phstop();csR()">Изменить номер</button></div>`]};
+ const r1=csR;csR=function(){const f=document.activeElement&&document.activeElement.id;const x=r1.apply(this,arguments);if(f==='auphone'){const e=csE(f);if(e){e.focus({preventScroll:true});try{e.setSelectionRange(e.value.length,e.value.length)}catch(z){}}}return x};
+ document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-seg{display:flex;gap:0;margin:0 0 10px;border:1.5px solid #c9a46a;border-radius:12px;overflow:hidden}#cmpsheet .cs-seg button{flex:1;min-height:44px;border:0;background:#fff;color:#1e2f4a;font:600 15px Montserrat,system-ui,sans-serif;cursor:pointer}#cmpsheet .cs-seg button.on{background:linear-gradient(90deg,#d4b57e,#f0dcb0 50%,#c9a46a)}</style>');
+}
 // ===== n29 END
 
 // ===== opros 23.11.2026 BEGIN
