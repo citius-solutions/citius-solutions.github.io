@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 16:41';
+var APPV='23.11.2026 16:50';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3968,9 +3968,9 @@ document.head.insertAdjacentHTML('beforeend','<style>#cmpsheet .cs-b.out{min-hei
 (function(){
 const HI_SP='sitius-splash';
 const HI_IMG=(function(){
-  try{if(location.protocol==='file:')return '/workspace/sitius/app_spec/film_poster_hero.jpg'}catch(e){}
-  try{return new URL('film_poster_hero.jpg', location.href.replace(/[^/]*$/, '')).href}catch(e){}
-  return 'https://www.citius-solution.ru/app-test/film_poster_hero.jpg';
+  try{if(location.protocol==='file:')return '/workspace/sitius/app_spec/film_poster_hero_v2.jpg'}catch(e){}
+  try{return new URL('film_poster_hero_v2.jpg', location.href.replace(/[^/]*$/, '')).href}catch(e){}
+  return 'https://www.citius-solution.ru/app-test/film_poster_hero_v2.jpg';
 })();
 const HI_GOALS=[
   ['sell','Продать',''],
@@ -4033,7 +4033,7 @@ function hiHtml(){
   const resume=prog?`<button type="button" class="hi-go" id="hello-go" onclick="helloGo()">Продолжить</button>
     <button type="button" class="hi-nw" onclick="helloNew()">Начать заново</button>
     <p class="hi-res">На этом устройстве есть сохранённые ответы. «Продолжить» откроет то место, где вы остановились.</p>`:'';
-  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="" width="1080" height="420"></div></div>
+  return `<div class="hi-pic"><div class="hi-pic-in"><img src="${HI_IMG}" alt="" width="1080" height="452"></div></div>
     <div class="hi-copy">
       <p class="hi-name">Ситиус Недвижимость</p>
       <p class="hi-line">Недвижимость в Москве и Санкт-Петербурге · премиальное качество на каждом этапе сделки</p>
@@ -4054,11 +4054,11 @@ function hiHtml(){
 function hiCss(){
   if(document.getElementById('hi-css'))return;
   document.head.insertAdjacentHTML('beforeend',`<style id="hi-css">
-#phone>#helloov#helloov,#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;width:100%;max-width:100%;height:100%;max-height:100%;box-sizing:border-box;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;overflow:hidden;font-family:Montserrat,system-ui,sans-serif;grid-column:1/-1;grid-row:1/-1;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#phone>#helloov#helloov,#helloov{position:absolute;inset:0;z-index:48;zoom:1!important;width:100%;max-width:100%;height:100%;max-height:100%;box-sizing:border-box;background:#1e2f4a;color:#fbf8f1;display:flex;flex-direction:column;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:Montserrat,system-ui,sans-serif;grid-column:1/-1;grid-row:1/-1;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 #phone:has(#helloov)>.top,#phone:has(#helloov)>#nav,#phone:has(#helloov)>#helpbtn,#phone:has(#helloov)>.tab{visibility:hidden}
-#helloov .hi-pic{flex:0 1 auto;width:100%;max-width:100%;min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#152033}
-#helloov .hi-pic-in{width:min(100%,calc(min(26vh,240px)*1080/420));max-width:100%;aspect-ratio:1080/420;max-height:min(26vh,240px);height:auto;overflow:hidden;position:relative;background:#152033;flex:0 1 auto}
-#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:100%;object-fit:cover;object-position:center top}
+#helloov .hi-pic{flex:1 0 auto;width:100%;max-width:100%;min-width:0;min-height:max(220px,30vh);position:relative;overflow:hidden;background:#152033}
+#helloov .hi-pic-in{position:absolute;inset:0;width:100%;height:100%;max-width:100%;min-height:0;overflow:hidden;background:#152033}
+#helloov .hi-pic img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:28% 46%}
 #helloov .hi-copy{flex:0 0 auto;padding:12px 16px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));text-align:center;box-sizing:border-box;width:100%;max-width:100%}
 #helloov .hi-name{margin:0 0 6px;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:22px;line-height:1.3;color:#fbf8f1}
 #helloov .hi-line{margin:0 0 12px;font-size:12.5px;line-height:1.45;color:#e8dcc4;display:block;overflow:hidden;max-height:calc(1.45em * 3)}
@@ -4068,7 +4068,7 @@ function hiCss(){
 #helloov .hi-stats b{display:block;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:18px;line-height:1.25;color:#d4b57e}
 #helloov .hi-stats span{display:block;margin-top:4px;font-size:10px;line-height:1.35;color:rgba(247,243,234,.88);overflow-wrap:anywhere}
 #helloov .hi-more{display:inline-block;color:#d4b57e;font-size:13.5px;line-height:1.4;padding:6px 2px}
-#helloov .hi-start{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;padding:8px 16px max(16px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-height:0;overflow:hidden;box-sizing:border-box;width:100%;max-width:100%}
+#helloov .hi-start{flex:0 0 auto;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;padding:8px 16px max(16px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box;width:100%;max-width:100%}
 #helloov .hi-q{margin:0;text-align:center;font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:20px;line-height:1.3;color:#fbf8f1;flex:0 0 auto}
 #helloov .hi-goals{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:100%;box-sizing:border-box;flex:0 0 auto}
 #helloov .hi-g{min-height:48px;padding:10px 8px;border:0;border-radius:12px;background:linear-gradient(180deg,#d4b57e,#c9a46a);color:#1e2f4a;font-weight:700;font-size:15px;line-height:1.25;cursor:pointer;font-family:Montserrat,system-ui,sans-serif}
@@ -4077,38 +4077,18 @@ function hiCss(){
 #helloov .hi-nw{display:block;width:100%;min-height:40px;margin:0;padding:8px;border:1.5px solid rgba(247,243,234,.45);border-radius:12px;background:transparent;color:#fbf8f1;font-size:15px;line-height:1.3;cursor:pointer;font-family:Montserrat,system-ui,sans-serif;flex:0 0 auto;box-sizing:border-box}
 #helloov .hi-res{margin:0;font-size:11.5px;line-height:1.45;color:#e8dcc4;text-align:center;flex:0 0 auto}
 #helloov .hi-g:focus-visible,#helloov .hi-go:focus-visible,#helloov .hi-nw:focus-visible,#helloov .hi-more:focus-visible{outline:2px solid #fbf8f1;outline-offset:2px}
-#helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(18vh,160px)*1080/420));max-height:min(18vh,160px)}
 @media (min-width:700px){
-  #helloov .hi-pic-in{width:min(100%,calc(min(26vh,260px)*1080/420));max-height:min(26vh,260px)}
-  #helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(16vh,140px)*1080/420));max-height:min(16vh,140px)}
+  #helloov .hi-pic{min-height:max(220px,30vh)}
   #helloov .hi-name{font-size:28px;line-height:1.25}
   #helloov .hi-line{font-size:14px;line-height:1.45;max-height:none}
   #helloov .hi-stats b{font-size:22px}
-  #helloov .hi-stats span{font-size:11px;line-height:1.35}
+  #helloov .hi-stats span{font-size:12px;line-height:1.35}
+  #helloov .hi-more{font-size:15px}
   #helloov .hi-q{font-size:24px}
   #helloov .hi-g{min-height:50px;font-size:16px}
+  #helloov .hi-go{min-height:54px;font-size:20px}
   #helloov .hi-copy,#helloov .hi-start{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
-  #helloov .hi-start{max-width:560px;width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box}
-  #helloov .hi-copy{max-width:560px;width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box}
-}
-@media (max-height:900px){
-  #helloov .hi-pic-in{width:min(100%,calc(min(16vh,130px)*1080/420));max-height:min(16vh,130px)}
-  #helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(12vh,100px)*1080/420));max-height:min(12vh,100px)}
-  #helloov .hi-name{font-size:20px;margin:0 0 4px}
-  #helloov .hi-line{margin:0 0 8px;font-size:12px}
-  #helloov .hi-stats{margin:0 0 6px}
-  #helloov .hi-stats>div{padding:6px 4px}
-  #helloov .hi-start{gap:6px;justify-content:flex-start;padding-top:4px}
-  #helloov .hi-g{min-height:42px;padding:8px}
-  #helloov .hi-go{min-height:46px;font-size:17px;padding:10px}
-  #helloov .hi-nw{min-height:36px}
-  #helloov .hi-q{font-size:18px}
-}
-@media (max-height:700px){
-  #helloov .hi-pic-in,#helloov.hi-hasprog .hi-pic-in{width:min(100%,calc(min(10vh,80px)*1080/420));max-height:min(10vh,80px)}
-  #helloov .hi-copy{padding-top:8px;padding-bottom:4px}
-  #helloov .hi-stats b{font-size:16px}
-  #helloov .hi-g{min-height:40px;padding:6px;font-size:14px}
+  #helloov .hi-start,#helloov .hi-copy{max-width:min(920px,calc(100% - 48px));width:100%;margin-left:auto;margin-right:auto;box-sizing:border-box}
 }
 </style>`);
 }
@@ -4382,14 +4362,25 @@ function aboutTabAdd(){
   s.onclick=open;
   s.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
 }
+function aboutTabHyphen(){
+  const sec=document.getElementById('tb-sec');
+  if(!sec)return;
+  const t=(sec.textContent||'').replace(/\u00ad/g,'');
+  if(t==='Безопасность')sec.textContent='Безопас\u00adность';
+}
 function aboutTabMark(){
   const s=document.getElementById('tb-about');
   if(s)s.className=(typeof cur==='string'&&cur==='about')?'on':'';
+  aboutTabHyphen();
 }
 function aboutTabCss(){
   if(document.getElementById('about-tab-css'))return;
   document.head.insertAdjacentHTML('beforeend',`<style id="about-tab-css">
-.tab span{flex:1 1 0;min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box}
+#phone>.tab{align-items:stretch}
+#phone>.tab>span{flex:1 1 0;min-width:0;text-align:center;box-sizing:border-box;white-space:normal;overflow:hidden;line-height:1.15;font-size:clamp(8.5px,2.55vw,10.5px);display:flex;align-items:center;justify-content:center;padding:2px 1px;hyphens:manual;overflow-wrap:normal;word-break:normal}
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (min-width:700px) and (min-height:501px) and (max-height:820px){
+#phone>.tab>span{display:block;text-align:left;font-size:inherit;line-height:1.25;padding:5px 8px;justify-content:flex-start;white-space:normal}
+}
 #tb-about{cursor:pointer}
 </style>`);
 }
@@ -4418,7 +4409,11 @@ function idleCheck(){if(IDLE_busy||!idleExpired())return false;IDLE_busy=1;
  try{AU.qr='';AU.qrl='';AU.has=0;AU.step='';AU.code='';AU.msg='';AU.err=''}catch(e){}
  try{if(typeof csClose==='function')csClose()}catch(e){}try{auBtnSync()}catch(e){}try{if(cur==='path')show('path')}catch(e){}
  idleShow();IDLE_busy=0;return true}
-function idleShow(){if(typeof sitiusSuccess!=='function')return;const ov=sitiusSuccess({title:'Вы вышли из-за неактивности',text:'Ответы сохранены.',btn:'Войти снова'});
+function idleSplashUp(){const sp=document.getElementById('splash');return !!(sp&&sp.isConnected)}
+function idleShow(){
+ if(idleSplashUp()){if(!idleShow._w){idleShow._w=1;const t=()=>{if(idleSplashUp()){setTimeout(t,250);return}idleShow._w=0;try{idleShow()}catch(e){}};setTimeout(t,250)}return}
+ if(document.querySelector('.sx-idle'))return;
+ if(typeof sitiusSuccess!=='function')return;const ov=sitiusSuccess({title:'Вы вышли из-за неактивности',text:'Ответы сохранены.',btn:'Войти снова'});
  if(!ov)return;ov.classList.add('sx-idle');const sv=ov.querySelector('svg');if(sv)sv.remove();
  const b=ov.querySelector('.sx-b');if(b)b.onclick=()=>{ov.remove();try{auOpen()}catch(e){}}}
 // вход (почта, Telegram, телефон, QR) — новая отметка активности
