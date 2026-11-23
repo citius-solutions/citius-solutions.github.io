@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 19:35';
+var APPV='23.11.2026 19:37';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -5347,6 +5347,8 @@ document.addEventListener('click',ev=>{const t=ev.target&&ev.target.closest&&ev.
 
 // ===== общий хук после отрисовки экрана
 function after(){fixTel();wireBack();
+  // ПК: раскладка p19 «карточки в ряд + панель Ваш старт» включалась на всех экранах этапа 0 (/^s0/) — на s0b–s0d колонки сжимались до букв. Оставляем её только на s0a.
+  try{const ph=document.getElementById('phone');if(ph&&cur!=='s0a')ph.classList.remove('c19-s0')}catch(e){}
   try{if(cur==='s0d')s0dPlan()}catch(e){LOG('fx20-a',e)}
   try{noRepeat()}catch(e){LOG('fx20-c',e)}
   try{if(['s1a','s1b','sum','plan'].includes(cur))priceDate();if(cur==='sum')budgetNote()}catch(e){LOG('fx20-d',e)}
