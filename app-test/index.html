@@ -906,6 +906,10 @@ const SVK='sitius-progress';
 function saveSt(){if(window.__noSave)return;try{localStorage.setItem(SVK,JSON.stringify({v:1,t:Date.now(),A,done:[...done],cur,hist:hist.slice(-40)}))}catch(e){}}
 function resetAll(){if(!confirm('Стереть ответы на этом устройстве и начать заново?'))return;try{localStorage.removeItem(SVK);localStorage.removeItem(SVK+'-prev')}catch(e){}window.__noSave=1;location.hash='';location.reload()}
 document.addEventListener('input',()=>setTimeout(saveSt,0));document.addEventListener('change',()=>setTimeout(saveSt,0));
+// 23.11 n28: чистый старт — общая очистка сохранённых ответов (кроме темы) и разовый сброс старого прогресса прошлых тестов
+function wipeProgress(){try{const P=SVK.replace(/progress$/,'');Object.keys(localStorage).forEach(k=>{if(k.startsWith(P)&&k!==THK&&k!==P+'fresh')localStorage.removeItem(k)})}catch(e){}}
+(function(){try{if(SVK!=='sitius-progress')return;const F='sitius-fresh',V='2311';if(localStorage.getItem(F)!==V){wipeProgress();localStorage.setItem(F,V)}}catch(e){}})();
+window.__autoupd=(()=>{try{return !!sessionStorage.getItem('sitius-autoupd')}catch(e){return false}})();
 (function(){const h=new URLSearchParams(location.hash.slice(1));if([...h.keys()].some(k=>!['theme','nosplash','splashhold','help','scroll'].includes(k)))return;const rd=k=>{try{const x=JSON.parse(localStorage.getItem(k)||'null');return x&&x.A&&x.A.goal?x:null}catch(e){return null}};let d=rd(SVK);if(!d)d=rd(SVK+'-prev');
  if(!d||!d.A||!d.A.goal)return;Object.assign(A,d.A);A.ck=d.A.ck||{};(d.done||[]).forEach(x=>done.add(x));hist.push(...(d.hist||[]));window.__restored={cur:d.cur,t:d.t};
  /* 23.11 n27: заставка и при восстановлении сохранённого прогресса держится 4 с (тап пропускает) */})();
@@ -2407,7 +2411,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='23.11.2026 12:34';
+var APPV='23.11.2026 12:50';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -2903,4 +2907,12 @@ const REGA_T='Архивная справка о зарегистрирован�
   for(const [k,v] of h){if(!['s','demo','help','done','scroll','theme','nosplash','splashhold'].includes(k))A[k]=v;}
   (h.get('done')||'').split(',').filter(Boolean).forEach(x=>done.add(+x));}
  if(h.get('demo'))window.__noSave=1;show(h.get('s')||(window.__restored&&SCR[window.__restored.cur]?window.__restored.cur:'s0a'));if(h.get('help'))$('helpbtn').click();if(h.get('scroll'))$('body').scrollTop=+h.get('scroll');})();
+// 23.11 n28: при сохранённом прогрессе — выбор «Продолжить» / «Начать заново» (виден после заставки)
+(function(){if(!window.__restored||window.__autoupd||SVK!=='sitius-progress')return;
+ const st=document.createElement('style');st.textContent=`#resumeov{position:absolute;inset:0;z-index:45;zoom:1!important;background:rgba(18,28,45,.94);display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box}#resumeov .rv{background:#fbf8f1;color:#1e2f4a;border-radius:16px;padding:24px 20px;max-width:420px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.35);text-align:center}#resumeov h2{font-family:'Playfair Display',Georgia,serif;font-size:22px;line-height:1.25;margin:0 0 10px}#resumeov p{font-size:15px;line-height:1.45;margin:0 0 18px}#resumeov button{display:block;width:100%;font-size:17px;font-weight:600;padding:15px 12px;border-radius:12px;margin-top:10px;cursor:pointer}#resumeov .go{background:#c9a46a;color:#1e2f4a;border:0}#resumeov .nw{background:transparent;color:#1e2f4a;border:2px solid #1e2f4a}`;document.head.appendChild(st);
+ const o=document.createElement('div');o.id='resumeov';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','resumeh');
+ o.innerHTML=`<div class="rv"><h2 id="resumeh">На этом устройстве есть сохранённые ответы</h2><p>Если вы открываете приложение впервые или хотите начать с чистого листа, нажмите «Начать заново» — все сохранённые ответы на этом устройстве будут удалены.</p><button class="go" type="button" id="resgo">Продолжить с того места, где остановились</button><button class="nw" type="button" id="resnew">Начать заново</button></div>`;
+ const ph=document.getElementById('phone')||document.body;ph.appendChild(o);
+ o.querySelector('#resgo').onclick=()=>o.remove();
+ o.querySelector('#resnew').onclick=()=>{window.__noSave=1;wipeProgress();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}location.reload()};})();
 </script><script id="sw-reg">if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})});navigator.serviceWorker.addEventListener("message",function(e){if(e.data!=="sitius-upd"||document.getElementById("updbar"))return;var d=document.createElement("div");d.id="updbar";d.setAttribute("role","status");d.style.cssText="position:fixed;left:10px;right:10px;bottom:12px;z-index:9999;background:#1e2f4a;color:#f7f3ea;border:1.5px solid #c9a46a;border-radius:12px;padding:10px 12px;font:600 14px/1.35 system-ui,sans-serif;display:flex;gap:10px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.35)";d.innerHTML="<span style=\"flex:1\">Вышла новая версия Аппа. Ответы сохранятся.</span><button style=\"background:#c9a46a;color:#1e2f4a;border:0;border-radius:9px;padding:8px 12px;font:700 14px system-ui,sans-serif\">Обновить</button>";d.querySelector("button").onclick=function(){location.reload()};document.body.appendChild(d)})}</script></body></html>
