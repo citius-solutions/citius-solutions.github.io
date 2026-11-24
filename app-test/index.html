@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='24.11.2026 13:09';
+var APPV='24.11.2026 13:31';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6361,6 +6361,27 @@ addEventListener('resize',()=>{try{aiApply()}catch(e){}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',aiApply);
 else setTimeout(aiApply,0);
 setTimeout(aiApply,200);
+})();
+// ---------- n29 p24 (24.11) · альтернатива: нижняя граница поиска встречного объекта — 1 неделя
+// Владелец 24.11: продавец часто ищет встречку параллельно с продажей или уже подобрал.
+// Верхнюю границу (8 недель) не меняем. Новых вопросов не добавляем.
+// Покупка без продажи и новостройка остаются «4–8 нед.».
+(function(){
+  function altSeek(){try{return A.goal==='alt'&&!nbMode()}catch(e){return false}}
+  try{
+    const s=STAGES.find(x=>x.n===6);
+    if(s){
+      Object.defineProperty(s,'w',{configurable:true,enumerable:true,get:function(){return altSeek()?'1–8 нед. ⚠':'4–8 нед. ⚠'}});
+    }
+  }catch(e){try{logErr('p24-w',e)}catch(x){}}
+  try{
+    const wk0=WK;
+    WK=function(n){
+      const w=wk0(n);
+      if(n===6&&altSeek()&&w&&w.d&&w.d[0]===28)return Object.assign({},w,{d:[7,w.d[1]]});
+      return w;
+    };
+  }catch(e){try{logErr('p24-wk',e)}catch(x){}}
 })();
 // ===== n29 END
 
