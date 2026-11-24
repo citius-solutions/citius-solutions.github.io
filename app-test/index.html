@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='24.11.2026 13:31';
+var APPV='24.11.2026 23:16';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6382,6 +6382,109 @@ setTimeout(aiApply,200);
       return w;
     };
   }catch(e){try{logErr('p24-wk',e)}catch(x){}}
+})();
+// ---------- n29 p25 (24.11) · мелкие правки (GB-18): яркий «?», вопрос про отказ от приватизации, этап 1 при альтернативе — «Оценка вашей квартиры»
+(function(){
+// ===== 1. «?» ярче и контрастнее (размеры не меняем: только цвет, фон, обводка, насыщенность знака)
+try{if(!document.getElementById('n29-p25-css'))document.head.insertAdjacentHTML('beforeend',`<style id="n29-p25-css">
+button.c21-qbtn:before,
+#body .c19-more>summary.c21-q:before,
+#cmpsheet .cs-more>summary.c21-q:before,
+#body .c19-more summary:before,
+.ntr button.c21-qbtn:before,[data-theme=light] .ntr button.c21-qbtn:before{
+  background:#dcb862!important;border-color:#8f6c2a!important;color:#14213a!important;font-weight:800!important;
+  box-shadow:0 0 0 1.5px rgba(240,217,168,.6),0 1px 4px rgba(0,0,0,.35)
+}
+[data-theme=light] button.c21-qbtn:before,
+[data-theme=light] #body .c19-more>summary.c21-q:before,
+[data-theme=light] #cmpsheet .cs-more>summary.c21-q:before,
+[data-theme=light] #body .c19-more summary:before{
+  background:#a8823a!important;border-color:#7d5f24!important;color:#fff!important;font-weight:800!important;
+  box-shadow:0 1px 3px rgba(80,55,15,.35)
+}
+button.c21-qbtn[aria-expanded=true]:before,#body .c19-more[open]>summary.c21-q:before{background:#f0d9a8!important}
+[data-theme=light] button.c21-qbtn[aria-expanded=true]:before,[data-theme=light] #body .c19-more[open]>summary.c21-q:before{background:#7d5f24!important}
+.p25-priv{margin-top:6px}
+</style>`)}catch(e){try{logErr('p25-css',e)}catch(x){}}
+
+// ===== 2. Приватизация: были ли отказавшиеся от участия
+try{if(typeof OKEYS!=='undefined'&&OKEYS.push&&!OKEYS.includes('privref'))OKEYS.push('privref')}catch(e){}
+const PRIV_LAW='ст. 19 Федерального закона № 189-ФЗ «О введении в действие Жилищного кодекса РФ»';
+const PRIV_STEP='До сделки: лица, отказавшиеся от приватизации, добровольно снимаются с регистрационного учёта или дают нотариально заверенное обязательство сняться с учёта';
+function privObjs(){try{return sObjs().filter(o=>(o.acqs||[]).includes('priv')||(!(o.acqs||[]).length&&o.acq==='priv'))}catch(e){return []}}
+function privRisk(){return privObjs().some(o=>o.privref==='y'||o.privref==='dk')}
+function privOnlyDk(){const L=privObjs().filter(o=>o.privref==='y'||o.privref==='dk');return L.length&&L.every(o=>o.privref==='dk')}
+window.p25privRisk=privRisk;
+function privWarn(v){
+  return `<div class="note risk p25-priv">${v==='dk'?'Уточните это заранее. ':''}Если такие люди есть, они сохраняют бессрочное право пользования квартирой (${PRIV_LAW}). Это право сохраняется и после продажи. Покупатель и банк это проверяют, поэтому круг покупателей становится меньше.<br>Что сделать до сделки: эти люди добровольно снимаются с регистрационного учёта или дают нотариально заверенное обязательство сняться с учёта. Шаг добавлен в «План сделки».</div>`}
+try{
+  const ab=acqBlock;
+  acqBlock=function(i,opts,full){
+    const h=ab.apply(this,arguments);
+    try{
+      if(full)return h;
+      const o=OB(i);if(!(o.acqs||[]).includes('priv'))return h;
+      return h+`<div class="f p25-privq"><div class="lbl">Есть ли лица, которые имели право участвовать в приватизации, но отказались от неё?${(A.so||[]).length?' · '+oRef(i):''}</div>${chipsO(i,'privref',[['y','Да'],['n','Нет'],['dk','Не знаю']])}${o.privref==='y'||o.privref==='dk'?privWarn(o.privref):''}</div>`;
+    }catch(e){try{logErr('p25-acq',e)}catch(x){}return h}
+  };
+}catch(e){try{logErr('p25-acqw',e)}catch(x){}}
+// шаг в «Плане сделки» (экран и PDF)
+try{
+  const ps=planSections;
+  planSections=function(){
+    const S=ps.apply(this,arguments);
+    try{
+      if(!privRisk())return S;
+      const it={h:'Приватизация: лица, отказавшиеся от участия',list:[...(privOnlyDk()?['Уточнить, есть ли такие лица']:[]),(privOnlyDk()?'Если есть — д':'Д')+PRIV_STEP.slice(1),
+          'Почему это важно: такие лица сохраняют бессрочное право пользования квартирой, и оно сохраняется после продажи ('+PRIV_LAW+'). Покупатель и банк это проверяют']};
+      const k=S.findIndex(x=>x.h==='Какие документы понадобятся');
+      if(k>=0)S.splice(k,0,it);else S.push(it);
+    }catch(e){try{logErr('p25-plan',e)}catch(x){}}
+    return S;
+  };
+}catch(e){try{logErr('p25-planw',e)}catch(x){}}
+// шаг в этапе 2 «Готовим к продаже» (документы заранее) и +1 шаг в подсчёте
+try{
+  if(SCR.s2c&&typeof SCR.s2c.b==='function'){
+    const b0=SCR.s2c.b;
+    SCR.s2c.b=function(){
+      const h=b0.apply(this,arguments);
+      try{
+        if(!privRisk())return h;
+        const c=ck('p25priv',PRIV_STEP+' ('+PRIV_LAW+')',T('t-own','собственник · нотариус — для обязательства'));
+        const i=h.indexOf('<div class="f">');
+        return i>=0?h.slice(0,i+15)+c+h.slice(i+15):c+h;
+      }catch(e){try{logErr('p25-s2c',e)}catch(x){}return h}
+    };
+  }
+}catch(e){try{logErr('p25-s2cw',e)}catch(x){}}
+try{
+  const wk1=WK;
+  WK=function(n){const w=wk1(n);try{if(n===2&&w&&privRisk())return Object.assign({},w,{st:w.st+1})}catch(e){}return w};
+}catch(e){try{logErr('p25-wk',e)}catch(x){}}
+
+// ===== 3. Этап 1 при альтернативе — просто «Оценка вашей квартиры» (как при продаже)
+try{
+  const sn0=stageName;
+  stageName=function(kind){
+    try{
+      if(kind===1&&A.goal==='alt'&&sells()){
+        const sG=grpN(sKinds()),sd=sLocDiff(),sn=sUnits().length,fit=L=>L.find(t=>t.length<=SHORT)||L[L.length-1];
+        return fit(['Оценка '+phr(sG,sd,true),'Оценка '+phr(sG,false,true),'Оценка ваших '+objGen(sn)]);
+      }
+    }catch(e){try{logErr('p25-sn',e)}catch(x){}}
+    return sn0.apply(this,arguments);
+  };
+}catch(e){try{logErr('p25-snw',e)}catch(x){}}
+// убираем «и подбор» из подписи в шапке экранов этапа 1
+try{
+  const sh=show;
+  show=function(id){
+    const r=sh.apply(this,arguments);
+    try{const s=SCR[id];if(s&&s.st===1&&A.goal==='alt'){const e=$('stepinfo');if(e&&/Оценка и подбор/.test(e.textContent))e.textContent=e.textContent.replace('Оценка и подбор','Оценка')}}catch(e){}
+    return r;
+  };
+}catch(e){try{logErr('p25-show',e)}catch(x){}}
 })();
 // ===== n29 END
 
