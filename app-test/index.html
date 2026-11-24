@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='24.11.2026 10:55';
+var APPV='24.11.2026 11:08';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -3619,7 +3619,7 @@ document.head.insertAdjacentHTML('beforeend','<style>.top .brand{white-space:now
 const TGQ=1;  // кнопка «Задать вопрос в Telegram» — только после деплоя Code.gs v2.1 (N29_TGQ=1)
 // ---------- n29 (23.11 15:35) · верхняя кнопка — меню: «Связаться с Ситиусом» (те же кнопки cBtns) + «Продолжить на другом устройстве» (вход, ссылка, файл)
 const TGQ_URL='https://t.me/citius_zayavki_bot?start=q';
-const tgqBtn=()=>TGQ?`<a class="btn ghost tgq" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:8px;text-align:center;text-decoration:none" href="${TGQ_URL}" target="_blank" rel="noopener">Задать вопрос в Telegram ↗</a><div class="hint" style="margin-top:3px">Откроется бот Ситиуса: нажмите «Старт» и напишите вопрос — сотрудник ответит там же.</div>`:'';
+const tgqBtn=()=>TGQ?`<a class="btn ghost tgq" style="display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:8px;text-align:center;text-decoration:none" href="${TGQ_URL}" target="_blank" rel="noopener">Задать вопрос в Telegram ↗</a><div class="hint" style="margin-top:3px">Откроется бот Ситиуса: нажмите «Старт» и напишите вопрос — сотрудник свяжется с вами.</div>`:'';
 if(TGQ){const cb0=cBtns;cBtns=function(){const h=cb0.apply(this,arguments);const k=h.indexOf('<div class="hint" style="margin-top:5px">MAX откроет');return k>=0?h.slice(0,k)+tgqBtn()+h.slice(k):h+tgqBtn()};
  // окно «Нужна помощь человека» собрано при загрузке — добавляем туда же
  (function(){try{const b=document.querySelector('#sheet .cbtns');if(b&&!b.querySelector('.tgq')){const m=b.querySelector('.hint');const d=document.createElement('div');d.innerHTML=tgqBtn();[...d.childNodes].forEach(n=>m?b.insertBefore(n,m):b.appendChild(n))}}catch(e){}})()}
@@ -4174,7 +4174,7 @@ function supRedraw(){if(typeof csR==='function'&&typeof csE==='function'&&csE('c
 function supOpen(){SUP.ok=0;SUP.err='';SUP.busy=0;if(typeof csOpen==='function'){csOpen('sup');return}supOwnOpen()}
 function supClose(){try{const o=typeof csE==='function'&&csE('cmpsheet');if(o&&o.style.display==='flex'&&typeof csClose==='function'){csClose();supReset();return}}catch(e){}supOwnClose();supReset()}
 function supView(){
- if(SUP.ok){const ok=SUP.hadContact?'Спасибо, мы получили сообщение и ответим':'Спасибо, мы получили сообщение';return ['Сообщить о проблеме',`<div class="cs-ok" role="status">${ok}</div>`+(typeof csBtn==='function'?csBtn('Закрыть','supClose()','pri'):`<button type="button" class="cs-b pri" onclick="supClose()">Закрыть</button>`)]}
+ if(SUP.ok){return ['Сообщить о проблеме',`<div class="cs-ok" role="status">Спасибо, заявка принята. Сотрудник Ситиуса свяжется с вами.</div>`+(typeof csBtn==='function'?csBtn('Закрыть','supClose()','pri'):`<button type="button" class="cs-b pri" onclick="supClose()">Закрыть</button>`)]}
  const err=SUP.err?`<div class="cs-err" role="alert">${supEsc(SUP.err)}</div>`:'';
  const btn=SUP.busy?'Отправляем…':(SUP.err?'Отправить ещё раз':'Отправить');
  const file=SUP.fileName?`<div class="cs-h" id="supfn">Файл: ${supEsc(SUP.fileName)}</div>`:'';
