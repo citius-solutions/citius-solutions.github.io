@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 09:35';
+var APPV='25.11.2026 09:40';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6411,7 +6411,7 @@ try{if(typeof OKEYS!=='undefined'&&OKEYS.push&&!OKEYS.includes('privref'))OKEYS.
 const PRIV_LAW='ст. 19 Федерального закона № 189-ФЗ «О введении в действие Жилищного кодекса РФ»';
 // 25.11 (владелец, юрист): без «или». Главное — добровольное снятие с учёта; нотариальное обязательство — дополнительно
 const PRIV_MAIN='до сделки эти люди добровольно снимаются с регистрационного учёта. По свежей судебной практике это считается отказом от бессрочного права пользования. Справку о зарегистрированных покажите покупателю.';
-const PRIV_EXTRA='Дополнительно, или если до сделки снятие с учёта не успевают оформить, — нотариально заверенное обязательство сняться с учёта. Оно не гарантирует выписку, но может пригодиться в суде, если дело дойдёт до этого.';
+const PRIV_EXTRA='Дополнительно — нотариально заверенное обязательство сняться с учёта. Оно не гарантирует выписку, но может пригодиться, если дело дойдёт до суда.';
 const PRIV_WHY='Почему это важно: такие лица сохраняют бессрочное право пользования квартирой, и оно сохраняется после продажи ('+PRIV_LAW+'). Покупатель и банк это проверяют.';
 function privObjs(){try{return sObjs().filter(o=>(o.acqs||[]).includes('priv')||(!(o.acqs||[]).length&&o.acq==='priv'))}catch(e){return []}}
 function privRisk(){return privObjs().some(o=>o.privref==='y'||o.privref==='dk')}
