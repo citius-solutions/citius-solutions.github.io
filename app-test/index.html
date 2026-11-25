@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 15:52';
+var APPV='25.11.2026 16:10';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7322,6 +7322,155 @@ try{if(!document.getElementById('n29-p34-css'))document.head.insertAdjacentHTML(
 #body .p34-ownlabs+ .row,
 #body .p34-ownlabs+.row{align-items:flex-end}
 </style>`)}catch(e){try{logErr('p34-css',e)}catch(x){}}
+})();
+// ---------- n29 p35 (25.11) · «Мой путь»: нажатие по этапу, номера у готовых, защита оценки
+// Почему «Оценка вашей квартиры» ничего не открывала (повторный вход, продажа+покупка):
+// 1) A.lst — это и способ размещения объявления («sitius» / «self»), и список цен похожих.
+//    OB(0) это сам A. После этапа «Объявление» lst становится строкой, а lstv уже 1 —
+//    vEst делает vRows().filter и падает, show ловит сбой и возвращает на «Мой путь»
+//    (простой список с подписью «открыть»). Нажатие выглядит как пустое: экран не меняется.
+// 2) На полной карточке этапа кликабельны только кружок и название (~15px).
+//    Подпись «осталось…» и пустое место в строке без обработчика — на телефоне промах
+//    по названию тоже ничего не делает.
+// Правки только здесь, чужие файлы не меняем.
+(function(){
+function isPlace(v){return typeof v==='string'&&v!==''&&!/^\s*\[/.test(v)}
+function asRows(v){
+  if(Array.isArray(v))return v;
+  if(typeof v==='string'&&/^\s*\[/.test(v)){
+    try{const p=JSON.parse(v);if(Array.isArray(p))return p}catch(e){}
+  }
+  return null;
+}
+function buildRows(j,o){
+  const R=[];
+  try{
+    const src=j?(o.comps||[]):(A.comps||[]);
+    (Array.isArray(src)?src:[]).forEach(c=>{if(c&&c.src==='добавлено вами'&&typeof num==='function'&&num(c.p))R.push({p:c.p,a:c.a||''})});
+    ['e1','e2','e3'].forEach(k=>{if(typeof num==='function'&&num(o[k]))R.push({p:o[k],a:''})});
+  }catch(e){}
+  return R;
+}
+try{
+  if(typeof vRows==='function'){
+    const v0=vRows;
+    vRows=function(j){
+      try{
+        const o=(typeof OB==='function'?OB(j):null)||{};
+        const keep=isPlace(o.lst)?o.lst:null;
+        const ready=asRows(o.lstRows);
+        if(keep){
+          if(ready)return ready;
+          o.lstRows=buildRows(j,o);
+          return o.lstRows;
+        }
+        const fromLst=asRows(o.lst);
+        if(fromLst){
+          if(!Array.isArray(o.lst))o.lst=fromLst;
+          return o.lst;
+        }
+        if(o.lstv&&o.lst!=null&&!Array.isArray(o.lst)){
+          o.lstRows=ready||buildRows(j,o);
+          return o.lstRows;
+        }
+        let L;
+        try{L=v0.apply(this,arguments)}catch(e){L=null}
+        if(Array.isArray(L)){
+          if(keep){o.lstRows=L;o.lst=keep;return o.lstRows}
+          return L;
+        }
+        if(keep){o.lst=keep;o.lstRows=buildRows(j,o);return o.lstRows}
+        o.lst=[];o.lstv=1;
+        return o.lst;
+      }catch(e){try{logErr('p35-vRows',e)}catch(x){}return []}
+    };
+  }
+}catch(e){try{logErr('p35-vRows-wrap',e)}catch(x){}}
+
+const CSS=`
+.st{cursor:pointer}
+.dot{position:relative}
+.dot .p35n{font-size:10.5px;font-weight:800;line-height:1}
+.dot .p35ok{position:absolute;right:-4px;bottom:-4px;width:13px;height:13px;border-radius:50%;background:#c9a46a;color:#1e2f4a;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:13px;box-shadow:0 0 0 1.5px #1e2f4a}
+[data-theme=light] .dot .p35ok{box-shadow:0 0 0 1.5px #fbf8f1}
+.dot.cur .p35ok{background:#1e2f4a;color:#c9a46a;box-shadow:0 0 0 1.5px #c9a46a}
+[data-theme=light] .dot.cur .p35ok{box-shadow:0 0 0 1.5px #c9a46a}
+`;
+try{
+  if(!document.getElementById('p35css')){
+    const st=document.createElement('style');st.id='p35css';st.textContent=CSS;document.head.appendChild(st);
+  }
+}catch(e){}
+
+function pathStages(){
+  try{return STAGES.filter(s=>{try{return s.show()}catch(e){return true}})}catch(e){return STAGES||[]}
+}
+function stageTarget(s){
+  try{if(typeof sF==='function')return sF(s)||'path'}catch(e){}
+  try{return s.first||'path'}catch(x){return 'path'}
+}
+function p35Decorate(){
+  if(typeof cur==='string'&&cur!=='path')return;
+  const root=document.getElementById('body');if(!root)return;
+  const L=pathStages();
+  const rows=[...root.querySelectorAll('.st')];
+  rows.forEach((row,i)=>{
+    const s=L[i];
+    const title=row.querySelector('.t');
+    const dot=row.querySelector('.dot');
+    let id=row.getAttribute('data-go')||'';
+    const src=[title,dot].find(el=>el&&el.getAttribute('onclick'));
+    const oc=src&&src.getAttribute('onclick')||'';
+    const m=oc.match(/go\(['"]([^'"]+)['"]\)/);
+    if(m)id=m[1];
+    if(!id&&s)id=stageTarget(s);
+    if(id)row.setAttribute('data-go',id);
+    if(src){
+      row.querySelectorAll('.dot[onclick], .t[onclick]').forEach(el=>el.removeAttribute('onclick'));
+    }
+    if(dot&&s&&s.n!==0){
+      const num=(typeof dispNo==='function'?dispNo(s.n):i);
+      const isDone=typeof done!=='undefined'&&done.has(s.n);
+      if(isDone){
+        if(!dot.querySelector('.p35n')){
+          dot.innerHTML='<span class="p35n">'+num+'</span><span class="p35ok" aria-hidden="true">✓</span>';
+        }
+      }else if(!String(dot.textContent||'').trim()){
+        dot.textContent=String(num);
+      }
+    }
+  });
+}
+function p35Bind(){
+  const root=document.getElementById('body');
+  if(!root)return;
+  if(!root.__p35bind){
+    root.__p35bind=1;
+    root.addEventListener('click',function(e){
+      if(cur!=='path')return;
+      if(e.target.closest('a,button,input,select,textarea,label'))return;
+      const row=e.target.closest('.st');if(!row)return;
+      const id=row.getAttribute('data-go');
+      if(!id||(id==='path'&&cur==='path'))return;
+      e.preventDefault();
+      try{go(id)}catch(err){try{logErr('p35-go',err)}catch(x){}}
+    });
+  }
+  p35Decorate();
+}
+
+try{
+  const sh=show;
+  show=function(id,keep){
+    let r;
+    try{r=sh.apply(this,arguments)}
+    finally{
+      try{if(cur==='path')p35Bind()}catch(e){try{logErr('p35-bind',e)}catch(x){}}
+    }
+    return r;
+  };
+}catch(e){try{logErr('p35-show',e)}catch(x){}}
+try{if(cur==='path')p35Bind()}catch(e){}
 })();
 // ===== n29 END
 
