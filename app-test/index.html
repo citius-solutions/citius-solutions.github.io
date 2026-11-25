@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 13:14';
+var APPV='25.11.2026 13:20';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6978,9 +6978,8 @@ form.re-form{display:block;margin:0;padding:0;width:100%;border:0;min-width:0}
 }catch(e){try{logErr('p32-css',e)}catch(x){}}
 })();
 // ---------- n29 p33 (25.11) · изящный график рыночной и желаемой цены
-// Вместо широкого сплошного столбика («слиток») — тонкие горизонтальные полоски
-// с мягким градиентом, воздух и бегущие цифры. Разница только если есть обе цены.
-// Палитра Аппа: золото и синий, без красного и зелёного. Разница — одна строка.
+// Тонкие полоски, палитра Аппа (золото и синий), без красного. Разница — одна строка.
+// Коридор рыночной — тот же, что в графиках оценки v1/v2: e.mkt*.9 … e.mkt*1.1 (±10 %).
 // p5_charts не меняем: этот файл идёт после и переопределяет chartPrices / chPlay / chBind.
 (function(){
 if(document.getElementById('n29-p33-css'))document.getElementById('n29-p33-css').remove();
@@ -6990,7 +6989,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-p33-css">
 .chart.ch33{margin:4px 0 2px}
 .ch33-diff{margin:2px 0 14px;text-align:left;font:600 11px/1.3 Montserrat,sans-serif;letter-spacing:.01em;color:#8a6a2f;white-space:nowrap}
 [data-theme=dark] .ch33-diff{color:#e0c48f}
-.ch33-diff.eq{opacity:.8}
+.ch33-diff.eq{opacity:.85}
 .ch33-diff .ch-n1{display:inline}
 .ch33-row{margin:0 0 14px}.ch33-row:last-child{margin-bottom:2px}
 .ch33-meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:7px}
@@ -6999,17 +6998,28 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-p33-css">
 .ch33-amt.m{color:#8a6a2f}[data-theme=dark] .ch33-amt.m{color:#e0c48f}
 .ch33-amt.o{color:#1e2f4a}[data-theme=dark] .ch33-amt.o{color:#d0d7e2}
 .ch33-track{position:relative;height:5px;border-radius:99px;background:rgba(168,132,74,.14);overflow:visible}
+.ch33-row.m .ch33-track{height:8px}
 [data-theme=dark] .ch33-track{background:rgba(224,196,143,.14)}
 .ch33-track:after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:1px;background:currentColor;opacity:.16;pointer-events:none}
 .ch33-row:not(:last-child) .ch33-track:after{display:none}
+.ch33-zone{position:absolute;top:0;height:100%;left:var(--lo,0%);width:calc(var(--hi,0%) - var(--lo,0%));border-radius:99px;transform-origin:50% center;transform:scaleX(1);
+  background:linear-gradient(90deg,rgba(184,147,90,.38) 0%,rgba(201,164,106,.52) 50%,rgba(224,196,143,.38) 100%)}
+[data-theme=dark] .ch33-zone{background:linear-gradient(90deg,rgba(184,147,90,.42) 0%,rgba(201,164,106,.58) 50%,rgba(224,196,143,.42) 100%)}
+.ch33-mid{position:absolute;top:-3px;bottom:-3px;left:var(--mid,50%);width:2px;margin-left:-1px;border-radius:1px;background:#c9a46a;pointer-events:none}
+[data-theme=dark] .ch33-mid{background:#e0c48f}
 .ch33-bar{display:block;height:100%;width:var(--p,0%);max-width:100%;border-radius:99px;transform-origin:left center;transform:scaleX(1);box-shadow:0 0 0 .5px rgba(168,132,74,.18)}
-.ch33-bar.m{background:linear-gradient(90deg,#b8935a 0%,#c9a46a 42%,#e0c48f 100%)}
 .ch33-bar.o{background:linear-gradient(90deg,#1e2f4a 0%,#2a3f5f 52%,#4a5f7a 100%);box-shadow:0 0 0 .5px rgba(30,47,74,.28)}
 [data-theme=dark] .ch33-bar.o{background:linear-gradient(90deg,#8a9bb3 0%,#c3cbd8 52%,#e6eaf0 100%);box-shadow:0 0 0 .5px rgba(195,203,216,.28)}
 .chart.ch33:not(.ch-done) .ch33-bar{transform:scaleX(0)}
+.chart.ch33:not(.ch-done) .ch33-zone{transform:scaleX(0);opacity:0}
+.chart.ch33:not(.ch-done) .ch33-mid{opacity:0}
 .chart.ch33.ch-in:not(.ch-done) .ch33-bar{transform:scaleX(1);transition:transform .9s cubic-bezier(.22,1,.36,1)}
 .chart.ch33.ch-in:not(.ch-done) .ch33-bar.o{transition-delay:.16s}
+.chart.ch33.ch-in:not(.ch-done) .ch33-zone{transform:scaleX(1);opacity:1;transition:transform .9s cubic-bezier(.22,1,.36,1),opacity .45s ease-out}
+.chart.ch33.ch-in:not(.ch-done) .ch33-mid{opacity:1;transition:opacity .35s ease-out .2s}
 .chart.ch33.ch-done .ch33-bar,.chart.ch33.chno .ch33-bar{transform:scaleX(1);transition:none}
+.chart.ch33.ch-done .ch33-zone,.chart.ch33.chno .ch33-zone{transform:scaleX(1);opacity:1;transition:none}
+.chart.ch33.ch-done .ch33-mid,.chart.ch33.chno .ch33-mid{opacity:1;transition:none}
 .chart.ch33:not(.ch-done) .ch33-amt,.chart.ch33:not(.ch-done) .ch33-diff{opacity:0}
 .chart.ch33.ch-in:not(.ch-done) .ch33-amt{opacity:1;transition:opacity .3s ease-out .08s}
 .chart.ch33.ch-in:not(.ch-done) .ch33-amt.o{transition-delay:.22s}
@@ -7018,26 +7028,47 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-p33-css">
 .chart.ch33.chno .ch33-amt,.chart.ch33.chno .ch33-diff{opacity:1;transition:none}
 @media (prefers-reduced-motion:reduce){
  .chart.ch33 .ch33-bar,.chart.ch33:not(.ch-in):not(.ch-done) .ch33-bar{transform:scaleX(1);transition:none}
+ .chart.ch33 .ch33-zone,.chart.ch33:not(.ch-in):not(.ch-done) .ch33-zone{transform:scaleX(1);opacity:1;transition:none}
+ .chart.ch33 .ch33-mid{opacity:1;transition:none}
  .chart.ch33 .ch33-amt,.chart.ch33 .ch33-diff,
  .chart.ch33.ch-in:not(.ch-done) .ch33-amt,.chart.ch33.ch-in:not(.ch-done) .ch33-diff{opacity:1;transition:none}
 }
 </style>`);
 
+// коридор как в p5_charts.v1/v2: ys=[e.mkt*.9,e.mkt*1.1,own]
+const CH33_BAND=0.1;
 function ch33ease(k){return 1-Math.pow(1-Math.max(0,Math.min(1,k)),3)}
 function ch33txt(v,tilde){return (tilde?'~':'')+chM(Math.max(0,v))+'\u00a0₽'}
-function ch33line(diff,pc,mid,sign0){
-  if(!mid&&Math.abs(pc)<=1)return 'Примерно по рынку';
-  const pos=(sign0!=null?sign0:diff)>=0;
-  const dir=pos?'выше рынка':'ниже рынка';
-  const sign=pos?'+':'−';
-  return 'На\u00a0'+Math.abs(pc)+'\u00a0% '+dir+' ('+sign+chRub(diff)+')';
+function ch33num(v){v=Math.max(0,v);return v>=1e6?(Math.round(v/1e5)/10).toLocaleString('ru-RU'):v>=1e3?Math.round(v/1e3).toLocaleString('ru-RU'):Math.round(v).toLocaleString('ru-RU')}
+function ch33unit(v){return v>=1e6?' млн':v>=1e3?' тыс.':''}
+function ch33rng(lo,hi){
+  lo=Math.max(0,lo);hi=Math.max(0,hi);
+  if(!lo||!hi)return ch33txt(hi||lo,true);
+  const u1=ch33unit(lo),u2=ch33unit(hi);
+  if(u1===u2)return ch33num(lo)+'\u2013'+ch33num(hi)+u2+'\u00a0₽';
+  return chM(lo)+'\u2013'+chM(hi)+'\u00a0₽';
+}
+function ch33bounds(mkt){return {lo:mkt*(1-CH33_BAND),hi:mkt*(1+CH33_BAND)}}
+function ch33line(own,lo,hi,counting){
+  if(!(own>0)||!(lo>0)||!(hi>0))return '';
+  if(!counting&&own>=lo&&own<=hi)return 'В пределах рынка';
+  if(own>hi){
+    const d=own-hi,pc=Math.round((own/hi-1)*100);
+    if(!counting&&pc<=0)return 'В пределах рынка';
+    return 'На\u00a0'+Math.abs(pc)+'\u00a0% выше рынка (+'+chRub(d)+')';
+  }
+  const d=lo-own,pc=Math.round((1-own/lo)*100);
+  if(!counting&&(d<=0||pc<=0))return 'В пределах рынка';
+  return 'На\u00a0'+Math.abs(pc)+'\u00a0% ниже рынка (\u2212'+chRub(d)+')';
 }
 function ch33finAmt(el){
-  el.querySelectorAll('.ch33-amt[data-v]').forEach(function(t){
+  const rng=el.querySelector('.ch33-amt.m[data-lo]');
+  if(rng)rng.textContent=ch33rng(+rng.dataset.lo||0,+rng.dataset.hi||0);
+  el.querySelectorAll('.ch33-amt.o[data-v]').forEach(function(t){
     t.textContent=ch33txt(+t.dataset.v||0,t.dataset.tilde==='1');
   });
   const n1=el.querySelector('.ch-n1');
-  if(n1)n1.textContent=ch33line(+el.dataset.diff||0,+el.dataset.pc||0);
+  if(n1)n1.textContent=ch33line(+el.dataset.own||0,+el.dataset.lo||0,+el.dataset.hi||0);
 }
 
 chPlay=function(el){
@@ -7045,23 +7076,32 @@ chPlay=function(el){
   el.classList.add('ch-in');
   const key=el.dataset.ck||'';
   const done=function(){ch33finAmt(el);el.classList.add('ch-done');if(key)CH_DONE[key]=1};
-  const amts=[].slice.call(el.querySelectorAll('.ch33-amt[data-v]'));
+  const rng=el.querySelector('.ch33-amt.m[data-lo]');
+  const amts=[].slice.call(el.querySelectorAll('.ch33-amt.o[data-v]'));
   const n1=el.querySelector('.ch-n1');
-  const diff=+el.dataset.diff||0,pc=+el.dataset.pc||0;
+  const own=+el.dataset.own||0,lo=+el.dataset.lo||0,hi=+el.dataset.hi||0,mkt=+el.dataset.mkt||0;
   if(chReduced()){done();return}
   const t0=performance.now(),dur=900,stag=160,dDiff=900,durDiff=550;
   function tick(t){
     const now=t-t0;
+    if(rng){
+      const k=ch33ease(now/dur);
+      if(k>0)rng.textContent=ch33rng(mkt-(mkt-lo)*k,mkt+(hi-mkt)*k);
+    }
     amts.forEach(function(node,i){
-      const k=ch33ease((now-i*stag)/dur);
+      const k=ch33ease((now-stag)/dur);
       if(k<=0)return;
       node.textContent=ch33txt((+node.dataset.v||0)*k,node.dataset.tilde==='1');
     });
     if(n1){
       const k=ch33ease((now-dDiff)/durDiff);
-      if(k>0)n1.textContent=ch33line(Math.abs(diff)*k,Math.round(Math.abs(pc)*k),1,diff);
+      if(k>0){
+        if(own>=lo&&own<=hi)n1.textContent='В пределах рынка';
+        else if(own>hi)n1.textContent=ch33line(hi+(own-hi)*k,lo,hi,1);
+        else n1.textContent=ch33line(lo-(lo-own)*k,lo,hi,1);
+      }
     }
-    const end=Math.max(dur+(amts.length? (amts.length-1)*stag:0), n1?dDiff+durDiff:0);
+    const end=Math.max(dur+(amts.length?stag:0), n1?dDiff+durDiff:0);
     if(now<end)requestAnimationFrame(tick);else done();
   }
   requestAnimationFrame(tick);
@@ -7082,28 +7122,32 @@ chBind=function(){
 
 chartPrices=function(j){
   const e=vEst(j),mkt=e.mkt||0,own=e.own||0;if(!mkt&&!own)return '';
-  const both=!!(mkt&&own),mx=Math.max(mkt,own,1);
-  const pct=function(v){return v?Math.max(4,Math.round(v/mx*100)):'0'};
+  const b=mkt?ch33bounds(mkt):{lo:0,hi:0},lo=b.lo,hi=b.hi;
+  const both=!!(mkt&&own),mx=Math.max(hi,own,mkt,1);
+  const pct=function(v){return Math.max(0,Math.min(100,v/mx*100))};
   const key=cur+'|p'+j+'|'+mkt+'|'+own,played=CH_DONE[key]||chReduced();
   const title=both?'Рыночная и ваша желаемая цена':(mkt?'Рыночная цена':'Ваша желаемая цена');
-  let diff=0,pc=0,aria='',diffH='';
+  let aria='',diffH='';
   if(both){
-    diff=own-mkt;pc=e.over;
-    const line=ch33line(diff,pc);
-    const eq=Math.abs(pc)<=1;
+    const line=ch33line(own,lo,hi);
+    const eq=own>=lo&&own<=hi;
     diffH=`<div class="ch33-diff${eq?' eq':''}"><span class="ch-n1">${hq(line)}</span></div>`;
-    aria=eq?'Примерно по рынку':line;
+    aria=line;
   }
-  function row(cls,name,v,tilde){
-    return `<div class="ch33-row"><div class="ch33-meta"><span class="ch33-name">${name}</span><span class="ch33-amt ${cls}" data-v="${v}" data-tilde="${tilde?'1':'0'}">${hq(ch33txt(v,tilde))}</span></div><div class="ch33-track" aria-hidden="true"><i class="ch33-bar ${cls}" style="--p:${pct(v)}%"></i></div></div>`;
+  function rowM(){
+    const pLo=pct(lo).toFixed(2),pHi=pct(hi).toFixed(2),pMid=pct(mkt).toFixed(2);
+    return `<div class="ch33-row m"><div class="ch33-meta"><span class="ch33-name">Рыночная</span><span class="ch33-amt m" data-lo="${lo}" data-hi="${hi}" data-mkt="${mkt}">${hq(ch33rng(lo,hi))}</span></div><div class="ch33-track" aria-hidden="true"><i class="ch33-zone" style="--lo:${pLo}%;--hi:${pHi}%"></i><i class="ch33-mid" style="--mid:${pMid}%"></i></div></div>`;
   }
-  const rows=(mkt?row('m','Рыночная',mkt,true):'')+(own?row('o','Ваша желаемая',own,false):'');
+  function rowO(){
+    return `<div class="ch33-row o"><div class="ch33-meta"><span class="ch33-name">Ваша желаемая</span><span class="ch33-amt o" data-v="${own}" data-tilde="0">${hq(ch33txt(own,false))}</span></div><div class="ch33-track" aria-hidden="true"><i class="ch33-bar o" style="--p:${pct(own)}%"></i></div></div>`;
+  }
+  const rows=(mkt?rowM():'')+(own?rowO():'');
   const V=anaVals(j),vals=V.map(function(x){return x.v}),ar=arN(OB(j).area),norm=ar&&V.some(function(x){return x.v!==x.raw});
   let hint='';
-  if(e.src==='an'&&vals.length)hint=`Рыночная — середина цен похожих объявлений (${vals.length} шт., от ${chM(vals[0])} до ${chM(vals[vals.length-1])})${norm?', пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}.`;
+  if(e.src==='an'&&vals.length)hint=`Рыночная — середина цен похожих объявлений (${vals.length} шт., от ${chM(vals[0])} до ${chM(vals[vals.length-1])})${norm?', пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}. Коридор на графике: ±10 % от этой середины.`;
   else if(e.src==='dist')hint=srcLine(e);
-  const lab=(mkt?'Рыночная ~'+chM(mkt)+' ₽':'')+(mkt&&own?', ':'')+(own?'ваша желаемая '+chM(own)+' ₽':'')+(aria?'. '+aria:'');
-  return `<div class="f"><div class="lbl">${title}</div><div class="${played?'chart chv ch33 ch-done chno':'chart chv ch33'}" data-diff="${diff}" data-pc="${pc}" data-ck="${hq(key)}" role="img" aria-label="${hq(lab)}">${diffH}${rows}</div>
+  const lab=(mkt?'Рыночная '+ch33rng(lo,hi):'')+(mkt&&own?', ':'')+(own?'ваша желаемая '+chM(own)+' ₽':'')+(aria?'. '+aria:'');
+  return `<div class="f"><div class="lbl">${title}</div><div class="${played?'chart chv ch33 ch-done chno':'chart chv ch33'}" data-diff="${own&&hi?own-hi:0}" data-pc="0" data-ck="${hq(key)}" data-lo="${lo}" data-hi="${hi}" data-mkt="${mkt}" data-own="${own}" role="img" aria-label="${hq(lab)}">${diffH}${rows}</div>
  ${hint?`<div class="hint">${hint}</div>`:''}</div>`;
 };
 })();
