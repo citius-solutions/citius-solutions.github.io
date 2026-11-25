@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 09:40';
+var APPV='25.11.2026 10:02';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6539,6 +6539,63 @@ try{
   const wk2=WK;
   WK=function(n){const w=wk2(n);try{if(w&&typeof w.sit==='string'&&/только собственнику/.test(w.sit))return Object.assign({},w,{sit:w.sit.replace('документы, которые выдают только собственнику, — с вашим участием','документы, которые выдают собственнику или его представителю по доверенности, — с вашим участием или по вашей доверенности')})}catch(e){}return w};
 }catch(e){try{logErr('p26-wk',e)}catch(x){}}
+})();
+// ---------- n29 p28 (25.11) · текст объявления: цена и этаж
+// Баг владельца: «цена не 10 млн, а 1». Причины: (1) в объявление шла рыночная оценка этапа 1 раньше вашей цены
+// («За сколько хотите продать» / «Ваша цена»); (2) «10 млн», «10,5 млн» превращались в 10 и 105 ₽ (из строки брались только цифры).
+// Второй баг: «этаж /14», если номер этажа не введён.
+(function(){
+// --- 1. разбор сумм с «млн» / «тыс.»: «10 млн» → 10 000 000, «10,5 млн» и «10.5 млн» → 10 500 000
+const MRX=/^(\d[\d ]*(?:[.,]\d+)?)\s*(млн|миллион[а-я]*|mln|тыс[а-я]*|т\.?\s?р|к|k)\.?\s*(₽|руб[а-я]*\.?|р\.?)?$/;
+function p28money(v){
+  const s=String(v==null?'':v).replace(/[\u00a0\u202f]/g,' ').trim().toLowerCase();
+  const m=s.match(MRX);if(!m)return null;
+  const n=parseFloat(m[1].replace(/ /g,'').replace(',','.'));if(!isFinite(n)||n<=0)return null;
+  return Math.round(n*(/^(млн|миллион|mln)/.test(m[2])?1e6:1e3));
+}
+const spD=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+window.p28money=p28money;
+// сохранённые ответы: поля цен и бюджета
+const MK=new Set(['myp','price','adp','kadp','sprice','p','bbud','own','mortsum','bp0','taxsum','p1','p2','p3','p4','e1','e2','e3']);
+function fixState(o,d){
+  if(!o||typeof o!=='object'||d>6)return;
+  for(const k of Object.keys(o)){const v=o[k];
+    if(typeof v==='string'){if(MK.has(k)){const n=p28money(v);if(n)o[k]=spD(n)}}
+    else if(v&&typeof v==='object')fixState(v,d+1)}
+}
+function fixAll(){try{if(typeof A==='object'&&A)fixState(A,0)}catch(e){}}
+// поле ввода: при выходе из поля «10 млн» заменяется на «10 000 000» до того, как приложение пересчитает экран
+function isMoneyInput(el){
+  if(!el||el.tagName!=='INPUT')return false;
+  const t=((el.getAttribute('aria-label')||'')+' '+(el.placeholder||'')).toLowerCase();
+  if(/адрес|площад|м²|этаж|ссылк|телефон|дней/.test(t))return false;
+  return /₽|цен|бюджет|продать|сумм|задат|взнос/.test(t);
+}
+document.addEventListener('change',function(e){
+  try{const el=e.target;if(!isMoneyInput(el))return;const n=p28money(el.value);if(!n)return;
+    el.value=spD(n);el.dispatchEvent(new Event('input',{bubbles:true}));fixAll()}catch(x){}
+},true);
+try{const sh=show;show=function(){fixAll();return sh.apply(this,arguments)}}catch(e){try{logErr('p28-show',e)}catch(x){}}
+fixAll();
+
+// --- 2. цена в объявлении: сначала поле «Цена в объявлении», потом ваша цена с этапов 0–1, потом рыночная оценка
+try{
+  const ae0=adpEst;
+  adpEst=function(g){
+    try{const P=g.map(x=>{const e=vEst(x);return (e&&e.own)||(e&&e.price)||0});if(P.every(x=>x>0))return P.reduce((a,b)=>a+b,0)}catch(e){}
+    return ae0.apply(this,arguments);
+  };
+}catch(e){try{logErr('p28-adp',e)}catch(x){}}
+
+// --- 3. этаж в тексте: «этаж 5/14»; без номера этажа — «14-этажный дом»; без «из» — «этаж 5»
+function fixFloor(t){
+  return String(t)
+    .replace(/, этаж \/(\d+)/g,(m,n)=>', '+n+'-этажный дом')
+    .replace(/, этаж (\d+)\/(?=[,.\s])/g,', этаж $1')
+    .replace(/, этаж \/(?=[,.\s])/g,'');
+}
+try{const g0=genText;genText=function(){return fixFloor(g0.apply(this,arguments))}}catch(e){try{logErr('p28-gt',e)}catch(x){}}
+try{if(typeof genTextG==='function'){const g1=genTextG;genTextG=function(){return fixFloor(g1.apply(this,arguments))}}}catch(e){try{logErr('p28-gtg',e)}catch(x){}}
 })();
 // ===== n29 END
 
