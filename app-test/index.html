@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 13:20';
+var APPV='25.11.2026 14:30';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6978,8 +6978,9 @@ form.re-form{display:block;margin:0;padding:0;width:100%;border:0;min-width:0}
 }catch(e){try{logErr('p32-css',e)}catch(x){}}
 })();
 // ---------- n29 p33 (25.11) · изящный график рыночной и желаемой цены
-// Тонкие полоски, палитра Аппа (золото и синий), без красного. Разница — одна строка.
-// Коридор рыночной — тот же, что в графиках оценки v1/v2: e.mkt*.9 … e.mkt*1.1 (±10 %).
+// v4: выступ выше коридора — тёплый янтарь, нехватка до нижней границы — спокойная бирюза;
+// пульс 3 раза после роста, затем статичный оттенок. Внутри коридора — «✓ В пределах рынка».
+// Коридор: как в графиках оценки v1/v2, e.mkt*.9 … e.mkt*1.1. Без красного.
 // p5_charts не меняем: этот файл идёт после и переопределяет chartPrices / chPlay / chBind.
 (function(){
 if(document.getElementById('n29-p33-css'))document.getElementById('n29-p33-css').remove();
@@ -6989,7 +6990,7 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-p33-css">
 .chart.ch33{margin:4px 0 2px}
 .ch33-diff{margin:2px 0 14px;text-align:left;font:600 11px/1.3 Montserrat,sans-serif;letter-spacing:.01em;color:#8a6a2f;white-space:nowrap}
 [data-theme=dark] .ch33-diff{color:#e0c48f}
-.ch33-diff.eq{opacity:.85}
+.ch33-diff.eq{opacity:.9}
 .ch33-diff .ch-n1{display:inline}
 .ch33-row{margin:0 0 14px}.ch33-row:last-child{margin-bottom:2px}
 .ch33-meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:7px}
@@ -7007,17 +7008,32 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-p33-css">
 [data-theme=dark] .ch33-zone{background:linear-gradient(90deg,rgba(184,147,90,.42) 0%,rgba(201,164,106,.58) 50%,rgba(224,196,143,.42) 100%)}
 .ch33-mid{position:absolute;top:-3px;bottom:-3px;left:var(--mid,50%);width:2px;margin-left:-1px;border-radius:1px;background:#c9a46a;pointer-events:none}
 [data-theme=dark] .ch33-mid{background:#e0c48f}
-.ch33-bar{display:block;height:100%;width:var(--p,0%);max-width:100%;border-radius:99px;transform-origin:left center;transform:scaleX(1);box-shadow:0 0 0 .5px rgba(168,132,74,.18)}
+.ch33-grow{position:absolute;inset:0;transform-origin:left center;transform:scaleX(1)}
+.ch33-bar{display:block;position:absolute;top:0;left:0;height:100%;width:var(--p,0%);max-width:100%;border-radius:99px;box-shadow:0 0 0 .5px rgba(168,132,74,.18)}
 .ch33-bar.o{background:linear-gradient(90deg,#1e2f4a 0%,#2a3f5f 52%,#4a5f7a 100%);box-shadow:0 0 0 .5px rgba(30,47,74,.28)}
 [data-theme=dark] .ch33-bar.o{background:linear-gradient(90deg,#8a9bb3 0%,#c3cbd8 52%,#e6eaf0 100%);box-shadow:0 0 0 .5px rgba(195,203,216,.28)}
-.chart.ch33:not(.ch-done) .ch33-bar{transform:scaleX(0)}
+.ch33-row.o.over .ch33-bar.o{border-radius:99px 0 0 99px}
+.ch33-xl{position:absolute;top:0;height:100%;left:var(--xl0,0%);width:calc(var(--xl1,0%) - var(--xl0,0%));border-radius:99px;pointer-events:none;opacity:.85}
+.ch33-xl.hi{background:linear-gradient(90deg,#d9a441 0%,#f0c060 100%);border-radius:0 99px 99px 0;box-shadow:0 0 4px rgba(240,192,96,.35)}
+.ch33-xl.lo{background:#3fa59a;box-shadow:0 0 4px rgba(63,165,154,.35)}
+[data-theme=dark] .ch33-xl.lo{background:#5fb8af;box-shadow:0 0 5px rgba(95,184,175,.4)}
+.chart.ch33:not(.ch-done) .ch33-xl.lo{opacity:0}
+.chart.ch33.ch-done .ch33-xl,.chart.ch33.chno .ch33-xl{opacity:.85}
+@keyframes ch33pulse{
+  0%,100%{opacity:.78;filter:brightness(1);box-shadow:0 0 3px var(--ch33-glow,rgba(240,192,96,.35))}
+  50%{opacity:1;filter:brightness(1.12);box-shadow:0 0 10px var(--ch33-glow,rgba(240,192,96,.6))}
+}
+.ch33-xl.hi{--ch33-glow:rgba(240,192,96,.55)}
+.ch33-xl.lo{--ch33-glow:rgba(63,165,154,.5)}
+[data-theme=dark] .ch33-xl.lo{--ch33-glow:rgba(95,184,175,.55)}
+.chart.ch33.ch-pulse .ch33-xl{animation:ch33pulse .9s ease-in-out 3 forwards}
+.chart.ch33:not(.ch-done) .ch33-grow{transform:scaleX(0)}
 .chart.ch33:not(.ch-done) .ch33-zone{transform:scaleX(0);opacity:0}
 .chart.ch33:not(.ch-done) .ch33-mid{opacity:0}
-.chart.ch33.ch-in:not(.ch-done) .ch33-bar{transform:scaleX(1);transition:transform .9s cubic-bezier(.22,1,.36,1)}
-.chart.ch33.ch-in:not(.ch-done) .ch33-bar.o{transition-delay:.16s}
+.chart.ch33.ch-in:not(.ch-done) .ch33-grow{transform:scaleX(1);transition:transform .9s cubic-bezier(.22,1,.36,1) .16s}
 .chart.ch33.ch-in:not(.ch-done) .ch33-zone{transform:scaleX(1);opacity:1;transition:transform .9s cubic-bezier(.22,1,.36,1),opacity .45s ease-out}
 .chart.ch33.ch-in:not(.ch-done) .ch33-mid{opacity:1;transition:opacity .35s ease-out .2s}
-.chart.ch33.ch-done .ch33-bar,.chart.ch33.chno .ch33-bar{transform:scaleX(1);transition:none}
+.chart.ch33.ch-done .ch33-grow,.chart.ch33.chno .ch33-grow{transform:scaleX(1);transition:none}
 .chart.ch33.ch-done .ch33-zone,.chart.ch33.chno .ch33-zone{transform:scaleX(1);opacity:1;transition:none}
 .chart.ch33.ch-done .ch33-mid,.chart.ch33.chno .ch33-mid{opacity:1;transition:none}
 .chart.ch33:not(.ch-done) .ch33-amt,.chart.ch33:not(.ch-done) .ch33-diff{opacity:0}
@@ -7026,16 +7042,18 @@ document.head.insertAdjacentHTML('beforeend',`<style id="n29-p33-css">
 .chart.ch33.ch-in:not(.ch-done) .ch33-diff{opacity:1;transition:opacity .35s ease-out .85s}
 .chart.ch33.ch-done .ch33-amt,.chart.ch33.ch-done .ch33-diff,
 .chart.ch33.chno .ch33-amt,.chart.ch33.chno .ch33-diff{opacity:1;transition:none}
+.ch33-cmp{margin:6px 0 8px;font:600 12.5px/1.4 Montserrat,sans-serif;color:#8a6a2f}
+[data-theme=dark] .ch33-cmp{color:#e0c48f}
 @media (prefers-reduced-motion:reduce){
- .chart.ch33 .ch33-bar,.chart.ch33:not(.ch-in):not(.ch-done) .ch33-bar{transform:scaleX(1);transition:none}
+ .chart.ch33 .ch33-grow,.chart.ch33:not(.ch-in):not(.ch-done) .ch33-grow{transform:scaleX(1);transition:none}
  .chart.ch33 .ch33-zone,.chart.ch33:not(.ch-in):not(.ch-done) .ch33-zone{transform:scaleX(1);opacity:1;transition:none}
  .chart.ch33 .ch33-mid{opacity:1;transition:none}
  .chart.ch33 .ch33-amt,.chart.ch33 .ch33-diff,
  .chart.ch33.ch-in:not(.ch-done) .ch33-amt,.chart.ch33.ch-in:not(.ch-done) .ch33-diff{opacity:1;transition:none}
+ .chart.ch33 .ch33-xl,.chart.ch33.ch-pulse .ch33-xl,.chart.ch33:not(.ch-done) .ch33-xl.lo{animation:none;opacity:.85}
 }
 </style>`);
 
-// коридор как в p5_charts.v1/v2: ys=[e.mkt*.9,e.mkt*1.1,own]
 const CH33_BAND=0.1;
 function ch33ease(k){return 1-Math.pow(1-Math.max(0,Math.min(1,k)),3)}
 function ch33txt(v,tilde){return (tilde?'~':'')+chM(Math.max(0,v))+'\u00a0₽'}
@@ -7049,17 +7067,30 @@ function ch33rng(lo,hi){
   return chM(lo)+'\u2013'+chM(hi)+'\u00a0₽';
 }
 function ch33bounds(mkt){return {lo:mkt*(1-CH33_BAND),hi:mkt*(1+CH33_BAND)}}
+function ch33pc(own,lo,hi){
+  if(!(own>0)||!(lo>0)||!(hi>0))return 0;
+  if(own>hi)return Math.round((own/hi-1)*100);
+  if(own<lo)return Math.round((1-own/lo)*100);
+  return 0;
+}
 function ch33line(own,lo,hi,counting){
   if(!(own>0)||!(lo>0)||!(hi>0))return '';
-  if(!counting&&own>=lo&&own<=hi)return 'В пределах рынка';
+  if(!counting&&own>=lo&&own<=hi)return '\u2713\u00a0В пределах рынка';
   if(own>hi){
     const d=own-hi,pc=Math.round((own/hi-1)*100);
-    if(!counting&&pc<=0)return 'В пределах рынка';
+    if(!counting&&pc<=0)return '\u2713\u00a0В пределах рынка';
     return 'На\u00a0'+Math.abs(pc)+'\u00a0% выше рынка (+'+chRub(d)+')';
   }
   const d=lo-own,pc=Math.round((1-own/lo)*100);
-  if(!counting&&(d<=0||pc<=0))return 'В пределах рынка';
+  if(!counting&&(d<=0||pc<=0))return '\u2713\u00a0В пределах рынка';
   return 'На\u00a0'+Math.abs(pc)+'\u00a0% ниже рынка (\u2212'+chRub(d)+')';
+}
+function ch33cmpHint(own,lo,hi){
+  if(!(own>0)||!(lo>0)||!(hi>0))return '';
+  const pc=Math.abs(ch33pc(own,lo,hi));
+  if(own>hi)return 'Дороже рынка на\u00a0'+pc+'\u00a0%, продажа может затянуться';
+  if(own<lo)return 'Ниже рынка на\u00a0'+pc+'\u00a0%, можно продать быстрее';
+  return '';
 }
 function ch33finAmt(el){
   const rng=el.querySelector('.ch33-amt.m[data-lo]');
@@ -7070,12 +7101,24 @@ function ch33finAmt(el){
   const n1=el.querySelector('.ch-n1');
   if(n1)n1.textContent=ch33line(+el.dataset.own||0,+el.dataset.lo||0,+el.dataset.hi||0);
 }
+function ch33startPulse(el){
+  const xl=el.querySelector('.ch33-xl');
+  if(!xl||chReduced())return;
+  el.classList.add('ch-pulse');
+  const done=function(){el.classList.remove('ch-pulse');xl.removeEventListener('animationend',done)};
+  xl.addEventListener('animationend',done);
+}
 
 chPlay=function(el){
   if(el.classList.contains('ch-done')||el.classList.contains('chno'))return;
   el.classList.add('ch-in');
   const key=el.dataset.ck||'';
-  const done=function(){ch33finAmt(el);el.classList.add('ch-done');if(key)CH_DONE[key]=1};
+  const done=function(){
+    ch33finAmt(el);
+    el.classList.add('ch-done');
+    if(key)CH_DONE[key]=1;
+    ch33startPulse(el);
+  };
   const rng=el.querySelector('.ch33-amt.m[data-lo]');
   const amts=[].slice.call(el.querySelectorAll('.ch33-amt.o[data-v]'));
   const n1=el.querySelector('.ch-n1');
@@ -7088,7 +7131,7 @@ chPlay=function(el){
       const k=ch33ease(now/dur);
       if(k>0)rng.textContent=ch33rng(mkt-(mkt-lo)*k,mkt+(hi-mkt)*k);
     }
-    amts.forEach(function(node,i){
+    amts.forEach(function(node){
       const k=ch33ease((now-stag)/dur);
       if(k<=0)return;
       node.textContent=ch33txt((+node.dataset.v||0)*k,node.dataset.tilde==='1');
@@ -7096,7 +7139,7 @@ chPlay=function(el){
     if(n1){
       const k=ch33ease((now-dDiff)/durDiff);
       if(k>0){
-        if(own>=lo&&own<=hi)n1.textContent='В пределах рынка';
+        if(own>=lo&&own<=hi)n1.textContent='\u2713\u00a0В пределах рынка';
         else if(own>hi)n1.textContent=ch33line(hi+(own-hi)*k,lo,hi,1);
         else n1.textContent=ch33line(lo-(lo-own)*k,lo,hi,1);
       }
@@ -7127,11 +7170,11 @@ chartPrices=function(j){
   const pct=function(v){return Math.max(0,Math.min(100,v/mx*100))};
   const key=cur+'|p'+j+'|'+mkt+'|'+own,played=CH_DONE[key]||chReduced();
   const title=both?'Рыночная и ваша желаемая цена':(mkt?'Рыночная цена':'Ваша желаемая цена');
+  const above=both&&own>hi,below=both&&own<lo,inside=both&&!above&&!below;
   let aria='',diffH='';
   if(both){
     const line=ch33line(own,lo,hi);
-    const eq=own>=lo&&own<=hi;
-    diffH=`<div class="ch33-diff${eq?' eq':''}"><span class="ch-n1">${hq(line)}</span></div>`;
+    diffH=`<div class="ch33-diff${inside?' eq':''}"><span class="ch-n1">${hq(line)}</span></div>`;
     aria=line;
   }
   function rowM(){
@@ -7139,16 +7182,23 @@ chartPrices=function(j){
     return `<div class="ch33-row m"><div class="ch33-meta"><span class="ch33-name">Рыночная</span><span class="ch33-amt m" data-lo="${lo}" data-hi="${hi}" data-mkt="${mkt}">${hq(ch33rng(lo,hi))}</span></div><div class="ch33-track" aria-hidden="true"><i class="ch33-zone" style="--lo:${pLo}%;--hi:${pHi}%"></i><i class="ch33-mid" style="--mid:${pMid}%"></i></div></div>`;
   }
   function rowO(){
-    return `<div class="ch33-row o"><div class="ch33-meta"><span class="ch33-name">Ваша желаемая</span><span class="ch33-amt o" data-v="${own}" data-tilde="0">${hq(ch33txt(own,false))}</span></div><div class="ch33-track" aria-hidden="true"><i class="ch33-bar o" style="--p:${pct(own)}%"></i></div></div>`;
+    const cap=above?Math.min(own,hi):own;
+    const pBar=pct(cap).toFixed(2);
+    let xl='';
+    if(above)xl=`<i class="ch33-xl hi" style="--xl0:${pct(hi).toFixed(2)}%;--xl1:${pct(own).toFixed(2)}%"></i>`;
+    else if(below)xl=`<i class="ch33-xl lo" style="--xl0:${pct(own).toFixed(2)}%;--xl1:${pct(lo).toFixed(2)}%"></i>`;
+    const grow=above?( `<span class="ch33-grow"><i class="ch33-bar o" style="--p:${pBar}%"></i>${xl}</span>` ):( `<span class="ch33-grow"><i class="ch33-bar o" style="--p:${pBar}%"></i></span>`+xl );
+    return `<div class="ch33-row o${above?' over':''}"><div class="ch33-meta"><span class="ch33-name">Ваша желаемая</span><span class="ch33-amt o" data-v="${own}" data-tilde="0">${hq(ch33txt(own,false))}</span></div><div class="ch33-track" aria-hidden="true">${grow}</div></div>`;
   }
   const rows=(mkt?rowM():'')+(own?rowO():'');
   const V=anaVals(j),vals=V.map(function(x){return x.v}),ar=arN(OB(j).area),norm=ar&&V.some(function(x){return x.v!==x.raw});
   let hint='';
   if(e.src==='an'&&vals.length)hint=`Рыночная — середина цен похожих объявлений (${vals.length} шт., от ${chM(vals[0])} до ${chM(vals[vals.length-1])})${norm?', пересчитаны на вашу площадь '+String(ar).replace('.',',')+' м² по цене за м²':''}. Коридор на графике: ±10 % от этой середины.`;
   else if(e.src==='dist')hint=srcLine(e);
+  const cmp=ch33cmpHint(own,lo,hi);
   const lab=(mkt?'Рыночная '+ch33rng(lo,hi):'')+(mkt&&own?', ':'')+(own?'ваша желаемая '+chM(own)+' ₽':'')+(aria?'. '+aria:'');
   return `<div class="f"><div class="lbl">${title}</div><div class="${played?'chart chv ch33 ch-done chno':'chart chv ch33'}" data-diff="${own&&hi?own-hi:0}" data-pc="0" data-ck="${hq(key)}" data-lo="${lo}" data-hi="${hi}" data-mkt="${mkt}" data-own="${own}" role="img" aria-label="${hq(lab)}">${diffH}${rows}</div>
- ${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+ ${cmp?`<div class="ch33-cmp">${cmp}</div>`:''}${hint?`<div class="hint">${hint}</div>`:''}</div>`;
 };
 })();
 // ---------- n29 p34 (25.11) · подпись поля «Добавлю свои деньги, ₽»
