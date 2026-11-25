@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 10:06';
+var APPV='25.11.2026 10:09';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6597,6 +6597,89 @@ function fixFloor(t){
 }
 try{const g0=genText;genText=function(){return fixFloor(g0.apply(this,arguments))}}catch(e){try{logErr('p28-gt',e)}catch(x){}}
 try{if(typeof genTextG==='function'){const g1=genTextG;genTextG=function(){return fixFloor(g1.apply(this,arguments))}}}catch(e){try{logErr('p28-gtg',e)}catch(x){}}
+})();
+// ---------- n29 p29 (25.11) · «Мой путь»: золотая цифра — этап, на котором вы сейчас
+// Баг: подсветка всегда стояла на первом незакрытом этапе (часто «Оценка вашей квартиры», цифра 1),
+// а не на этапе, который вы открыли последним.
+(function(){
+function pathList(){try{return STAGES.filter(s=>{try{return s.show()}catch(e){return true}})}catch(e){return STAGES||[]}}
+function inferPathCur(){
+  try{if(typeof A.pathCur==='number'&&A.pathCur>=0)return A.pathCur}catch(e){}
+  try{
+    if(window.__restored&&window.__restored.cur&&SCR[window.__restored.cur]&&SCR[window.__restored.cur].st>=0)
+      return SCR[window.__restored.cur].st;
+    if(typeof cur==='string'&&SCR[cur]&&SCR[cur].st>=0)return SCR[cur].st;
+    if(typeof hist!=='undefined'&&hist&&hist.length){
+      for(let i=hist.length-1;i>=0;i--){const s=SCR[hist[i]];if(s&&s.st>=0)return s.st}
+    }
+  }catch(e){}
+  return null;
+}
+function rememberStage(n){
+  if(typeof n!=='number'||n<0)return;
+  try{curStage=n}catch(e){}
+  try{A.pathCur=n}catch(e){}
+}
+function pathActiveN(L,consume){
+  L=L||pathList();
+  const first=()=>{const x=L.find(s=>!done.has(s.n));return x?x.n:null};
+  let n=null;
+  try{n=(typeof A.pathCur==='number')?A.pathCur:(typeof curStage==='number'?curStage:null)}catch(e){}
+  let advance=false;
+  try{advance=!!A.pathAdvance;if(consume)A.pathAdvance=0}catch(e){}
+  if(n==null||n<0||!L.some(s=>s.n===n))return first();
+  if(advance){
+    const later=L.slice(L.findIndex(s=>s.n===n)+1).find(s=>!done.has(s.n));
+    return later?later.n:n;
+  }
+  return n;
+}
+function markPathDots(h,L){
+  L=L||pathList();
+  const curN=pathActiveN(L,true);
+  if(curN!=null)rememberStage(curN);
+  let i=0;
+  return String(h).replace(/<div class="st"><div class="dot[^"]*"/g,m=>{
+    const s=L[i++];if(!s)return m;
+    const isDone=done.has(s.n),isCur=s.n===curN;
+    const cls=isDone&&isCur?'dot done cur':isDone?'dot done':isCur?'dot cur':'dot';
+    return '<div class="st"><div class="'+cls+'"';
+  });
+}
+try{
+  const n=inferPathCur();
+  if(n!=null)rememberStage(n);
+}catch(e){}
+try{
+  const sh=show;
+  show=function(id,keep){
+    try{const s=SCR[id];if(s&&s.st>=0)rememberStage(s.st)}catch(e){}
+    return sh.apply(this,arguments);
+  };
+}catch(e){try{logErr('p29-show',e)}catch(x){}}
+try{
+  const nb=document.getElementById('next');
+  if(nb)nb.addEventListener('click',function(){
+    try{if(cur&&SCR[cur]&&SCR[cur].st>=0&&(nb.textContent||'').trim()==='Этап готов')A.pathAdvance=1}catch(e){}
+  },true);
+}catch(e){}
+try{
+  const pb=SCR.path.b;
+  SCR.path.b=function(){
+    const h=pb.apply(this,arguments);
+    try{return markPathDots(h)}catch(e){try{logErr('p29-path',e)}catch(x){}return h}
+  };
+}catch(e){try{logErr('p29-wrap',e)}catch(x){}}
+try{
+  if(typeof pathSafe==='function'){
+    const ps=pathSafe;
+    pathSafe=function(){
+      const h=ps.apply(this,arguments);
+      try{return markPathDots(h)}catch(e){return h}
+    };
+  }
+}catch(e){}
+window.pathActiveN=pathActiveN;
 })();
 // ===== n29 END
 
