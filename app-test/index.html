@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 10:09';
+var APPV='25.11.2026 10:24';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6598,11 +6598,14 @@ function fixFloor(t){
 try{const g0=genText;genText=function(){return fixFloor(g0.apply(this,arguments))}}catch(e){try{logErr('p28-gt',e)}catch(x){}}
 try{if(typeof genTextG==='function'){const g1=genTextG;genTextG=function(){return fixFloor(g1.apply(this,arguments))}}}catch(e){try{logErr('p28-gtg',e)}catch(x){}}
 })();
-// ---------- n29 p29 (25.11) · «Мой путь»: золотая цифра — этап, на котором вы сейчас
+// ---------- n29 p29 (25.11) · «Мой путь»: текущий этап; счётчик без «Старта»; next() без побочного done; формулировка в чек-листе этапа 3
 // Баг: подсветка всегда стояла на первом незакрытом этапе (часто «Оценка вашей квартиры», цифра 1),
 // а не на этапе, который вы открыли последним.
+// p30 (25.11): «Пройдено X из 9» без «Старта»; этап становится «готово» только по кнопке «Этап готов»;
+// в чек-листе объявления — «кто вы: собственник или представитель».
 (function(){
 function pathList(){try{return STAGES.filter(s=>{try{return s.show()}catch(e){return true}})}catch(e){return STAGES||[]}}
+function countedStages(){return pathList().filter(s=>s.n!==0)}
 function inferPathCur(){
   try{if(typeof A.pathCur==='number'&&A.pathCur>=0)return A.pathCur}catch(e){}
   try{
@@ -6634,7 +6637,19 @@ function pathActiveN(L,consume){
   }
   return n;
 }
+function pathCountFix(h){
+  const L=countedStages(),d=L.filter(s=>done.has(s.n)).length,tot=L.length,pct=tot?d/tot*100:0;
+  const lab='Пройдено '+d+' из '+plg(tot,'этапа','этапов');
+  return String(h)
+    .replace(/Пройдено \d+ из \d+ этап(?:а|ов)/,lab)
+    .replace(/(<div class="bar"><div style="width:)[^%"]+%/, '$1'+pct+'%');
+}
+function fixTopBar(){
+  const L=countedStages(),d=L.filter(s=>done.has(s.n)).length,e=$('pbar');
+  if(e)e.style.width=(L.length?d/L.length*100:0)+'%';
+}
 function markPathDots(h,L){
+  h=pathCountFix(h);
   L=L||pathList();
   const curN=pathActiveN(L,true);
   if(curN!=null)rememberStage(curN);
@@ -6650,11 +6665,24 @@ try{
   const n=inferPathCur();
   if(n!=null)rememberStage(n);
 }catch(e){}
+
+// show() вызывал s.next() только ради подписи «Этап готов» и тем самым заранее делал done.add.
+// На время отрисовки done.add отключён; по самой кнопке next() вызывается уже после show и отмечает этап как нужно.
+let peekDepth=0;
+try{
+  const add0=done.add.bind(done);
+  done.add=function(x){if(peekDepth>0)return done;return add0(x)};
+}catch(e){try{logErr('p29-done',e)}catch(x){}}
 try{
   const sh=show;
   show=function(id,keep){
     try{const s=SCR[id];if(s&&s.st>=0)rememberStage(s.st)}catch(e){}
-    return sh.apply(this,arguments);
+    peekDepth++;
+    let r;
+    try{r=sh.apply(this,arguments)}
+    finally{peekDepth--}
+    try{fixTopBar()}catch(e){}
+    return r;
   };
 }catch(e){try{logErr('p29-show',e)}catch(x){}}
 try{
@@ -6679,7 +6707,19 @@ try{
     };
   }
 }catch(e){}
+
+// Этап 3 · Текст объявления: кто вы — собственник или представитель
+try{
+  const b0=SCR.s3b.b;
+  SCR.s3b.b=function(){
+    const h=b0.apply(this,arguments);
+    return String(h).replace(/Указано [«"]собственник[»"], удобное время звонков/g,
+      'Указано, кто вы: собственник или представитель, и удобное время звонков');
+  };
+}catch(e){try{logErr('p29-s3b',e)}catch(x){}}
+
 window.pathActiveN=pathActiveN;
+window.countedStages=countedStages;
 })();
 // ===== n29 END
 
