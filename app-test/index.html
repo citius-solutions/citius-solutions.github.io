@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 11:53';
+var APPV='25.11.2026 12:56';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6755,6 +6755,227 @@ try{
 #cmpsheet .cs-seg,#cmpsheet #auphone{display:none!important}
 </style>`);
 }catch(e){try{logErr('p31-css',e)}catch(x){}}
+})();
+// ---------- n29 p32 (25.11) · последние адреса почты на этом устройстве
+// Под полем #auemail — до 3 недавних адресов кнопками. Нажатие подставляет адрес,
+// крестик убирает его из списка. Список только на этом устройстве (localStorage).
+// p6_auth_ui и p11_compact не меняем: этот файл идёт после них и вешается на DOM.
+(function(){
+const KEY='cs_recent_emails', MAX=3;
+
+function reEsc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function reOk(s){return /^\S+@\S+\.\S+$/.test(s)}
+
+function reLoad(){
+  try{
+    const a=JSON.parse(localStorage.getItem(KEY)||'[]');
+    if(!Array.isArray(a))return [];
+    const out=[], seen={};
+    for(let i=0;i<a.length;i++){
+      const s=String(a[i]||'').trim();
+      if(!s||!reOk(s))continue;
+      const k=s.toLowerCase();
+      if(seen[k])continue;
+      seen[k]=1;out.push(s);
+      if(out.length>=MAX)break;
+    }
+    return out;
+  }catch(e){return []}
+}
+function reStore(list){
+  try{localStorage.setItem(KEY,JSON.stringify(list.slice(0,MAX)))}catch(e){}
+}
+function reSave(em){
+  em=String(em||'').trim();
+  if(!reOk(em))return;
+  const k=em.toLowerCase();
+  const list=reLoad().filter(x=>x.toLowerCase()!==k);
+  list.unshift(em);
+  reStore(list);
+}
+function reRemove(em){
+  const k=String(em||'').toLowerCase();
+  reStore(reLoad().filter(x=>x.toLowerCase()!==k));
+}
+
+function reFill(em){
+  const inp=document.getElementById('auemail');
+  if(!inp)return;
+  inp.value=em;
+  try{if(typeof AU!=='undefined')AU.email=em}catch(e){}
+  try{inp.dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}
+  try{inp.focus({preventScroll:true})}catch(e){try{inp.focus()}catch(x){}}
+}
+
+function reWrap(inp){
+  let f=inp.closest('form');
+  if(!f){
+    f=document.createElement('form');
+    f.className='re-form';
+    f.setAttribute('autocomplete','on');
+    f.setAttribute('onsubmit','return false');
+    f.addEventListener('submit',function(e){e.preventDefault();return false});
+    inp.parentNode.insertBefore(f,inp);
+    f.appendChild(inp);
+  }else{
+    if(!f.getAttribute('autocomplete'))f.setAttribute('autocomplete','on');
+    f.classList.add('re-form');
+  }
+  inp.setAttribute('name','email');
+  inp.setAttribute('autocomplete','email');
+  if(!inp.getAttribute('data-re-enter')){
+    inp.setAttribute('data-re-enter','1');
+    inp.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;
+      // в компактном окне Enter уже вызывает auMail из onkeydown поля
+      if(inp.getAttribute('onkeydown')&&/auMail/.test(inp.getAttribute('onkeydown')))return;
+      e.preventDefault();
+      try{if(typeof auMail==='function')auMail()}catch(x){}
+    });
+  }
+}
+
+function reReady(inp){
+  if(!inp.closest('form')||inp.getAttribute('name')!=='email')return false;
+  const list=reLoad();
+  const row=document.getElementById('re-emails');
+  if(!list.length)return !row;
+  if(!row)return false;
+  const shown=[].slice.call(row.querySelectorAll('.re-pick')).map(function(b){return b.getAttribute('data-em')||''});
+  if(shown.length!==list.length)return false;
+  for(let i=0;i<list.length;i++)if(shown[i].toLowerCase()!==list[i].toLowerCase())return false;
+  return true;
+}
+
+function rePaintRow(row,list){
+  row.textContent='';
+  for(let i=0;i<list.length;i++){
+    const em=list[i];
+    const chip=document.createElement('span');
+    chip.className='re-chip';
+    const pick=document.createElement('button');
+    pick.type='button';
+    pick.className='re-pick';
+    pick.setAttribute('data-em',em);
+    pick.setAttribute('title',em);
+    pick.setAttribute('aria-label','Подставить адрес '+em);
+    const txt=document.createElement('span');
+    txt.className='re-txt';
+    txt.textContent=em;
+    pick.appendChild(txt);
+    const x=document.createElement('button');
+    x.type='button';
+    x.className='re-x';
+    x.setAttribute('data-em',em);
+    x.setAttribute('aria-label','Убрать адрес '+em);
+    x.textContent='×';
+    chip.appendChild(pick);
+    chip.appendChild(x);
+    row.appendChild(chip);
+  }
+}
+
+let rePainting=0;
+function rePaint(){
+  if(rePainting)return;
+  const inp=document.getElementById('auemail');
+  if(!inp){
+    const old=document.getElementById('re-emails');
+    if(old)old.remove();
+    return;
+  }
+  if(reReady(inp))return;
+  rePainting=1;
+  try{
+    reWrap(inp);
+    const list=reLoad();
+    let row=document.getElementById('re-emails');
+    if(!list.length){
+      if(row)row.remove();
+      return;
+    }
+    const form=inp.closest('form')||inp;
+    if(!row){
+      row=document.createElement('div');
+      row.id='re-emails';
+      row.className='re-emails';
+      row.setAttribute('aria-label','Недавние адреса почты');
+    }
+    if(row.parentNode!==form.parentNode||row.previousSibling!==form){
+      form.parentNode.insertBefore(row,form.nextSibling);
+    }
+    rePaintRow(row,list);
+  }finally{rePainting=0}
+}
+
+function reAfter(fn){
+  return function(){
+    const r=fn.apply(this,arguments);
+    try{rePaint()}catch(e){}
+    return r;
+  };
+}
+
+try{
+  const m0=auMail;
+  auMail=function(){
+    try{
+      const e=document.getElementById('auemail');
+      if(e)AU.email=e.value.trim();
+    }catch(x){}
+    const em=(typeof AU!=='undefined'&&AU.email||'').trim();
+    const valid=reOk(em);
+    const pd=typeof A!=='undefined'&&!!A.pdauth;
+    const r=m0.apply(this,arguments);
+    if(valid&&pd){reSave(em);try{rePaint()}catch(e){}}
+    return r;
+  };
+}catch(e){try{logErr('p32-auMail',e)}catch(x){}}
+
+try{if(typeof csR==='function')csR=reAfter(csR)}catch(e){try{logErr('p32-csR',e)}catch(x){}}
+try{if(typeof auR==='function')auR=reAfter(auR)}catch(e){try{logErr('p32-auR',e)}catch(x){}}
+try{if(typeof csOpen==='function')csOpen=reAfter(csOpen)}catch(e){try{logErr('p32-csOpen',e)}catch(x){}}
+
+document.addEventListener('click',function(e){
+  const x=e.target.closest&&e.target.closest('#re-emails .re-x');
+  if(x){
+    e.preventDefault();e.stopPropagation();
+    reRemove(x.getAttribute('data-em'));
+    try{rePaint()}catch(err){}
+    return;
+  }
+  const p=e.target.closest&&e.target.closest('#re-emails .re-pick');
+  if(p){
+    e.preventDefault();e.stopPropagation();
+    reFill(p.getAttribute('data-em'));
+  }
+});
+
+try{
+  const mo=new MutationObserver(function(){try{rePaint()}catch(e){}});
+  const start=function(){if(document.body)mo.observe(document.body,{childList:true,subtree:true})};
+  if(document.body)start();else document.addEventListener('DOMContentLoaded',start);
+}catch(e){try{logErr('p32-mo',e)}catch(x){}}
+
+try{rePaint()}catch(e){}
+
+try{
+  if(!document.getElementById('n29-p32-css'))document.head.insertAdjacentHTML('beforeend',`<style id="n29-p32-css">
+form.re-form{display:block;margin:0;padding:0;width:100%;border:0;min-width:0}
+.re-emails{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px;max-width:100%}
+#dealsheet .aubox .re-emails{margin:6px 0 8px}
+.re-chip{display:inline-flex;align-items:center;max-width:100%;min-height:28px;border:1px solid #c9a46a;border-radius:999px;background:#f7f0e0;color:#1e2f4a;box-sizing:border-box;overflow:hidden}
+.re-pick{display:flex;align-items:center;min-width:0;flex:1;max-width:100%;background:none;border:0;padding:3px 2px 3px 10px;color:inherit;font:600 12.5px/1.2 Montserrat,system-ui,sans-serif;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}
+.re-txt{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:100%}
+.re-x{flex:none;width:28px;height:28px;min-width:28px;min-height:28px;margin:0 2px 0 0;padding:0;border:0;border-radius:50%;background:transparent;color:#8a6a2f;font:600 18px/28px Montserrat,system-ui,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.re-x:hover,.re-x:focus-visible{background:rgba(201,164,106,.25)}
+.re-pick:focus-visible,.re-x:focus-visible{outline:2px solid #a8844a;outline-offset:-2px}
+[data-theme=dark] #dealsheet .re-chip,[data-theme=dark] .aubox .re-chip{background:#1a2a40;color:#fbf8f1;border-color:#c9a46a}
+[data-theme=dark] #dealsheet .re-x,[data-theme=dark] .aubox .re-x{color:#e0c48f}
+[data-theme=dark] #cmpsheet .re-chip{background:#f7f0e0;color:#1e2f4a}
+[data-theme=dark] #cmpsheet .re-x{color:#8a6a2f}
+</style>`);
+}catch(e){try{logErr('p32-css',e)}catch(x){}}
 })();
 // ===== n29 END
 
