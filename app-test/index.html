@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='24.11.2026 23:16';
+var APPV='25.11.2026 09:28';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6485,6 +6485,58 @@ try{
     return r;
   };
 }catch(e){try{logErr('p25-show',e)}catch(x){}}
+})();
+// ---------- n29 p26 (25.11) · «только собственник» → «собственник или представитель по доверенности»
+// Владелец 25.11: документы и действия, которые приписаны только собственнику, может сделать и его представитель
+// по доверенности, в том числе Ситиус по вашей доверенности. Места, где закон требует личного участия
+// (запись в ЕГРН о невозможности регистрации без личного участия — ст. 36 218-ФЗ), не трогаем.
+(function(){
+const P26_TIP='Сделать это может собственник или его представитель по доверенности, например Ситиус по вашей доверенности.';
+const P26_TIP_S='Это делает продавец или его представитель по доверенности. Попросите у продавца документ или копию.';
+// подсказки к плашкам
+try{
+  const tt=tipText;
+  tipText=function(c,t){
+    try{
+      const s=String(t||'').replace(/<[^>]+>/g,'');
+      if(c==='t-own'&&/^(только )?собственник( или представитель)?(\s·|$)/.test(s))return P26_TIP;
+      if(c==='t-own'&&/^продавец или представитель/.test(s))return P26_TIP_S;
+    }catch(e){}
+    const r=tt.apply(this,arguments);
+    return r==='Сделать может только собственник.'?P26_TIP:r;
+  };
+}catch(e){try{logErr('p26-tip',e)}catch(x){}}
+// плашки: «собственник · …», «только собственник» → «собственник или представитель · …»
+// «только продавец» (справки о зарегистрированных, СНТ) → «продавец или представитель»; справки ПНД/НД — без изменений
+function fixTag(el){
+  try{
+    if(!el||el.__p26)return;el.__p26=1;
+    const n=el.firstChild;if(!n||n.nodeType!==3)return;
+    const v=n.nodeValue;
+    if(/^только собственник/.test(v))n.nodeValue=v.replace(/^только собственник/,'собственник или представитель');
+    else if(/^собственник(\s·|$)/.test(v)&&!/^собственник или/.test(v))n.nodeValue=v.replace(/^собственник/,'собственник или представитель');
+    else if(/^только продавец/.test(v)){
+      const ck=el.closest&&el.closest('.ck');
+      if(ck&&/ПНД|НД продавца/.test(ck.textContent))return;
+      n.nodeValue=v.replace(/^только продавец/,'продавец или представитель');
+    }
+  }catch(e){}
+}
+function fixAll(root){try{(root||document).querySelectorAll('span.tag.t-own').forEach(fixTag)}catch(e){}}
+try{
+  const sh=show;
+  show=function(){const r=sh.apply(this,arguments);fixAll(document);return r};
+}catch(e){try{logErr('p26-show',e)}catch(x){}}
+try{
+  const mo=new MutationObserver(M=>{for(const m of M)for(const a of m.addedNodes){if(a.nodeType!==1)continue;if(a.matches&&a.matches('span.tag.t-own'))fixTag(a);else if(a.querySelectorAll)fixAll(a)}});
+  const go=()=>{try{mo.observe(document.body,{childList:true,subtree:true});fixAll(document)}catch(e){}};
+  if(document.body)go();else document.addEventListener('DOMContentLoaded',go);
+}catch(e){try{logErr('p26-mo',e)}catch(x){}}
+// описание работы на этапе 2
+try{
+  const wk2=WK;
+  WK=function(n){const w=wk2(n);try{if(w&&typeof w.sit==='string'&&/только собственнику/.test(w.sit))return Object.assign({},w,{sit:w.sit.replace('документы, которые выдают только собственнику, — с вашим участием','документы, которые выдают собственнику или его представителю по доверенности, — с вашим участием или по вашей доверенности')})}catch(e){}return w};
+}catch(e){try{logErr('p26-wk',e)}catch(x){}}
 })();
 // ===== n29 END
 
