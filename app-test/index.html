@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 10:24';
+var APPV='25.11.2026 11:53';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -6720,6 +6720,41 @@ try{
 
 window.pathActiveN=pathActiveN;
 window.countedStages=countedStages;
+})();
+// ---------- n29 p31 (25.11) · вход без SMS и без вкладки «Телефон»
+// Владелец 25.11: Апп работает без входа (прогресс на устройстве + «Перенести на другое устройство»).
+// Вход по желанию: почта, Telegram, MAX. Вход по номеру телефона / SMS убираем из окна входа —
+// коды не приходят. PHQ не выключаем (флаг v2.2 остаётся). p6_auth_ui и p14_phone не меняем:
+// этот файл идёт после них и скрывает вкладку «Телефон». Поле телефона в заявке Ситиусу не трогаем.
+(function(){
+function p31toMail(){
+  try{
+    if(typeof AU==='undefined')return;
+    if(AU.m==='phone')AU.m='mail';
+    if(AU.step==='ph'){AU.step='';AU.code='';AU.ph='';AU.phLate=0}
+  }catch(e){}
+}
+try{p31toMail()}catch(e){}
+try{
+  phSeg=function(){return ''};
+}catch(e){try{logErr('p31-phSeg',e)}catch(x){}}
+try{
+  const am=auMode;
+  auMode=function(m){if(m==='phone')m='mail';p31toMail();return am.call(this,m)};
+}catch(e){try{logErr('p31-auMode',e)}catch(x){}}
+try{
+  const cv=csView;
+  csView=function(){p31toMail();return cv.apply(this,arguments)};
+}catch(e){try{logErr('p31-csView',e)}catch(x){}}
+try{
+  const ap=auPh;
+  auPh=function(){p31toMail();try{AU.err='';if(typeof csR==='function')csR();else if(typeof auR==='function')auR()}catch(e){}};
+}catch(e){try{logErr('p31-auPh',e)}catch(x){}}
+try{
+  if(!document.getElementById('n29-p31-css'))document.head.insertAdjacentHTML('beforeend',`<style id="n29-p31-css">
+#cmpsheet .cs-seg,#cmpsheet #auphone{display:none!important}
+</style>`);
+}catch(e){try{logErr('p31-css',e)}catch(x){}}
 })();
 // ===== n29 END
 
