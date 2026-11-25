@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 16:10';
+var APPV='25.11.2026 16:20';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7471,6 +7471,120 @@ try{
   };
 }catch(e){try{logErr('p35-show',e)}catch(x){}}
 try{if(cur==='path')p35Bind()}catch(e){}
+})();
+// ---------- n29 p36 (25.11) · график: без дубля процента, сумма в подсказке, если влезает
+// Когда цена выше или ниже коридора, верхнюю строку «На X % выше/ниже рынка (±Y)» не показываем:
+// остаётся нижняя подсказка. Сумму в скобках добавляем, только если вся фраза
+// помещается в одну строку при ширине карточки как на 390px; иначе подсказка как была.
+// Внутри коридора по-прежнему «✓ В пределах рынка», без подсказки.
+// Шрифт подсказки — как у бывшей верхней строки (11px), сверху небольшой отступ от полоски.
+// p33 v5 (конечная ширина полосок по умолчанию) и p35 не меняем.
+(function(){
+if(document.getElementById('n29-p36-css'))document.getElementById('n29-p36-css').remove();
+document.head.insertAdjacentHTML('beforeend',`<style id="n29-p36-css">
+.chart.ch33 + .ch33-cmp{margin:14px 0 8px;font:600 11px/1.3 Montserrat,sans-serif;letter-spacing:.01em;color:#8a6a2f}
+[data-theme=dark] .chart.ch33 + .ch33-cmp,
+[data-theme=dark] .ch33-cmp{color:#e0c48f}
+</style>`);
+
+function ch36pc(own,lo,hi){
+  if(!(own>0)||!(lo>0)||!(hi>0))return 0;
+  if(own>hi)return Math.round((own/hi-1)*100);
+  if(own<lo)return Math.round((1-own/lo)*100);
+  return 0;
+}
+function ch36parts(own,lo,hi){
+  if(!(own>0)||!(lo>0)||!(hi>0))return {short:'',full:''};
+  const pc=Math.abs(ch36pc(own,lo,hi));
+  const rub=typeof chRub==='function'?chRub:function(v){return String(Math.round(Math.abs(v)))+' ₽'};
+  if(own>hi){
+    const short='Дороже рынка на\u00a0'+pc+'\u00a0%, продажа может затянуться';
+    const full='Дороже рынка на\u00a0'+pc+'\u00a0% (+'+rub(own-hi)+'), продажа может затянуться';
+    return {short:short,full:full};
+  }
+  if(own<lo){
+    const short='Ниже рынка на\u00a0'+pc+'\u00a0%, можно продать быстрее';
+    const full='Ниже рынка на\u00a0'+pc+'\u00a0% (\u2212'+rub(lo-own)+'), можно продать быстрее';
+    return {short:short,full:full};
+  }
+  return {short:'',full:''};
+}
+
+function ch36esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+function ch36fit(root){
+  const scope=root&&root.querySelectorAll?root:document;
+  scope.querySelectorAll('.ch33-cmp[data-full]').forEach(function(n){
+    const full=n.getAttribute('data-full')||'';
+    const short=n.getAttribute('data-short')||'';
+    if(!full){if(short)n.textContent=short;return}
+    if(!short||full===short){n.textContent=full;return}
+    const w=n.clientWidth||0;
+    if(w<8){n.textContent=short;return}
+    const s=document.createElement('span');
+    const cs=getComputedStyle(n);
+    s.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;pointer-events:none';
+    s.style.font=cs.font;
+    s.style.letterSpacing=cs.letterSpacing;
+    s.style.fontWeight=cs.fontWeight;
+    s.style.fontSize=cs.fontSize;
+    s.style.fontFamily=cs.fontFamily;
+    s.textContent=full;
+    document.body.appendChild(s);
+    const ok=s.offsetWidth<=w+0.5;
+    s.remove();
+    n.textContent=ok?full:short;
+  });
+}
+
+try{
+  if(typeof ch33cmpHint==='function'){
+    ch33cmpHint=function(own,lo,hi){return ch36parts(own,lo,hi).short};
+  }
+}catch(e){}
+
+try{
+  const cp0=chartPrices;
+  chartPrices=function(j){
+    let h;
+    try{h=cp0.apply(this,arguments)}catch(e){try{logErr('p36-chart',e)}catch(x){}return ''}
+    if(!h||typeof h!=='string')return h;
+    try{
+      // верхняя строка разницы только внутри коридора (класс eq)
+      h=h.replace(/<div class="ch33-diff"><span class="ch-n1">[^<]*<\/span><\/div>\s*/,'');
+      const m=h.match(/data-lo="([^"]+)"[^>]*data-hi="([^"]+)"[^>]*data-mkt="[^"]*"[^>]*data-own="([^"]+)"/);
+      if(m){
+        const parts=ch36parts(+m[3]||0,+m[1]||0,+m[2]||0);
+        if(parts.short){
+          const tag='<div class="ch33-cmp" data-short="'+ch36esc(parts.short)+'" data-full="'+ch36esc(parts.full)+'">'+ch36esc(parts.short)+'</div>';
+          if(/<div class="ch33-cmp">/.test(h))h=h.replace(/<div class="ch33-cmp">[^<]*<\/div>/,tag);
+          else h=h.replace(/(<\/div>\s*)(<div class="hint">|$)/,function(a,a1,a2){return '</div> '+tag+a2});
+        }
+      }
+    }catch(e){try{logErr('p36-html',e)}catch(x){}}
+    return h;
+  };
+}catch(e){try{logErr('p36-wrap',e)}catch(x){}}
+
+try{
+  const b0=chBind;
+  chBind=function(){
+    const r=b0.apply(this,arguments);
+    try{ch36fit(document.getElementById('body')||document)}catch(e){}
+    return r;
+  };
+}catch(e){}
+
+try{
+  const sh=show;
+  show=function(id,keep){
+    const r=sh.apply(this,arguments);
+    try{ch36fit(document.getElementById('body')||document)}catch(e){}
+    return r;
+  };
+}catch(e){}
 })();
 // ===== n29 END
 
