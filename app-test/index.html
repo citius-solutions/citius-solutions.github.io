@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 08:19';
+var APPV='26.11.2026 08:23';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7621,10 +7621,16 @@ try{
   if(document.getElementById('n29-p38-css'))return;
   const st=document.createElement('style');st.id='n29-p38-css';
   st.textContent=
-    '.p38-gap{margin:10px 0 4px;padding:12px 14px;border-radius:12px;border:1.5px solid #c9a46a;background:#243654;color:#f4efe4;font-size:13px;line-height:1.45}'+
-    '.p38-gap .p38-gap-btn{border-color:#c9a46a;color:#c9a46a;background:transparent}'+
-    '[data-theme="light"] .p38-gap{background:#f4ead4;color:#1e2f4a;border-color:#c9a46a}'+
-    '[data-theme="light"] .p38-gap .p38-gap-btn{color:#1e2f4a;border-color:#c9a46a;background:transparent}';
+    '.p38-gap{margin:10px 0 4px;padding:12px 14px;border-radius:12px;border:1.5px solid #c9a46a;background:#243654;color:#fbf8f1;font-size:13px;line-height:1.45}'+
+    '.p38-gap,.p38-gap *{color:#fbf8f1}'+
+    '.p38-gap .p38-gap-btn{border-color:#c9a46a;color:#f0dcb0;background:transparent}'+
+    '[data-theme="light"] .p38-gap{background:#f6ecd8;color:#1e2f4a;border-color:#c9a46a}'+
+    '[data-theme="light"] .p38-gap,[data-theme="light"] .p38-gap *{color:#1e2f4a}'+
+    '[data-theme="light"] .p38-gap .p38-gap-btn{color:#1e2f4a;border-color:#c9a46a;background:transparent}'+
+    /* Итог — светлая «бумага» в обеих темах; .planpaper * иначе красит текст в тёмно-синий на синем фоне */
+    '.planpaper .p38-gap{background:#f6ecd8;border:1.5px solid #c9a46a;color:#1e2f4a}'+
+    '.planpaper .p38-gap,.planpaper .p38-gap *{color:#1e2f4a}'+
+    '.planpaper .p38-gap .p38-gap-btn{color:#1e2f4a;border-color:#c9a46a;background:transparent}';
   document.documentElement.appendChild(st);
 
   function p38authed(){try{return typeof authOn==='function'&&!!authOn()}catch(e){return false}}
@@ -7743,20 +7749,6 @@ try{
       return /рыночн|выше рынка|ниже рынка|отличается/.test(m)?'':m;
     });
   }
-  function p38budLine(){
-    try{
-      const b=budget();
-      if(!b)return 'Бюджет покупки: ещё не указан — этап 0';
-      const rh=typeof buyRange==='function'?buyRange(b):[0,0];
-      const lo=rh[0],hi=rh[1];
-      const f=typeof strip==='function'?strip(budgetFormula()):String(budgetFormula()||'');
-      let t='Бюджет покупки ~'+fmt(b);
-      if(lo&&hi)t+=', Ищем '+fmt(lo)+' – '+fmt(hi);
-      if(f)t+=', Как посчитан: '+f;
-      return t;
-    }catch(e){return ''}
-  }
-
   if(SCR.s1c&&typeof SCR.s1c.b==='function'){
     SCR.s1c.b=function(){
       const mu=typeof vN==='function'&&vN()>1;
@@ -7795,10 +7787,6 @@ try{
     planSections=function(){
       const S=ps0.apply(this,arguments);
       (S||[]).forEach(function(s){
-        if(s.h==='Бюджет'&&s.rows&&s.rows.length){
-          s.rows=null;
-          s.text=p38budLine();
-        }
         if(s.h==='Цена'&&p38gapOn()){
           s.warn='';
           s.extra=p38gapHtml(true);
