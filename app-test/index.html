@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 12:19';
+var APPV='26.11.2026 12:25';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -8013,11 +8013,65 @@ try{
     b=set(b,'ch33-bar o',null,pBar);
     if(own&&hi&&own>hi)b=set(b,'ch33-xl hi',pct(hi),Math.max(0,pct(own)-pct(hi)));
     if(own&&lo&&own<lo)b=set(b,'ch33-xl lo',pct(own),Math.max(0,pct(lo)-pct(own)));
-    return b;
+    return p39fixCmp(b,own,lo,hi,mkt);
+  }
+  function p39mktRef(lo,hi,mkt){if(+mkt>0)return +mkt;if(+lo>0&&+hi>0)return (+lo+ +hi)/2;return 0}
+  function p39overPc(own,mkt){return (own>0&&mkt>0)?Math.round((own/mkt-1)*100):0}
+  function p39escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+  function p39cmpParts(own,lo,hi,mkt){
+    mkt=p39mktRef(lo,hi,mkt);
+    if(!(own>0)||!(mkt>0))return {short:'',full:''};
+    if(!(own<lo||own>hi))return {short:'',full:''};
+    const pc=Math.abs(p39overPc(own,mkt));
+    const rub=typeof chRub==='function'?chRub:function(v){
+      const a=Math.abs(v);
+      return (a>=1e6?(Math.round(a/1e5)/10).toLocaleString('ru-RU')+' млн':a>=1e3?Math.round(a/1e3).toLocaleString('ru-RU')+' тыс.':Math.round(a).toLocaleString('ru-RU'))+' ₽';
+    };
+    if(own>hi){
+      const short='Дороже рынка на\u00a0'+pc+'\u00a0%, продажа может затянуться';
+      const full='Дороже рынка на\u00a0'+pc+'\u00a0% (+'+rub(own-mkt)+'), продажа может затянуться';
+      return {short:short,full:full};
+    }
+    const short='Ниже рынка на\u00a0'+pc+'\u00a0%, можно продать быстрее';
+    const full='Ниже рынка на\u00a0'+pc+'\u00a0% (\u2212'+rub(mkt-own)+'), можно продать быстрее';
+    return {short:short,full:full};
+  }
+  function p39fixCmp(h,own,lo,hi,mkt){
+    const parts=p39cmpParts(own,lo,hi,mkt);
+    if(!parts.short)return h;
+    const tag='<div class="ch33-cmp" data-short="'+p39escAttr(parts.short)+'" data-full="'+p39escAttr(parts.full)+'">'+p39escAttr(parts.full)+'</div>';
+    if(/<div class="ch33-cmp"/.test(h))return h.replace(/<div class="ch33-cmp"[^>]*>[^<]*<\/div>/,tag);
+    return h;
   }
   if(typeof chartPrices==='function'){
     const cp0=chartPrices;
     chartPrices=function(j){return p39fixChart(cp0.apply(this,arguments))};
+  }
+  if(typeof ch33cmpHint==='function'){
+    const c0=ch33cmpHint;
+    ch33cmpHint=function(own,lo,hi,mkt){
+      const p=p39cmpParts(own,lo,hi,mkt);
+      return p.short||c0.apply(this,arguments);
+    };
+  }
+  if(typeof ch33line==='function'){
+    const ln0=ch33line;
+    ch33line=function(own,lo,hi,counting){
+      const mkt=p39mktRef(lo,hi,0);
+      if(!(own>0)||!(mkt>0))return ln0.apply(this,arguments);
+      if(!counting&&own>=lo&&own<=hi)return ln0.apply(this,arguments);
+      const pc=p39overPc(own,mkt);
+      const rub=typeof chRub==='function'?chRub:function(v){return String(Math.round(Math.abs(v)))+' ₽'};
+      if(own>hi){
+        if(!counting&&pc<=0)return ln0.apply(this,arguments);
+        return 'На\u00a0'+Math.abs(pc)+'\u00a0% выше рынка (+'+rub(own-mkt)+')';
+      }
+      if(own<lo){
+        if(!counting&&pc>=0)return ln0.apply(this,arguments);
+        return 'На\u00a0'+Math.abs(pc)+'\u00a0% ниже рынка (\u2212'+rub(mkt-own)+')';
+      }
+      return ln0.apply(this,arguments);
+    };
   }
 
   /* ---------- 4. школа и детский сад раздельно ---------- */
@@ -8323,9 +8377,14 @@ try{
       let h=t0.apply(this,arguments);
       try{
         const st=taxStatus();
-        if(st.free&&st.why!=='kids'){
-          if(typeof NOTAX==='string'&&h.indexOf(NOTAX)>=0)h=h.replace(NOTAX,P39_NOTAX);
-          else h=h.replace(/По общему правилу налога с продажи не будет:[^<]*/,P39_NOTAX+'.');
+        if(st.free){
+          if(st.why!=='kids'){
+            const titled='<b>'+P39_NOTAX+'</b>';
+            if(typeof NOTAX==='string'&&h.indexOf(NOTAX)>=0)h=h.replace(NOTAX,titled);
+            else if(h.indexOf('<b>'+P39_NOTAX+'</b>')<0&&h.indexOf(P39_NOTAX)>=0)h=h.replace(P39_NOTAX,titled);
+            else h=h.replace(/По общему правилу налога с продажи не будет:[^<]*/,titled);
+          }
+          h=h.replace(/\s*<button class="btn primary"[^>]*>Ситиус проверит, можно ли снизить налог<\/button>/g,'');
         }
         if(!st.free){
           const q=(!st.known)?p39taxQ():'';
