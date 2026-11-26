@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 08:27';
+var APPV='26.11.2026 12:19';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7941,6 +7941,453 @@ try{
       if(c==='m-h'||/^человек$/.test(s)||/вы\s*\/\s*(юрист|представитель)/.test(s))
         return 'Это не проверить по ссылке: нужны справки, архивы и документы. Делаете вы сами или представитель по доверенности.';
       return tt0.apply(this,arguments);
+    };
+  }
+})();
+// p39 GB-30b (26.11): 14 правок владельца — общая шкала графика, чек-лист и «Куда идти»,
+// школа/сад раздельно, скрипт звонка, светлые чипы, ⚠, тексты «Сам или с агентством»,
+// нотариус по договору, сроки в итоге, налог 3/5 лет.
+(function(){
+  if(document.getElementById('n29-p39-css'))return;
+  const st=document.createElement('style');st.id='n29-p39-css';
+  st.textContent=
+    /* 3. «Куда идти»: иконка + название слева на всю ширину, «?» одной колонкой справа */
+    '.p39-org .sl{display:flex;align-items:center;width:100%;box-sizing:border-box;gap:8px;min-height:40px;padding:6px 0;margin:0}'+
+    '.p39-org .c21-qblock{width:100%;box-sizing:border-box;border-bottom:1px solid #3d5578}'+
+    '[data-theme="light"] .p39-org .c21-qblock{border-bottom-color:#ece5d6}'+
+    '.p39-org .c21-qblock > .sl{border-bottom:0}'+
+    '.p39-org .c21-qhead{display:flex;align-items:center;width:100%;box-sizing:border-box;gap:8px;min-height:40px}'+
+    '.p39-org .c21-qhead > .sl{flex:1 1 auto;min-width:0;border-bottom:0;padding:0;margin:0}'+
+    '.p39-org .sl .ic{flex:0 0 28px;width:28px;height:28px;display:inline-block;text-align:center;font-size:0;line-height:28px;'+
+      'background:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23f0dcb0\' stroke-width=\'1.7\' stroke-linejoin=\'round\'><rect x=\'4\' y=\'10\' width=\'16\' height=\'11\' rx=\'1\'/><path d=\'M4 10l8-6 8 6\'/><path d=\'M9 21v-6h6v6\'/></svg>") center/18px no-repeat}'+
+    '[data-theme="light"] .p39-org .sl .ic{'+
+      'background-image:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%231e2f4a\' stroke-width=\'1.7\' stroke-linejoin=\'round\'><rect x=\'4\' y=\'10\' width=\'16\' height=\'11\' rx=\'1\'/><path d=\'M4 10l8-6 8 6\'/><path d=\'M9 21v-6h6v6\'/></svg>")}'+
+    '.p39-org .sl .nm{flex:1 1 auto;min-width:0;text-align:left;white-space:normal;overflow:visible;font-size:13px;line-height:1.3}'+
+    '.p39-org .c21-qhead > .c21-qbtn,.p39-org .sl > .c21-qbtn,.p39-org button.c21-qbtn{flex:0 0 32px;margin-left:auto;align-self:center}'+
+    /* 6. тёмные чипы внутри карточек — светлые, золотая обводка, текст navy, обе темы */
+    '.card .tag.t-bank,.card .tag.t-any,.card .tag.t-not,.card .tag.t-op,.card .tag.m-a,.card .tag.m-s,'+
+    '.card .t-bank,.card .t-any,.card .t-not,.card .t-op,.card .m-a,.card .m-s,'+
+    '.ntr .tag.t-bank,.ntr .tag.t-any,.ntr .t-bank,'+
+    '.card .tag.t-own,.card .tag.t-mfc,.card .tag.t-warn,.card .tag.m-h,'+
+    '.card .t-own,.card .t-mfc,.card .t-warn,.card .m-h{'+
+      'background:#f6ecd8;color:#1e2f4a;border:1px solid #c9a46a}'+
+    '.p39-stnote{margin:2px 0 8px 0;font-size:11.5px;line-height:1.35;color:#5a6a80}'+'[data-theme="dark"] .p39-stnote{color:#b8c0cc}'+'.planpaper .p39-stnote{color:#5a6a80}'+
+    '.p39-sttotal{margin-top:8px;font-size:13px;font-weight:600;color:#1e2f4a}'+
+    '[data-theme="dark"] .p39-sttotal{color:#f0dcb0}'+
+    '.planpaper .p39-sttotal{color:#1e2f4a}'+
+    '.p39-taxq{margin:0 0 8px}';
+  document.documentElement.appendChild(st);
+
+  /* ---------- 1. общая шкала графика ---------- */
+  function p39axis(lo,hi,mkt,own){
+    const vals=[lo,hi,mkt,own].filter(function(v){return +v>0}).map(Number);
+    if(!vals.length)return {pct:function(){return 0}};
+    const lo0=Math.min.apply(null,vals),hi0=Math.max.apply(null,vals);
+    const span=Math.max(hi0-lo0,hi0*0.08,1);
+    const pad=Math.max(span*0.25,hi0*0.05);
+    const min=Math.max(0,lo0-pad),max=hi0+pad*0.12;
+    const den=Math.max(max-min,1);
+    return {min,max,pct:function(v){return Math.max(0,Math.min(100,(Number(v)-min)/den*100))}};
+  }
+  function p39fixChart(h){
+    if(!h||h.indexOf('data-lo="')<0)return h;
+    const m=h.match(/data-lo="([^"]+)"[^>]*data-hi="([^"]+)"[^>]*data-mkt="([^"]+)"[^>]*data-own="([^"]+)"/);
+    if(!m)return h;
+    const lo=+m[1],hi=+m[2],mkt=+m[3],own=+m[4];
+    if(!lo&&!hi&&!own)return h;
+    const pct=p39axis(lo,hi,mkt,own).pct;
+    const cap=(own&&hi&&own>hi)?hi:own;
+    function set(html,sel,left,width){
+      const re=new RegExp('(<i class="'+sel+'" style=")([^"]*)(">)');
+      return html.replace(re,function(_,a,s,c){
+        let st=s;
+        if(left!=null)st=/left:\s*[\d.]+%/.test(st)?st.replace(/left:\s*[\d.]+%/,'left:'+left.toFixed(2)+'%'):st+'left:'+left.toFixed(2)+'%;';
+        if(width!=null)st=/width:\s*[\d.]+%/.test(st)?st.replace(/width:\s*[\d.]+%/,'width:'+width.toFixed(2)+'%'):st+'width:'+width.toFixed(2)+'%;';
+        return a+st+c;
+      });
+    }
+    let b=h;
+    const pLo=pct(lo),pHi=pct(hi),pMid=pct(mkt),pBar=pct(cap||0);
+    b=set(b,'ch33-zone',pLo,Math.max(0,pHi-pLo));
+    b=set(b,'ch33-mid',pMid,null);
+    b=set(b,'ch33-bar o',null,pBar);
+    if(own&&hi&&own>hi)b=set(b,'ch33-xl hi',pct(hi),Math.max(0,pct(own)-pct(hi)));
+    if(own&&lo&&own<lo)b=set(b,'ch33-xl lo',pct(own),Math.max(0,pct(lo)-pct(own)));
+    return b;
+  }
+  if(typeof chartPrices==='function'){
+    const cp0=chartPrices;
+    chartPrices=function(j){return p39fixChart(cp0.apply(this,arguments))};
+  }
+
+  /* ---------- 4. школа и детский сад раздельно ---------- */
+  function p39splitFeat(L){
+    if(!Array.isArray(L))return L;
+    if(L.some(function(x){return x&&x[0]==='kg'})){
+      return L.map(function(it){
+        if(it&&it[0]==='school')return ['school','Рядом школа'];
+        if(it&&it[0]==='kg')return ['kg','Рядом детский сад'];
+        return it;
+      });
+    }
+    const out=[];
+    L.forEach(function(it){
+      if(it&&it[0]==='school'){
+        out.push(['school','Рядом школа']);
+        out.push(['kg','Рядом детский сад']);
+      }else out.push(it);
+    });
+    return out;
+  }
+  function p39migFeat(){
+    try{
+      if(typeof A==='undefined'||!A||A.fm39)return;
+      const apply=function(o){
+        if(!o||!Array.isArray(o.feat)||o.feat.indexOf('school')<0)return;
+        if(o.feat.indexOf('kg')<0)o.feat.push('kg');
+      };
+      apply(A);
+      (A.so||[]).forEach(apply);
+      A.fm39=1;
+    }catch(e){}
+  }
+  function p39schoolPhrase(F){
+    F=F||[];
+    const sch=F.indexOf('school')>=0,kg=F.indexOf('kg')>=0;
+    if(sch&&kg)return 'Рядом школа и детский сад. ';
+    if(sch)return 'Рядом школа. ';
+    if(kg)return 'Рядом детский сад. ';
+    return '';
+  }
+  try{
+    if(typeof FEAT_FLAT!=='undefined')FEAT_FLAT=p39splitFeat(FEAT_FLAT);
+    if(typeof FEAT_HOUSE!=='undefined')FEAT_HOUSE=p39splitFeat(FEAT_HOUSE);
+  }catch(e){}
+  if(typeof featL==='function'){
+    const fl0=featL;
+    featL=function(){return p39splitFeat(fl0.apply(this,arguments))};
+  }
+  if(typeof featMig==='function'){
+    const fm0=featMig;
+    featMig=function(){const r=fm0.apply(this,arguments);p39migFeat();return r};
+  }else{
+    p39migFeat();
+  }
+  function p39patchGen(fn){
+    if(typeof fn!=='function')return fn;
+    return function(){
+      const args=arguments;
+      p39migFeat();
+      let t=fn.apply(this,args);
+      try{
+        let F=(typeof A!=='undefined'&&A&&A.feat)||[];
+        try{
+          if(typeof featOf==='function'){
+            const u=args[0]||0;
+            const U=typeof featU==='function'?featU():[[0]];
+            const g=(U[u]||[0]);
+            F=featOf(g[0],'feat');
+          }
+        }catch(e){}
+        const phrase=p39schoolPhrase(F);
+        t=String(t||'').replace(/Рядом школа или детский сад\.\s*/g,phrase);
+      }catch(e){}
+      return t;
+    };
+  }
+  try{if(typeof genText==='function')genText=p39patchGen(genText)}catch(e){}
+  try{if(typeof genTextG==='function')genTextG=p39patchGen(genTextG)}catch(e){}
+  if(SCR.s3a&&typeof SCR.s3a.b==='function'){
+    const a0=SCR.s3a.b;
+    SCR.s3a.b=function(){p39migFeat();return a0.apply(this,arguments)};
+  }
+
+  /* ---------- 2. чек-лист документов ---------- */
+  if(SCR.s2c&&typeof SCR.s2c.b==='function'){
+    const s2=SCR.s2c.b;
+    SCR.s2c.b=function(){
+      let h=s2.apply(this,arguments);
+      try{
+        if(h.indexOf('Покупатель может запросить другие документы')<0){
+          const item=(typeof ck==='function')
+            ?ck('g39more','Покупатель может запросить другие документы')
+            :'<div class="ck"><i></i><div>Покупатель может запросить другие документы</div></div>';
+          const re=/<div class="f(?: p39-org)?"><div class="lbl">Куда идти<\/div>/;
+          const m=h.match(re);
+          const i=m?h.lastIndexOf(m[0]):-1;
+          h=i>=0?h.slice(0,i)+item+h.slice(i):h+item;
+        }
+      }catch(e){}
+      return h;
+    };
+  }
+
+  /* ---------- 3 + 7. «Куда идти» вёрстка и ВЦКП ---------- */
+  if(typeof orgList==='function'){
+    const ol0=orgList;
+    orgList=function(list){
+      let h=ol0.apply(this,arguments);
+      return String(h||'').replace('<div class="f"><div class="lbl">Куда идти</div>','<div class="f p39-org"><div class="lbl">Куда идти</div>');
+    };
+  }
+  function p39debt(s){
+    return String(s||'')
+      .replace('УК или расчётный центр (ВЦКП ⚠)','УК или расчётный центр (в Санкт-Петербурге — ВЦКП)')
+      .replace('(ВЦКП ⚠)','(в Санкт-Петербурге — ВЦКП)');
+  }
+  if(typeof docCity0==='function'){
+    const d0=docCity0;
+    docCity0=function(){
+      const r=d0.apply(this,arguments);
+      try{if(r&&r.debt)r.debt=p39debt(r.debt)}catch(e){}
+      return r;
+    };
+  }
+  if(typeof docCity==='function'){
+    const dc=docCity;
+    docCity=function(){
+      const r=dc.apply(this,arguments);
+      try{if(r&&r.debt)r.debt=p39debt(r.debt)}catch(e){}
+      return r;
+    };
+  }
+
+  /* ---------- 5. скрипт первого звонка ---------- */
+  if(SCR.s4a&&typeof SCR.s4a.b==='function'){
+    const c0=SCR.s4a.b;
+    SCR.s4a.b=function(){
+      let h=c0.apply(this,arguments);
+      try{
+        h=h.replace('<b>4. «Когда готовы оформить покупку?»</b>','<b>4. «Когда готовы выйти на сделку?»</b>');
+        h=h.replace(
+          /<div class="card"><b>2\. «Как будете платить\?»<\/b>([\s\S]*?)<\/div>\s*<div class="card"><b>3\. «Нужно ли вам сначала что-то продать\?»<\/b>([\s\S]*?)<\/div>/,
+          '<div class="card"><b>2. «Нужно ли вам сначала что-то продать?»</b>$2</div>\n <div class="card"><b>3. «Как будете платить?»</b>$1</div>'
+        );
+      }catch(e){}
+      return h;
+    };
+  }
+
+  /* ---------- 7 + 13. этапы и сроки в итоге ---------- */
+  try{
+    const s4=STAGES.find(function(x){return x.n===4});
+    if(s4&&typeof s4.w==='string')s4.w=s4.w.replace(/\s*⚠/g,'');
+  }catch(e){}
+  if(typeof planSections==='function'){
+    const ps0=planSections;
+    planSections=function(){
+      const S=ps0.apply(this,arguments);
+      try{
+        const x=S.find(function(s){return s.h==='Этапы и сроки'});
+        if(x&&x.rows){
+          x.rows=x.rows.map(function(r){
+            const a=r[0],c=r[1];
+            if(/Звонки и показы/.test(String(a))){
+              return [a,String(c||'').replace(/\s*⚠/g,''),'зависит от цены и спроса'];
+            }
+            return r;
+          });
+          x.p39foot=[
+            'Часть этапов можно совмещать, например документы собирать во время подготовки квартиры. Так сделка проходит быстрее.',
+            'Всего обычно 1–3 месяца'
+          ];
+        }
+      }catch(e){}
+      return S;
+    };
+  }
+  if(typeof planSecHtml==='function'){
+    const ph0=planSecHtml;
+    planSecHtml=function(x,pdf){
+      if(!x||x.h!=='Этапы и сроки')return ph0.apply(this,arguments);
+      try{
+        const e=typeof hq==='function'?hq:function(s){return String(s||'').replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])})};
+        let b='';
+        if(x.rows){
+          if(pdf){
+            b+='<table>'+x.rows.map(function(r){
+              const a=r[0],c=r[1],n=r[2];
+              return '<tr><td>'+e(a)+'</td><td><b>'+e(c)+'</b>'+(n?'<br><span class="note">'+e(n)+'</span>':'')+'</td></tr>';
+            }).join('')+'</table>';
+          }else{
+            b+='<div class="ord-sum">'+x.rows.map(function(r){
+              const a=r[0],c=r[1],n=r[2];
+              return '<div><span>'+e(a)+'</span><b>'+e(c)+'</b></div>'+(n?'<div class="p39-stnote">'+e(n)+'</div>':'');
+            }).join('')+'</div>';
+          }
+        }
+        if(x.note)b+=pdf?'<p class="note">'+e(x.note)+'</p>':'<div class="hint" style="margin-top:4px">'+e(x.note)+'</div>';
+        if(x.p39foot&&x.p39foot[0])b+=pdf?'<p class="note">'+e(x.p39foot[0])+'</p>':'<div class="p39-stnote" style="margin-top:8px">'+e(x.p39foot[0])+'</div>';
+        if(x.p39foot&&x.p39foot[1])b+=pdf?'<p><b>'+e(x.p39foot[1])+'</b></p>':'<div class="p39-sttotal">'+e(x.p39foot[1])+'</div>';
+        return pdf?'<h2>'+e(x.h)+'</h2>'+b:'<div class="f"><div class="lbl">'+e(x.h)+'</div>'+b+'</div>';
+      }catch(e){return ph0.apply(this,arguments)}
+    };
+  }
+
+  /* ---------- 8–11. «Сам или с агентством» ---------- */
+  const P39_OLD2='Если в это же время вы занимаетесь тем, что умеете, вы зарабатываете — и этой суммы обычно хватает, чтобы покрыть работу агента Ситиуса.';
+  const P39_NEW2='Поручите эту работу Ситиусу, а вместо этого займитесь любимым делом, отдохните, проведите время с близкими или просто зарабатывайте привычным вам способом. Выгода от сотрудничества с Ситиусом больше, чем экономия на услугах опытного агента. При этом нужный вам результат вы получаете быстрее.';
+  function p39vs(h){
+    if(!h)return h;
+    return String(h)
+      .replace(P39_OLD2,P39_NEW2)
+      .replace('Вы экономите время жизни и занимаетесь своей работой','Вы экономите время жизни и занимаетесь своими делами')
+      .replace('Обычно услуги агента стоят меньше, чем выгода в цене и условиях объекта','Выгоднее и быстрее')
+      .replace('<li>Важно выбрать надёжного агента</li>','');
+  }
+  if(SCR.plan&&typeof SCR.plan.b==='function'){
+    const pb0=SCR.plan.b;
+    SCR.plan.b=function(){return p39vs(pb0.apply(this,arguments))};
+  }
+
+  /* ---------- 12. нотариус — только при договоре ---------- */
+  const P39_NOT='Нотариуса организует Ситиус, если с ним заключён договор.';
+  if(typeof notaryCard==='function'){
+    const nc0=notaryCard;
+    notaryCard=function(mand,why){
+      let h=nc0.apply(this,arguments);
+      return String(h||'').replace(/Нотариуса организует Ситиус\./g,P39_NOT);
+    };
+  }
+  if(SCR.notary&&typeof SCR.notary.b==='function'){
+    const nb0=SCR.notary.b;
+    SCR.notary.b=function(){
+      let h=nb0.apply(this,arguments);
+      h=String(h||'')
+        .replace('<b>Нотариуса организует Ситиус</b>','<b>'+P39_NOT.replace(/\.$/,'')+'</b>')
+        .replace(/Нотариуса организует Ситиус\./g,P39_NOT);
+      return h;
+    };
+  }
+
+  /* ---------- 14. налог: 3/5 лет, вопрос если нет данных ---------- */
+  if(typeof oNorm==='function'){
+    const on0=oNorm;
+    oNorm=function(o){
+      const r=on0.apply(this,arguments);
+      try{
+        if(o&&(!o.acqs||!o.acqs.length)&&o.acq){
+          o.acqs=[o.acq];
+          o.ad=o.ad||{};
+          if(!o.ad[o.acq]&&(o.regd||o.since))o.ad[o.acq]=o.regd||o.since;
+        }
+      }catch(e){}
+      return r;
+    };
+  }
+  if(typeof pick==='function'){
+    const pk0=pick;
+    pick=function(k,v,m){
+      const r=pk0.apply(this,arguments);
+      try{
+        if(k==='acq'&&v&&typeof A!=='undefined'){
+          A.acqs=A.acqs&&A.acqs.length&&A.acqs.indexOf(v)>=0?A.acqs:[v];
+          if(!A.acqs.length)A.acqs=[v];
+          if(A.acqs.indexOf(v)<0)A.acqs=[v];
+          A.ad=A.ad||{};
+          if((A.since||A.regd)&&!A.ad[v])A.ad[v]=A.regd||A.since;
+          if(typeof syncO==='function')syncO();
+        }
+      }catch(e){}
+      return r;
+    };
+  }
+  const P39_NOTAX='Налога с этой продажи нет: срок владения больше минимального';
+  function p39taxQ(){
+    try{
+      const acq=A.acq||'';
+      const dt=A.regd||A.since||((A.ad&&acq&&A.ad[acq])||'');
+      const opts=[['priv','Приватизация'],['inh','Наследство'],['gift','Дар от близкого родственника'],['gift2','Дар от другого человека'],['rent','Рента'],['buy','Покупка'],['ddu','ДДУ']];
+      const chipsH=typeof chips==='function'?chips('acq',opts):opts.map(function(x){return x[1]}).join(' · ');
+      return '<div class="f p39-taxq"><div class="lbl">Как и когда получена квартира</div>'+chipsH+
+        '<div class="lbl" style="margin-top:6px">Год или дата получения</div>'+
+        '<input placeholder="например, 1993" value="'+(typeof hq==='function'?hq(dt):String(dt||''))+
+        '" aria-label="Год или дата получения" onchange="A.since=this.value;if(/^\\d{4}-\\d\\d-\\d\\d$/.test(this.value))A.regd=this.value;else if(/^\\d{4}$/.test(String(this.value).trim())){A.since=this.value;A.regd=\'\';}'+
+        'A.ad=A.ad||{};if(A.acq){A.acqs=A.acqs&&A.acqs.length?A.acqs:[A.acq];A.ad[A.acq]=A.regd||A.since}'+
+        'if(typeof syncO===\'function\')syncO();show(cur,true)"></div>';
+    }catch(e){return ''}
+  }
+  if(typeof taxStatus==='function'){
+    const ts0=taxStatus;
+    taxStatus=function(){
+      try{
+        if(typeof oNorm==='function'){oNorm(A);(A.so||[]).forEach(oNorm)}
+        if(typeof syncO==='function')syncO();
+      }catch(e){}
+      return ts0.apply(this,arguments);
+    };
+  }
+  if(SCR.s10c&&typeof SCR.s10c.b==='function'){
+    const t0=SCR.s10c.b;
+    SCR.s10c.b=function(){
+      let h=t0.apply(this,arguments);
+      try{
+        const st=taxStatus();
+        if(st.free&&st.why!=='kids'){
+          if(typeof NOTAX==='string'&&h.indexOf(NOTAX)>=0)h=h.replace(NOTAX,P39_NOTAX);
+          else h=h.replace(/По общему правилу налога с продажи не будет:[^<]*/,P39_NOTAX+'.');
+        }
+        if(!st.free){
+          const q=(!st.known)?p39taxQ():'';
+          if(q){
+            const mark='<div class="card"><b>С этой продажи может быть налог.</b>';
+            h=h.indexOf(mark)>=0?h.replace(mark,q+mark):q+h;
+          }
+        }
+      }catch(e){}
+      return h;
+    };
+  }
+  if(typeof planCosts==='function'){
+    const pc0=planCosts;
+    planCosts=function(){
+      const R=pc0.apply(this,arguments);
+      try{
+        if(typeof sells==='function'&&!sells())return R;
+        const st=typeof taxStatus==='function'?taxStatus():{};
+        (R||[]).forEach(function(row){
+          if(row&&row[0]==='Налог с продажи'){
+            if(st.free)row[1]='нет: срок владения больше минимального';
+          }
+        });
+      }catch(e){}
+      return R;
+    };
+  }
+  if(typeof taxHint==='function'){
+    const th0=taxHint;
+    taxHint=function(where){
+      try{
+        const st=taxStatus();
+        if(st.free){
+          const w=where?' · '+where:'';
+          return '<div class="taxc" style="padding:6px 8px"><b>Налог с продажи'+w+'</b><div class="hint">'+P39_NOTAX+'.</div></div>';
+        }
+      }catch(e){}
+      return th0.apply(this,arguments);
+    };
+  }
+
+  function p39fixOrg(root){
+    try{
+      (root||document).querySelectorAll('.p39-org .sl').forEach(function(sl){
+        const nm=sl.querySelector('.nm');
+        const ic=sl.querySelector('.ic');
+        const head=sl.querySelector('.c21-qhead');
+        const btn=head&&head.querySelector(':scope > .c21-qbtn');
+        if(head&&nm&&ic){
+          if(btn){head.insertBefore(ic,btn);head.insertBefore(nm,btn)}
+          else{head.appendChild(ic);head.appendChild(nm)}
+        }
+      });
+    }catch(e){}
+  }
+  if(typeof show==='function'){
+    const sh0=show;
+    show=function(){
+      const r=sh0.apply(this,arguments);
+      try{p39fixOrg(document.getElementById('body')||document)}catch(e){}
+      return r;
     };
   }
 })();
