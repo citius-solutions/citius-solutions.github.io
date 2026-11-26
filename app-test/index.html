@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 12:25';
+var APPV='26.11.2026 13:31';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -8446,6 +8446,165 @@ try{
     show=function(){
       const r=sh0.apply(this,arguments);
       try{p39fixOrg(document.getElementById('body')||document)}catch(e){}
+      return r;
+    };
+  }
+})();
+// p40 GB-31 (26.11): заметка о пошлине с 01.01.2027 (4 000 ₽ оставляем как сейчас).
+// Заодно уточнение формулировки нотариуса (GB-30 п. 12): «если вы заключили с нами договор».
+(function(){
+  if(document.getElementById('n29-p40-css'))return;
+  const st=document.createElement('style');st.id='n29-p40-css';
+  st.textContent=
+    '.p40-duty{margin:4px 0 0;font-size:11.5px;line-height:1.35;color:#5a6a80}'+
+    '[data-theme="dark"] .p40-duty{color:#b8c0cc}'+
+    '.planpaper .p40-duty{color:#5a6a80}'+
+    '.p40-duty a{color:inherit}';
+  document.documentElement.appendChild(st);
+
+  const N6='С 1 января 2027 года, вероятно, 6 000 ₽: закон принят Госдумой';
+  const N750='С 1 января 2027 года, вероятно, максимум 750 000 ₽: закон принят Госдумой';
+  function noteEl(t){return '<div class="p40-duty">'+t+'</div>'}
+  const NOTE6=noteEl(N6);
+  const NOTE750=noteEl(N750);
+
+  function p40norm(s){return String(s||'').replace(/&nbsp;/g,'\u00a0').replace(/\u00a0/g,' ')}
+  function p40has4000(s){return /4[\s]000/.test(p40norm(s))}
+  function p40has500(s){return /500[\s]000/.test(p40norm(s))}
+  function p40isDuty(s){return /Госпошлин|госпошлин|пошлин[аыу] за регистрац/i.test(s)}
+
+  /* ---------- нотариус: утверждённая формулировка ---------- */
+  const P40_NOT='Нотариуса организует Ситиус, если вы заключили с нами договор.';
+  function p40notary(h){
+    if(!h)return h;
+    let s=String(h);
+    s=s.replace(/Нотариуса организует Ситиус, если с (ним|Ситиусом|нами) заключ[её]н договор\.?/g,P40_NOT);
+    s=s.replace(/Нотариуса организует Ситиус, если вы заключили с Ситиусом договор\.?/g,P40_NOT);
+    s=s.replace(/если с ним заключ[её]н договор/g,'если вы заключили с нами договор');
+    s=s.replace(/если с Ситиусом заключ[её]н договор/g,'если вы заключили с нами договор');
+    // heading without period already covered by first replace; if bare heading remains:
+    s=s.replace(/<b>Нотариуса организует Ситиус<\/b>/g,'<b>'+P40_NOT.replace(/\.$/,'')+'</b>');
+    return s;
+  }
+  if(typeof notaryCard==='function'){
+    const nc0=notaryCard;
+    notaryCard=function(){return p40notary(nc0.apply(this,arguments))};
+  }
+  if(SCR.notary&&typeof SCR.notary.b==='function'){
+    const nb0=SCR.notary.b;
+    SCR.notary.b=function(){return p40notary(nb0.apply(this,arguments))};
+  }
+
+  /* ---------- FEE_RX (экран регистрации и список МФЦ) ---------- */
+  try{
+    if(typeof FEE_RX!=='undefined'&&Array.isArray(FEE_RX)){
+      FEE_RX.forEach(function(row){
+        if(!row||!/Госпошлина/.test(String(row[0]||'')))return;
+        if(typeof row[1]!=='function'||row[1].__p40)return;
+        const f=row[1];
+        row[1]=function(){
+          let h=f.apply(this,arguments);
+          if(h&&h.indexOf('p40-duty')<0&&p40has4000(h))h+=NOTE6;
+          return h;
+        };
+        row[1].__p40=1;
+      });
+    }
+  }catch(e){}
+
+  /* ---------- Тарифы и госпошлина (SCR.ntar) ---------- */
+  if(SCR.ntar&&typeof SCR.ntar.b==='function'){
+    const n0=SCR.ntar.b;
+    SCR.ntar.b=function(){
+      let h=n0.apply(this,arguments);
+      try{
+        if(h&&h.indexOf('p40-duty')<0){
+          h=h.replace(/(<div class="card"><b>Госпошлина за регистрацию права<\/b>[\s\S]*?)<\/div>/,function(m,a){
+            return a+NOTE6+'</div>';
+          });
+        }
+      }catch(e){}
+      return h;
+    };
+  }
+
+  /* ---------- Итог «Расходы», PDF и текст плана ---------- */
+  if(typeof planSecHtml==='function'){
+    const ph0=planSecHtml;
+    planSecHtml=function(x,pdf){
+      let h=ph0.apply(this,arguments);
+      try{
+        if(!x||x.h!=='Расходы'||!h||h.indexOf('p40-duty')>=0)return h;
+        if(pdf){
+          h=h.replace(/(<td>Госпошлина за регистрацию<\/td><td><b>[^<]*<\/b><\/td><\/tr>)/,function(m){
+            return m+'<tr><td colspan="2" class="note">'+N6+'</td></tr>';
+          });
+        }else{
+          h=h.replace(/(<div><span>Госпошлина за регистрацию<\/span><b>[^<]*<\/b><\/div>)(?!\s*<div class="p40-duty")/,function(m){
+            return m+NOTE6;
+          });
+        }
+      }catch(e){}
+      return h;
+    };
+  }
+  if(typeof planText==='function'){
+    const pt0=planText;
+    planText=function(){
+      let t=pt0.apply(this,arguments);
+      try{
+        if(t&&t.indexOf(N6)<0){
+          t=t.replace(/(Госпошлина за регистрацию:[^\n]*)/,function(m){return m+'\n'+N6});
+        }
+      }catch(e){}
+      return p40notary(t);
+    };
+  }
+
+  /* ---------- общий проход по HTML: пошлина + нотариус, без дублей ---------- */
+  function p40patchHtml(h){
+    if(!h)return h;
+    h=p40notary(h);
+    try{
+      h=h.replace(/(<div class="card"[^>]*>)([\s\S]*?)(<\/div>)/g,function(m,a,body,c){
+        if(/p40-duty/.test(body))return m;
+        if(p40isDuty(body)&&p40has4000(body))return a+body+NOTE6+c;
+        return m;
+      });
+      h=h.replace(/(<div><span>Госпошлина за регистрацию<\/span><b>[^<]*<\/b><\/div>)(?!\s*<div class="p40-duty")/g,function(m){
+        return m+NOTE6;
+      });
+      // Список МФЦ уже дополняется через FEE_RX (заметка после ссылки). Здесь не трогаем,
+      // иначе заметка вставится ещё и до ссылки.
+      // потолок 500 000 ₽ у пошлины за регистрацию — если такая сумма где-то указана
+      if(p40has500(h)&&p40isDuty(h)&&h.indexOf('750 000')<0&&h.indexOf(N750)<0){
+        h=h.replace(/(500[\s\u00a0]000(?:&nbsp;|\s)*₽)/,function(m){return m+NOTE750});
+      }
+    }catch(e){}
+    return h;
+  }
+
+  function p40domNotes(root){
+    if(!root||!root.querySelectorAll)return;
+    // Остаток: пункт списка «Госпошлина — … 4 000 ₽» без заметки (если FEE_RX не сработал).
+    [...root.querySelectorAll('li')].forEach(function(el){
+      if(el.querySelector('.p40-duty'))return;
+      const tx=el.innerText||'';
+      if(p40isDuty(tx)&&p40has4000(tx))el.insertAdjacentHTML('beforeend',NOTE6);
+    });
+  }
+  if(typeof show==='function'){
+    const sh0=show;
+    show=function(){
+      const r=sh0.apply(this,arguments);
+      try{
+        const b=typeof $==='function'?$('body'):document.getElementById('body');
+        if(b&&b.innerHTML){
+          const n=p40patchHtml(b.innerHTML);
+          if(n!==b.innerHTML)b.innerHTML=n;
+          p40domNotes(b);
+        }
+      }catch(e){}
       return r;
     };
   }
