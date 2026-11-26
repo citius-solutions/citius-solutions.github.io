@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 08:23';
+var APPV='26.11.2026 08:27';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7630,7 +7630,8 @@ try{
     /* Итог — светлая «бумага» в обеих темах; .planpaper * иначе красит текст в тёмно-синий на синем фоне */
     '.planpaper .p38-gap{background:#f6ecd8;border:1.5px solid #c9a46a;color:#1e2f4a}'+
     '.planpaper .p38-gap,.planpaper .p38-gap *{color:#1e2f4a}'+
-    '.planpaper .p38-gap .p38-gap-btn{color:#1e2f4a;border-color:#c9a46a;background:transparent}';
+    '.planpaper .p38-gap .p38-gap-btn{color:#1e2f4a;border-color:#c9a46a;background:transparent}'+
+    '.p38-gap > .c21-qblock > .c21-qhead-solo,.p38-gap > .c21-qhead-solo{display:none!important}';
   document.documentElement.appendChild(st);
 
   function p38authed(){try{return typeof authOn==='function'&&!!authOn()}catch(e){return false}}
@@ -7734,14 +7735,16 @@ try{
     }catch(e){return 0}
   }
   function p38gapOn(j){return Math.abs(p38over(j))>10}
-  function p38gapHtml(omitPct,pdf){
+  function p38gapHtml(mode,pdf){
     if(!p38gapOn())return '';
     const x=Math.abs(p38over());
-    const t=omitPct
-      ?'Ваша оценка отличается от рыночной. Отделка, вид и состояние могут это оправдать. Ситиус уточнит оценку.'
-      :'Ваша оценка отличается от рыночной на '+x+' %. Отделка, вид и состояние могут это оправдать. Ситиус уточнит оценку.';
+    const rest=' Отделка, вид и состояние могут это оправдать. Ситиус уточнит оценку.';
+    let t;
+    if(mode==='chart')t='Ваша оценка заметно отличается от рыночной.'+rest;
+    else if(mode)t='Ваша оценка отличается от рыночной.'+rest;
+    else t='Ваша оценка отличается от рыночной на '+x+' %.'+rest;
     if(pdf)return '<div class="p38-gap">'+t+'</div>';
-    return '<div class="p38-gap" role="note"><div>'+t+'</div><button type="button" class="btn ghost p38-gap-btn" style="margin-top:8px;width:100%" onclick="A.ctx=\'уточнить оценку\';A.sent=0;go(\'agent\')">Уточнить оценку</button></div>';
+    return '<!--p38gap--><div class="p38-gap" role="note"><div>'+t+'</div><button type="button" class="btn ghost p38-gap-btn" style="margin-top:8px;width:100%" onclick="A.ctx=\'уточнить оценку\';A.sent=0;go(\'agent\')">Уточнить оценку</button></div><!--/p38gap-->';
   }
   function p38stripDup(h){
     if(!p38gapOn())return h;
@@ -7749,6 +7752,27 @@ try{
       return /рыночн|выше рынка|ниже рынка|отличается/.test(m)?'':m;
     });
   }
+  function p38placeGapAfter(h){
+    h=String(h||'');
+    const a=h.indexOf('<!--p38gap-->'),b=h.indexOf('<!--/p38gap-->');
+    if(a<0||b<a)return h;
+    const g=h.slice(a,b+14);
+    return h.slice(0,a)+h.slice(b+14)+g;
+  }
+  function p38tidyGap(){
+    document.querySelectorAll('.p38-gap').forEach(function(g){
+      const block=g.querySelector(':scope > .c21-qblock');
+      if(!block)return;
+      const solo=block.querySelector(':scope > .c21-qhead-solo');
+      [...block.querySelectorAll(':scope > details')].forEach(function(d){
+        if(g.parentNode)g.parentNode.insertBefore(d,g.nextSibling);
+      });
+      if(solo||!block.querySelector('.lbl, .c21-qtitle, b, h2, h3')){
+        try{block.remove()}catch(e){}
+      }
+    });
+  }
+
   if(SCR.s1c&&typeof SCR.s1c.b==='function'){
     SCR.s1c.b=function(){
       const mu=typeof vN==='function'&&vN()>1;
@@ -7771,16 +7795,54 @@ try{
     const cp0=chartPrices;
     chartPrices=function(j){
       let h=cp0.apply(this,arguments);
-      const g=p38gapHtml(0);
+      const g=p38gapHtml('chart');
       if(g&&h&&h.indexOf('p38-gap')<0)h+=g;
       return h;
     };
   }
-  ['s1a','s1b'].forEach(function(id){
-    if(!SCR[id]||typeof SCR[id].b!=='function')return;
-    const b0=SCR[id].b;
-    SCR[id].b=function(){return p38stripDup(b0.apply(this,arguments))};
-  });
+  if(SCR.s1a&&typeof SCR.s1a.b==='function'){
+    const a0=SCR.s1a.b;
+    SCR.s1a.b=function(){return p38stripDup(a0.apply(this,arguments))};
+  }
+  if(SCR.s1b&&typeof SCR.s1b.b==='function'){
+    const b0=SCR.s1b.b;
+    SCR.s1b.b=function(){return p38placeGapAfter(p38stripDup(b0.apply(this,arguments)))};
+  }
+  if(typeof skipBack==='function'){
+    const sb0=skipBack;
+    skipBack=function(el){
+      if(el&&el.classList&&el.classList.contains('p38-gap'))return true;
+      return sb0.apply(this,arguments);
+    };
+  }
+  if(typeof findHost==='function'){
+    const fh0=findHost;
+    findHost=function(det){
+      const host=fh0.apply(this,arguments);
+      if(host&&host.closest&&host.closest('.p38-gap')){
+        let el=host.closest('.p38-gap');
+        el=el.previousElementSibling;
+        while(el&&((el.classList&&el.classList.contains('p38-gap'))||(typeof skipBack==='function'&&skipBack(el))))el=el.previousElementSibling;
+        if(el){
+          const t=typeof titleIn==='function'?titleIn(el):null;
+          return t||el;
+        }
+      }
+      return host;
+    };
+  }
+  if(typeof show==='function'){
+    const sh0=show;
+    show=function(){
+      const r=sh0.apply(this,arguments);
+      const run=function(){try{p38tidyGap()}catch(e){}};
+      run();
+      if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);
+      setTimeout(run,0);
+      setTimeout(run,40);
+      return r;
+    };
+  }
 
   if(typeof planSections==='function'){
     const ps0=planSections;
