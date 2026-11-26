@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='25.11.2026 16:24';
+var APPV='26.11.2026 08:17';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7613,6 +7613,279 @@ try{
   };
   idleLimitMs.__p37=1;
 }catch(e){try{logErr('p37-idle',e)}catch(x){}}
+})();
+// p38 GB-30: E privacy (no deal hydrate without session; wipe on logout/idle) ·
+// A своя цена на стратегии и в бюджете итога · B спокойный блок >10 % ·
+// C пульс графика, когда карточка входит в кадр · D «представитель по доверенности»
+(function(){
+  if(document.getElementById('n29-p38-css'))return;
+  const st=document.createElement('style');st.id='n29-p38-css';
+  st.textContent=
+    '.p38-gap{margin:10px 0 4px;padding:12px 14px;border-radius:12px;border:1.5px solid #c9a46a;background:#243654;color:#f4efe4;font-size:13px;line-height:1.45}'+
+    '.p38-gap .p38-gap-btn{border-color:#c9a46a;color:#c9a46a;background:transparent}'+
+    '[data-theme="light"] .p38-gap{background:#f4ead4;color:#1e2f4a;border-color:#c9a46a}'+
+    '[data-theme="light"] .p38-gap .p38-gap-btn{color:#1e2f4a;border-color:#c9a46a;background:transparent}';
+  document.documentElement.appendChild(st);
+
+  function p38authed(){try{return typeof authOn==='function'&&!!authOn()}catch(e){return false}}
+  function p38resetMem(){
+    try{window.__noSave=1}catch(e){}
+    try{Object.keys(A).forEach(k=>{try{delete A[k]}catch(e){}})}catch(e){}
+    A.goal=null;A.ck={};
+    try{if(typeof done!=='undefined'&&done&&typeof done.clear==='function')done.clear()}catch(e){}
+    try{if(typeof hist!=='undefined'&&Array.isArray(hist))hist.length=0}catch(e){}
+    try{window.__restored=null}catch(e){}
+    try{
+      if(typeof CH_DONE!=='undefined'&&CH_DONE){
+        if(typeof CH_DONE.clear==='function')CH_DONE.clear();
+        else Object.keys(CH_DONE).forEach(k=>{try{delete CH_DONE[k]}catch(e){}});
+      }
+    }catch(e){}
+  }
+  function p38forget(){
+    try{if(typeof wipeProgress==='function')wipeProgress()}catch(e){}
+    p38resetMem();
+  }
+  window.p38forget=p38forget;
+
+  if(typeof saveSt==='function'){
+    const s0=saveSt;
+    saveSt=function(){if(window.__noSave||!p38authed())return;return s0.apply(this,arguments)};
+  }
+  if(typeof authLogout==='function'){
+    const al0=authLogout;
+    authLogout=function(){try{p38forget()}catch(e){}try{return al0.apply(this,arguments)}finally{try{window.__noSave=0}catch(e){}}};
+  }
+  if(typeof auOut==='function'){
+    const o0=auOut;
+    auOut=function(){
+      try{p38forget()}catch(e){}
+      const msg='Вы вышли. Без входа ответы на этом устройстве не сохраняются.';
+      const ok=window.sitiusSuccess;
+      if(typeof ok==='function'){
+        window.sitiusSuccess=function(t){
+          if(typeof t==='string'&&/остались/.test(t))t=msg;
+          return ok.apply(this,arguments);
+        };
+      }
+      try{return o0.apply(this,arguments)}
+      finally{
+        if(typeof ok==='function')window.sitiusSuccess=ok;
+        try{if(typeof AU!=='undefined')AU.msg=msg}catch(e){}
+      }
+    };
+  }
+  if(!p38authed()){try{p38forget()}catch(e){}try{window.__noSave=0}catch(e){}}
+
+  function p38ownSum(){
+    try{
+      const n=typeof vN==='function'?vN():1;
+      let s=0;
+      for(let j=0;j<n;j++)s+=(typeof vOwnP==='function'?vOwnP(j):0)||0;
+      if(s>0)return s;
+      if(typeof sellPrice==='function')return sellPrice()||0;
+    }catch(e){}
+    return 0;
+  }
+  function p38base(){
+    try{
+      const n=typeof vN==='function'?vN():1;
+      if(n<=1)return (typeof vOwnP==='function'?vOwnP(typeof vCur==='function'?vCur():0):0)||0;
+      let s=0,ok=0;
+      for(let j=0;j<n;j++){const p=(typeof vOwnP==='function'?vOwnP(j):0)||0;if(p){s+=p;ok++}}
+      return ok===n?s:0;
+    }catch(e){return 0}
+  }
+  if(typeof saleIn==='function'){
+    const si0=saleIn;
+    saleIn=function(){
+      if(A.goal!=='alt')return 0;
+      const own=p38ownSum();
+      if(own>0)return own;
+      return si0.apply(this,arguments);
+    };
+  }
+  if(typeof budgetFormula==='function'){
+    const bf0=budgetFormula;
+    budgetFormula=function(){
+      const t=bf0.apply(this,arguments);
+      return String(t||'').replace(/продажа\s*~?/,'ваша цена продажи ');
+    };
+  }
+
+  function p38over(j){
+    try{
+      const e=vEst(j==null?(typeof vCur==='function'?vCur():0):j);
+      if(!e||!(e.mkt>0)||!(e.own>0))return 0;
+      return Math.round((e.own/e.mkt-1)*100);
+    }catch(e){return 0}
+  }
+  function p38gapOn(j){return Math.abs(p38over(j))>10}
+  function p38gapHtml(omitPct,pdf){
+    if(!p38gapOn())return '';
+    const x=Math.abs(p38over());
+    const t=omitPct
+      ?'Ваша оценка отличается от рыночной. Отделка, вид и состояние могут это оправдать. Ситиус уточнит оценку.'
+      :'Ваша оценка отличается от рыночной на '+x+' %. Отделка, вид и состояние могут это оправдать. Ситиус уточнит оценку.';
+    if(pdf)return '<div class="p38-gap">'+t+'</div>';
+    return '<div class="p38-gap" role="note"><div>'+t+'</div><button type="button" class="btn ghost p38-gap-btn" style="margin-top:8px;width:100%" onclick="A.ctx=\'уточнить оценку\';A.sent=0;go(\'agent\')">Уточнить оценку</button></div>';
+  }
+  function p38stripDup(h){
+    if(!p38gapOn())return h;
+    return String(h||'').replace(/<div class="note risk"[^>]*>[\s\S]*?<\/div>/g,function(m){
+      return /рыночн|выше рынка|ниже рынка|отличается/.test(m)?'':m;
+    });
+  }
+  function p38budLine(){
+    try{
+      const b=budget();
+      if(!b)return 'Бюджет покупки: ещё не указан — этап 0';
+      const rh=typeof buyRange==='function'?buyRange(b):[0,0];
+      const lo=rh[0],hi=rh[1];
+      const f=typeof strip==='function'?strip(budgetFormula()):String(budgetFormula()||'');
+      let t='Бюджет покупки ~'+fmt(b);
+      if(lo&&hi)t+=', Ищем '+fmt(lo)+' – '+fmt(hi);
+      if(f)t+=', Как посчитан: '+f;
+      return t;
+    }catch(e){return ''}
+  }
+
+  if(SCR.s1c&&typeof SCR.s1c.b==='function'){
+    SCR.s1c.b=function(){
+      const mu=typeof vN==='function'&&vN()>1;
+      const base=p38base();
+      const gap=p38gapHtml(0);
+      return (typeof oTabs==='function'?oTabs():'')+
+        '<div class="f"><div class="lbl">Ваш объект</div>'+(base
+          ?'<div class="big">'+fmt(base)+'</div>'+
+           '<div class="sl"><span class="nm">Быстро</span><span class="prc">'+fmt(Math.round(base*.97))+'</span></div>'+
+           '<div class="sl"><span class="nm">Рынок</span><span class="prc">'+fmt(base)+'</span></div>'+
+           '<div class="sl"><span class="nm">Макс</span><span class="prc">'+fmt(Math.round(base*1.05))+'</span></div>'
+          :'<div class="hint">ещё не указана ваша цена — сначала <a href="#" onclick="go(\'s1b\');return false">'+(mu?'ваши цены':'вашу цену')+'</a></div>')+
+        '</div>'+
+        '<div class="hint">Опирается на вашу желаемую цену. Минус 3 % — быстрее, плюс 5 % — потолок.</div>'+
+        (typeof nbNew==='function'&&nbNew()?'<div class="hint" style="margin-top:4px">Для новостройки ориентир другой: смотрите цену в ДДУ и у застройщика, а не только объявления вторички.</div>':'')+
+        (gap||'')+(typeof DUL!=='undefined'?DUL:'')+(typeof st1==='function'?st1():'');
+    };
+  }
+  if(typeof chartPrices==='function'){
+    const cp0=chartPrices;
+    chartPrices=function(j){
+      let h=cp0.apply(this,arguments);
+      const g=p38gapHtml(0);
+      if(g&&h&&h.indexOf('p38-gap')<0)h+=g;
+      return h;
+    };
+  }
+  ['s1a','s1b'].forEach(function(id){
+    if(!SCR[id]||typeof SCR[id].b!=='function')return;
+    const b0=SCR[id].b;
+    SCR[id].b=function(){return p38stripDup(b0.apply(this,arguments))};
+  });
+
+  if(typeof planSections==='function'){
+    const ps0=planSections;
+    planSections=function(){
+      const S=ps0.apply(this,arguments);
+      (S||[]).forEach(function(s){
+        if(s.h==='Бюджет'&&s.rows&&s.rows.length){
+          s.rows=null;
+          s.text=p38budLine();
+        }
+        if(s.h==='Цена'&&p38gapOn()){
+          s.warn='';
+          s.extra=p38gapHtml(true);
+        }
+      });
+      return S;
+    };
+  }
+  if(typeof planSecHtml==='function'){
+    const sh0=planSecHtml;
+    planSecHtml=function(x,pdf){
+      if(x&&x.extra&&pdf){
+        const ex=x.extra;x.extra=undefined;
+        let h=sh0.apply(this,arguments);
+        x.extra=ex;
+        return h+p38gapHtml(true,true);
+      }
+      let h=sh0.apply(this,arguments);
+      if(x&&x.extra&&!pdf){
+        const g=x.extra;
+        if(h.lastIndexOf('</div>')>=0)h=h.slice(0,h.lastIndexOf('</div>'))+g+'</div>';
+        else h+=g;
+      }
+      return h;
+    };
+  }
+
+  function p38pulseWatch(el){
+    if(!el||!el.classList||!el.classList.contains('ch33'))return;
+    if(typeof chReduced==='function'?chReduced():(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+    if(!el.querySelector('.ch33-xl'))return;
+    if(el._p38obs||el._p38pulsed||el.classList.contains('ch-pulse'))return;
+    const playing=el.classList.contains('ch-anim')&&!el.classList.contains('ch-done');
+    if(playing)return;
+    if(typeof ch33inView==='function'&&ch33inView(el)&&!el.classList.contains('ch-done'))return;
+    const start=function(){
+      if(el._p38pulsed||el.classList.contains('ch-pulse'))return;
+      if(el.classList.contains('ch-anim')&&!el.classList.contains('ch-done'))return;
+      if(typeof ch33startPulse==='function'){
+        el._p38pulsed=1;
+        ch33startPulse(el);
+      }
+    };
+    const root=document.getElementById('body')||null;
+    try{
+      const io=new IntersectionObserver(function(ents){
+        ents.forEach(function(en){
+          if(!en.isIntersecting)return;
+          start();
+          try{io.disconnect()}catch(e){}
+        });
+      },{root:root,threshold:0.12,rootMargin:'0px'});
+      el._p38obs=io;
+      io.observe(el);
+    }catch(e){
+      try{start()}catch(err){}
+    }
+  }
+  if(typeof chBind==='function'){
+    const bind0=chBind;
+    chBind=function(){
+      const r=bind0.apply(this,arguments);
+      try{document.querySelectorAll('.chart.ch33').forEach(p38pulseWatch)}catch(e){}
+      return r;
+    };
+  }
+
+  if(SCR.sec&&typeof SCR.sec.b==='function'){
+    const sec0=SCR.sec.b;
+    SCR.sec.b=function(){
+      let h=String(sec0.apply(this,arguments)||'')
+        .replace(/вы \/ юрист\*/g,'вы / представитель*')
+        .replace(/\* юрист — платно/g,'* представитель по доверенности — платно');
+      if(/вы \/ представитель\*/.test(h)&&!/представитель по доверенности — платно/.test(h)){
+        h=h.replace(/(вы \/ представитель\*[\s\S]*?<\/div>)(?![\s\S]*представитель по доверенности — платно)/,
+          function(m){return m+'<div class="hint">* представитель по доверенности — платно, кнопка «Нужна помощь человека».</div>'});
+        if(!/представитель по доверенности — платно/.test(h)){
+          const i=h.lastIndexOf('вы / представитель*');
+          const j=h.indexOf('</div>', i);
+          if(j>0)h=h.slice(0,j+6)+'<div class="hint">* представитель по доверенности — платно, кнопка «Нужна помощь человека».</div>'+h.slice(j+6);
+        }
+      }
+      return h;
+    };
+  }
+  if(typeof tipText==='function'){
+    const tt0=tipText;
+    tipText=function(c,t){
+      const s=String(t||'').replace(/<[^>]+>/g,'');
+      if(c==='m-h'||/^человек$/.test(s)||/вы\s*\/\s*(юрист|представитель)/.test(s))
+        return 'Это не проверить по ссылке: нужны справки, архивы и документы. Делаете вы сами или представитель по доверенности.';
+      return tt0.apply(this,arguments);
+    };
+  }
 })();
 // ===== n29 END
 
