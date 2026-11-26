@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 08:17';
+var APPV='26.11.2026 08:19';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7656,23 +7656,30 @@ try{
     const al0=authLogout;
     authLogout=function(){try{p38forget()}catch(e){}try{return al0.apply(this,arguments)}finally{try{window.__noSave=0}catch(e){}}};
   }
+  if(typeof sitiusSuccess==='function'){
+    const ok0=sitiusSuccess;
+    sitiusSuccess=function(t){
+      const txt='Без входа ответы на этом устройстве не сохраняются.';
+      if(t&&typeof t==='object'){
+        const n={};
+        for(const k in t)n[k]=t[k];
+        if(/остались|Ответы сохранены/.test(String(n.text||'')))n.text=txt;
+        return ok0.call(this,n);
+      }
+      if(typeof t==='string'&&/остались|Ответы сохранены/.test(t))
+        t='Вы вышли. '+txt;
+      return ok0.apply(this,arguments);
+    };
+  }
   if(typeof auOut==='function'){
     const o0=auOut;
     auOut=function(){
       try{p38forget()}catch(e){}
       const msg='Вы вышли. Без входа ответы на этом устройстве не сохраняются.';
-      const ok=window.sitiusSuccess;
-      if(typeof ok==='function'){
-        window.sitiusSuccess=function(t){
-          if(typeof t==='string'&&/остались/.test(t))t=msg;
-          return ok.apply(this,arguments);
-        };
-      }
-      try{return o0.apply(this,arguments)}
-      finally{
-        if(typeof ok==='function')window.sitiusSuccess=ok;
-        try{if(typeof AU!=='undefined')AU.msg=msg}catch(e){}
-      }
+      try{if(typeof AU!=='undefined')AU.msg=msg}catch(e){}
+      const r=o0.apply(this,arguments);
+      try{if(typeof AU!=='undefined')AU.msg=msg}catch(e){}
+      return r;
     };
   }
   if(!p38authed()){try{p38forget()}catch(e){}try{window.__noSave=0}catch(e){}}
