@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 16:22';
+var APPV='27.11.2026 16:24';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -9566,6 +9566,7 @@ body[data-theme="dark"] #body .p46-remain,
 html[data-theme="dark"] #body .p46-remain b,
 body[data-theme="dark"] #body .p46-remain b,
 [data-theme="dark"] #body .p46-remain b{color:#d4b57e}
+#body .p46-rangelbl{font-size:12.5px;margin-top:10px;margin-bottom:2px;color:inherit}
 #body .p46-hidetop{display:none!important}
 `;
 document.head.appendChild(st);
@@ -9629,7 +9630,7 @@ function p46priceHtml(j){
   return '<div class="p46-price">'+
     '<div class="p46-plbl">Цена покупки, ₽'+more+'</div>'+
     '<input inputmode="numeric" aria-label="Цена покупки, ₽'+more+'" placeholder="например, 3 500 000" value="'+p46esc(v)+'" oninput="p46setPrice('+j+',this.value)" onchange="show(cur,true)">'+
-    '<div class="p46-phint">Можно меньше суммы продажи — остаток останется у вас.</div></div>';
+    '<div class="p46-phint">Можно меньше суммы продажи — разница будет вашей.</div></div>';
 }
 function p46remainHtml(){
   const r=p46remain();
@@ -9777,6 +9778,43 @@ function p46hideTop(body){
   });
 }
 
+function p46fixRange(body){
+  body=body||document.getElementById('body');
+  if(!body||!A||A.goal!=='alt')return;
+  const buy=p46buyCost();
+  if(!(buy>0)||typeof buyRange!=='function')return;
+  const rng=(typeof rngT==='function'?rngT.apply(null,buyRange(buy)):'');
+  if(!rng)return;
+  const blk=[...body.querySelectorAll('.f')].find(f=>{
+    const l=f.querySelector('.lbl');
+    return l&&/^Бюджет на покупку/.test((l.innerText||'').trim());
+  });
+  if(!blk)return;
+  const big=blk.querySelector('.big');
+  if(!big)return;
+  big.textContent=rng;
+  if(!blk.querySelector('.p46-rangelbl')){
+    big.insertAdjacentHTML('beforebegin','<div class="p46-rangelbl">Ищем объявления</div>');
+  }
+  const date=blk.querySelector('.fx20-date');
+  if(date&&!date.getAttribute('data-p46rng')){
+    const day=(typeof TODAY==='function'?TODAY():'');
+    date.setAttribute('data-p46rng','1');
+    date.textContent='От цены покупки −1 млн до +10 % — запас на торг.'+(day?' Расчёт на '+day+'.':'');
+  }
+  const price=blk.querySelector('.p46-price');
+  const lab=blk.querySelector('.p46-rangelbl');
+  const remain=blk.querySelector('.p46-remain');
+  if(price&&lab){
+    let at=price;
+    [lab,big,date].filter(Boolean).forEach(el=>{
+      if(el.previousElementSibling!==at)at.insertAdjacentElement('afterend',el);
+      at=el;
+    });
+    if(remain&&remain.previousElementSibling!==at)at.insertAdjacentElement('afterend',remain);
+  }
+}
+
 function p46updRemain(){
   const body=document.getElementById('body');
   if(!body||!A||A.goal!=='alt')return;
@@ -9791,20 +9829,7 @@ function p46updRemain(){
     else el.innerHTML='';
   });
   p46hideTop(body);
-  try{
-    const buy=p46buyCost();
-    if(buy&&typeof buyRange==='function'){
-      const rng=(typeof rngT==='function'?rngT.apply(null,buyRange(buy)): '');
-      const blk=[...body.querySelectorAll('.f')].find(f=>{
-        const l=f.querySelector('.lbl');
-        return l&&/^Бюджет на покупку/.test((l.innerText||'').trim());
-      });
-      if(blk&&rng){
-        const big=blk.querySelector('.big');
-        if(big)big.textContent=rng;
-      }
-    }
-  }catch(e){}
+  try{p46fixRange(body)}catch(e){}
   if(cheap){
     body.querySelectorAll('.hint, .fx20-date, .c19-mb').forEach(el=>{
       let t=el.innerHTML;
@@ -9884,7 +9909,7 @@ try{
       try{
         if(A&&A.goal==='alt'&&typeof h==='string'){
           if(/Если заполнено — считаем по нему/.test(h)){
-            h=h.replace('Если заполнено — считаем по нему, а не по средней цене.','Если заполнено — считаем по нему, а не по средней цене. Можно меньше суммы продажи — остаток останется у вас.');
+            h=h.replace('Если заполнено — считаем по нему, а не по средней цене.','Если заполнено — считаем по нему, а не по средней цене. Можно меньше суммы продажи — разница будет вашей.');
           }
           if(h.indexOf('p46-remain')<0)h+=p46remainHtml();
         }
