@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 18:03';
+var APPV='27.11.2026 18:09';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -10094,11 +10094,36 @@ function p47fixSugHtml(html,q,buy){
   return box.innerHTML;
 }
 
+function p47retouchBox(box){
+  if(!box||box.__p47lock)return;
+  const k=box.dataset&&box.dataset.k;
+  const buy=typeof p44buy==='function'&&p44buy(k);
+  const inp=k&&document.querySelector('.loc[data-k="'+k+'"] .locin');
+  const q=inp&&inp.value;
+  const html=p47fixSugHtml(box.innerHTML,q,buy);
+  if(html&&html!==box.innerHTML){
+    box.__p47lock=1;
+    box.innerHTML=html;
+    box.__p47lock=0;
+  }
+}
+function p47watchBox(){
+  if(p47watchBox._on)return;p47watchBox._on=1;
+  const mo=new MutationObserver(function(){
+    const box=document.getElementById('addrbox');
+    if(box&&box.querySelector('.locsug')){
+      try{p47retouchBox(box)}catch(e){}
+    }
+  });
+  mo.observe(document.documentElement,{childList:true,subtree:true});
+}
+
 try{
+  p47watchBox();
   if(typeof p44add==='function'&&!p44add.__p47){
     const add0=p44add;
     window.p44add=function(k,name,meta){
-      if(p47isSettlementName(name)){
+      if(p47isSettlementName(name)&&!/\(весь /.test(String(name||''))){
         const base=p47base(name);
         const chip=p47chipName(name);
         try{
@@ -10114,17 +10139,30 @@ try{
     };
     window.p44add.__p47=1;
   }
-  if(typeof adrRender==='function'&&!adrRender.__p47){
-    const ar=adrRender;
-    adrRender=function(el,k,html){
+  // p44.adrChoose вызывает локальный p44add, а не window.p44add —
+  // федеральный город (имя = регион) иначе снова проглатывается как регион без чипа.
+  if(typeof adrChoose==='function'&&!adrChoose.__p47){
+    const ch=adrChoose;
+    window.adrChoose=function(d){
       try{
-        const buy=typeof p44buy==='function'&&p44buy(k);
-        const q=el&&el.value;
-        html=p47fixSugHtml(html,q,buy);
+        const box=d&&d.parentNode;
+        const k=box&&box.dataset&&box.dataset.k;
+        if(k&&typeof p44buy==='function'&&p44buy(k)&&d&&d.dataset&&d.dataset.n!=null&&d.dataset.t==null&&p47isSettlementName(d.dataset.n)){
+          d.dataset.n=p47chipName(d.dataset.n);
+        }
       }catch(e){}
-      return ar.apply(this,arguments);
+      return ch.apply(this,arguments);
     };
-    adrRender.__p47=1;
+    window.adrChoose.__p47=1;
+  }
+  if(typeof locType==='function'&&!locType.__p47){
+    const lt=locType;
+    locType=function(el){
+      const r=lt.apply(this,arguments);
+      try{p47retouchBox(document.getElementById('addrbox'))}catch(e){}
+      return r;
+    };
+    locType.__p47=1;
   }
 }catch(e){try{logErr('p47-init',e)}catch(x){}}
 
