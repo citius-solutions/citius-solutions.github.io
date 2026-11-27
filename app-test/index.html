@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 10:39';
+var APPV='27.11.2026 10:51';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -8904,6 +8904,407 @@ try{
       };
     }
   }catch(e){try{logErr('p43-csView',e)}catch(x){}}
+})();
+// p44 (27.11): в покупке можно выбрать несколько районов и населённых пунктов.
+// Каждая подсказка становится чипом с «×», поле очищается и ждёт следующий выбор.
+// Дубликаты не добавляются. Список сохраняется в ходе сделки и в плане — через запятую.
+// Продажа: адрес по-прежнему один. Типы покупки: квартира, новостройка, дом/дача/участок, доля.
+// Заодно: подписи нижней полосы на ширине 360–390 полностью помещаются, без переименования.
+// p6_auth_ui / p8 / p11 / p13 / p14 не правим — только обёртки.
+(function(){
+if(document.getElementById('n29-p44-css'))return;
+
+const st=document.createElement('style');st.id='n29-p44-css';
+st.textContent=
+  '.p44-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}'+
+  '.p44-chip{display:inline-flex;align-items:center;max-width:100%;min-height:28px;border:1px solid #c9a46a;border-radius:999px;background:#f7f0e0;color:#1e2f4a;box-sizing:border-box;overflow:hidden}'+
+  '.p44-n{padding:4px 4px 4px 10px;font:600 12.5px/1.2 Montserrat,system-ui,sans-serif}'+
+  '.p44-x{flex:none;width:28px;height:28px;min-width:28px;min-height:28px;margin:0 2px 0 0;padding:0;border:0;border-radius:50%;background:transparent;color:#8a6a2f;font:600 18px/28px Montserrat,system-ui,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}'+
+  '.p44-x:hover,.p44-x:focus-visible{background:rgba(201,164,106,.25)}'+
+  '.p44-x:focus-visible{outline:2px solid #a8844a;outline-offset:-2px}'+
+  '[data-theme="dark"] .p44-chip{background:#1a2a40;color:#fbf8f1;border-color:#c9a46a}'+
+  '[data-theme="dark"] .p44-x{color:#e0c48f}'+
+  '.p44-planloc{display:block;margin-top:4px;font-weight:400;opacity:.88;font-size:13px;line-height:1.35;color:inherit}'+
+  /* нижняя полоса на узком телефоне: чуть меньше кегль и межбуквенный интервал, без обрезки подписей */
+  '@media (max-width:430px){'+
+    '#phone>.tab{padding-left:0!important;padding-right:0!important}'+
+    '#phone>.tab>span,#phone>.tab>span.c19t{padding-left:0!important;padding-right:0!important;min-width:0}'+
+    '#phone>.tab>span .c19-tl{font-size:7.5px!important;letter-spacing:-.045em;overflow:hidden;text-overflow:clip;white-space:nowrap!important;max-width:100%}'+
+  '}';
+document.documentElement.appendChild(st);
+
+function esc(s){return typeof hq==='function'?hq(String(s)):String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function p44norm(s){
+  return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ').replace(/\s*(муниципальный\s+)?район$/i,'').trim()
+}
+function p44names(){
+  const L=[];
+  try{if(typeof SPB!=='undefined')SPB.forEach(function(d){L.push(d[0])})}catch(e){}
+  try{if(typeof LO!=='undefined')LO.forEach(function(d){L.push(d[0])})}catch(e){}
+  try{if(typeof LOR!=='undefined')LOR.forEach(function(d){L.push(d)})}catch(e){}
+  return L
+}
+function p44canon(name){
+  const n=String(name||'').trim();if(!n)return '';
+  const hit=p44names().find(function(x){return p44norm(x)===p44norm(n)});
+  return hit||n
+}
+function p44isReg(name){
+  const t=String(name||'').trim();if(!t)return false;
+  if(t==='Москва'||t==='Санкт-Петербург'||t==='Севастополь')return true;
+  try{
+    if(typeof RG_ALL!=='undefined'&&RG_ALL.some(function(r){return r===t||p44norm(r)===p44norm(t)}))return true;
+  }catch(e){}
+  return false
+}
+function p44buy(k){
+  if(!k)return false;
+  if(k[0]==='s')return false;
+  if(k[0]==='b')return true;
+  if(k[0]==='x'){
+    const i=+k.slice(1)||0;
+    try{return typeof xBuys==='function'&&!!xBuys(i)}catch(e){return false}
+  }
+  if(k==='g'||k[0]==='g'){
+    try{if(typeof buys==='function'&&buys())return true}catch(e){}
+    return typeof A==='object'&&A&&A.goal==='new'
+  }
+  return false
+}
+function p44get(k){
+  try{
+    if(k&&k[0]==='b'&&typeof bDist==='function')return (bDist(+k.slice(1)||0)||[]).slice();
+    if(k&&k[0]==='x'){
+      const i=+k.slice(1)||0;
+      if(!i)return (A.xdist||[]).slice();
+      const o=(typeof xO==='function'?xO(i):null)||{};
+      return (o.dist||[]).slice()
+    }
+  }catch(e){}
+  return ((typeof A==='object'&&A&&A.dist)||[]).slice()
+}
+function p44set(k,list){
+  const seen={},arr=[];
+  (list||[]).forEach(function(s){
+    const n=p44canon(String(s||'').trim());if(!n)return;
+    const key=p44norm(n);if(seen[key])return;seen[key]=1;arr.push(n)
+  });
+  if(k&&k[0]==='b'&&typeof bSet==='function')bSet(+k.slice(1)||0,'dist',arr);
+  else if(k&&k[0]==='x'){
+    const i=+k.slice(1)||0;
+    if(!i)A.xdist=arr;
+    else{A.xo=A.xo||[];A.xo[i-1]=A.xo[i-1]||{};A.xo[i-1].dist=arr}
+  }else A.dist=arr;
+  return arr
+}
+function p44add(k,name,meta){
+  name=p44canon(String(name||'').trim());
+  if(!name)return false;
+  if(p44isReg(name)){
+    try{
+      if(typeof locPut==='function'){
+        locPut(k,'city',name);
+        const r=(meta&&meta.reg)||(typeof rgFind==='function'&&rgFind(name))||name;
+        if(r)locPut(k,'reg',r);
+      }
+    }catch(e){}
+    return false
+  }
+  const L=p44get(k);
+  if(L.some(function(x){return p44norm(x)===p44norm(name)}))return false;
+  L.push(name);
+  p44set(k,L);
+  if(meta&&meta.reg&&typeof locPut==='function'){
+    try{
+      const cur=typeof locGet==='function'&&locGet(k)?locGet(k).reg:'';
+      if(!cur)locPut(k,'reg',meta.reg)
+    }catch(e){}
+  }
+  return true
+}
+function p44del(k,name){
+  const key=p44norm(name);
+  p44set(k,p44get(k).filter(function(x){return p44norm(x)!==key}))
+}
+function p44html(k){
+  const L=p44get(k);
+  if(!L.length)return '';
+  return '<div class="p44-chips" role="list" aria-label="Выбранные районы и места">'+L.map(function(n){
+    return '<span class="p44-chip" role="listitem"><span class="p44-n">'+esc(n)+'</span><button type="button" class="p44-x" aria-label="Убрать '+esc(n)+'" data-n="'+esc(n)+'" onclick="p44drop(event)">×</button></span>'
+  }).join('')+'</div>'
+}
+function p44paint(k){
+  const w=document.querySelector('.loc[data-k="'+k+'"]');
+  if(!w)return;
+  const html=p44html(k);
+  const prev=w.querySelector('.p44-chips');
+  if(!html){if(prev)prev.remove();return}
+  if(prev){prev.outerHTML=html;return}
+  const locw=w.querySelector('.locw');
+  if(locw)locw.insertAdjacentHTML('afterend',html);
+  else w.insertAdjacentHTML('afterbegin',html)
+}
+function p44focus(k){
+  const n=document.querySelector('.loc[data-k="'+k+'"] .locin');
+  if(!n)return;
+  n.value='';
+  try{n.focus({preventScroll:true});n.setSelectionRange(0,0)}catch(e){try{n.focus()}catch(err){}}
+}
+window.p44drop=function(ev){
+  ev.preventDefault();ev.stopPropagation();
+  const btn=ev.currentTarget;
+  const w=btn.closest('.loc');
+  const k=w&&w.dataset.k;
+  if(!k)return;
+  p44del(k,btn.getAttribute('data-n'));
+  p44paint(k);
+  const inp=w.querySelector('.locin');
+  if(inp)inp.placeholder=p44get(k).length?'ещё район или населённый пункт':'например, Всеволожск или Приморский район';
+  p44focus(k);
+  if(typeof saveSt==='function')saveSt()
+};
+function p44label(d){
+  if(!d||!d.dataset)return '';
+  if(d.dataset.n)return String(d.dataset.n).trim();
+  const t=String(d.dataset.t||'').trim();
+  const c=String(d.dataset.c||'').trim();
+  if(/район|округ|поселок|посёлок|деревня|село|поселение/i.test(t)||(t&&!/\d/.test(t)))return t;
+  if(/\d/.test(t))return c||t;
+  return t||c
+}
+function p44meta(d){
+  const r=d.dataset.r||'';
+  const stt=d.dataset.st||'';
+  const c=d.dataset.c||d.dataset.n||'';
+  let rg=r;
+  try{if(!rg&&typeof rgFind==='function')rg=rgFind(stt)||rgFind(c)||''}catch(e){}
+  if(!rg&&(c==='Москва'||c==='Санкт-Петербург'||c==='Севастополь'))rg=c;
+  return {reg:rg||stt||''}
+}
+
+if(typeof adrChoose==='function'&&!adrChoose.__p44){
+  const ch=adrChoose;
+  window.adrChoose=function(d){
+    const box=d&&d.parentNode;
+    const k=(box&&box.dataset&&box.dataset.k)||(d.closest&&d.closest('.loc')&&d.closest('.loc').dataset.k);
+    if(!p44buy(k))return ch.apply(this,arguments);
+    const name=p44label(d);
+    if(name)p44add(k,name,p44meta(d));
+    try{if(typeof adrHide==='function')adrHide()}catch(e){}
+    p44paint(k);
+    const el=document.querySelector('.loc[data-k="'+k+'"] .locin');
+    if(el){
+      el.value='';
+      el.dataset.done='1';
+      el.placeholder=p44get(k).length?'ещё район или населённый пункт':'например, Всеволожск или Приморский район';
+    }
+    p44focus(k);
+    try{if(typeof locHint==='function')locHint(k)}catch(e){}
+    if(typeof saveSt==='function')saveSt();
+  };
+  window.adrChoose.__p44=1
+}
+
+if(typeof locPick==='function'&&!locPick.__p44){
+  const lp=locPick;
+  locPick=function(d){
+    const w=d&&d.closest&&d.closest('.loc');
+    const k=w&&w.dataset.k;
+    if(p44buy(k)&&typeof adrChoose==='function')return adrChoose(d);
+    return lp.apply(this,arguments)
+  };
+  locPick.__p44=1
+}
+
+if(typeof locIn==='function'&&!locIn.__p44){
+  const li=locIn;
+  locIn=function(k,lab,ph){
+    let h=li.apply(this,arguments);
+    if(!p44buy(k))return h;
+    h=h.replace(/(<input class="locin"[^>]*value=")([^"]*)(")/,'$1$3');
+    const phNew=p44get(k).length?'ещё район или населённый пункт':'например, Всеволожск или Приморский район';
+    h=h.replace(/(<input class="locin"[^>]*placeholder=")([^"]*)(")/,'$1'+esc(phNew)+'$3');
+    const chips=p44html(k);
+    if(chips){
+      if(h.indexOf('<div class="hint lochint">')>=0)h=h.replace('<div class="hint lochint">',chips+'<div class="hint lochint">');
+      else h+=chips
+    }
+    return h
+  };
+  locIn.__p44=1
+}
+
+if(typeof locType==='function'&&!locType.__p44){
+  const lt=locType;
+  locType=function(el){
+    const w=el&&el.closest&&el.closest('.loc');
+    const k=w&&w.dataset.k;
+    if(!p44buy(k))return lt.apply(this,arguments);
+    let keep='';
+    try{keep=locGet(k).city}catch(e){}
+    const r=lt.apply(this,arguments);
+    try{if(locGet(k).city!==keep)locPut(k,'city',keep)}catch(e){}
+    return r
+  };
+  locType.__p44=1
+}
+
+if(typeof locCommit==='function'&&!locCommit.__p44){
+  const lc=locCommit;
+  locCommit=function(el){
+    const w=el&&el.closest&&el.closest('.loc');
+    const k=w&&w.dataset.k;
+    if(p44buy(k)){try{delete el.dataset.done}catch(e){}if(el)el.value='';return}
+    return lc.apply(this,arguments)
+  };
+  locCommit.__p44=1
+}
+
+if(typeof bSet==='function'&&!bSet.__p44){
+  const bs=bSet;
+  bSet=function(j,k,v,re){
+    let keep=null,old=null;
+    if(k==='reg'){
+      try{keep=bDist(j).slice();old=bGet(j,'reg')}catch(e){}
+    }
+    const r=bs.apply(this,arguments);
+    if(keep&&(v===old||p44norm(v)===p44norm(old||''))){
+      try{
+        const now=bDist(j);
+        if(now.length!==keep.length||now.some(function(x,i){return x!==keep[i]}))bs.call(this,j,'dist',keep)
+      }catch(e){}
+    }
+    return r
+  };
+  bSet.__p44=1
+}
+
+if(typeof bLocLine==='function'&&!bLocLine.__p44){
+  const bl=bLocLine;
+  bLocLine=function(j){
+    try{
+      const d=bDist(j)||[];
+      const city=typeof bCity==='function'?bCity(j):'';
+      const skip=city&&d.some(function(x){return p44norm(x)===p44norm(city)});
+      return locLine([bReg(j),skip?'':city,d.length?d.join(', '):''])
+    }catch(e){return bl.apply(this,arguments)}
+  };
+  bLocLine.__p44=1
+}
+
+
+if(typeof shortPh==='function'&&!shortPh.__p44){
+  const sp=shortPh;
+  shortPh=function(root){
+    const r=sp.apply(this,arguments);
+    try{
+      const scope=root&&root.querySelectorAll?root:document;
+      scope.querySelectorAll('input.locin').forEach(function(inp){
+        const w=inp.closest('.loc');
+        const k=w&&w.dataset.k;
+        if(p44buy(k))inp.setAttribute('placeholder',p44get(k).length?'ещё район или населённый пункт':'например, Всеволожск или Приморский район');
+      });
+    }catch(e){}
+    return r
+  };
+  shortPh.__p44=1
+}
+
+if(typeof planSecHtml==='function'&&!planSecHtml.__p44){
+  const ps=planSecHtml;
+  planSecHtml=function(x,pdf){
+    let h=ps.apply(this,arguments);
+    if(x&&x.items)h=h.replace(/<br><span class="hint">/g,'<br><span class="p44-planloc">');
+    return h
+  };
+  planSecHtml.__p44=1
+}
+
+if(typeof wrapHint==='function'&&!wrapHint.__p44){
+  const wh=wrapHint;
+  wrapHint=function(el){
+    if(el&&el.classList&&el.classList.contains('p44-planloc'))return;
+    return wh.apply(this,arguments)
+  };
+  wrapHint.__p44=1
+}
+
+/* нижняя полоса: подогнать подписи, чтобы «Безопасность» и остальные читались целиком */
+function p44fixSecLabel(){
+  const sec=document.getElementById('tb-sec');
+  if(!sec)return;
+  const lab=sec.querySelector('.c19-tl')||sec;
+  const raw=(lab.textContent||'').replace(/\u00ad/g,'');
+  if(raw==='Безопасность'&&lab.textContent!=='Безопасность')lab.textContent='Безопасность'
+}
+function p44tabReset(tab){
+  if(!tab)return;
+  tab.style.paddingLeft='';tab.style.paddingRight='';
+  [...tab.querySelectorAll(':scope > span')].forEach(function(s){
+    s.style.paddingLeft='';s.style.paddingRight='';
+    const l=s.querySelector('.c19-tl');
+    if(l){l.style.fontSize='';l.style.letterSpacing='';}
+  })
+}
+function p44fitTabs(){
+  p44fixSecLabel();
+  const tab=document.querySelector('#phone>.tab');
+  if(!tab)return;
+  const cs=window.getComputedStyle(tab);
+  if(cs.flexDirection==='column'){p44tabReset(tab);return}
+  const w=tab.getBoundingClientRect().width;
+  if(w>500||w<150){p44tabReset(tab);return}
+  const spans=[...tab.querySelectorAll(':scope > span')];
+  if(!spans.length)return;
+  tab.style.paddingLeft='0px';
+  tab.style.paddingRight='0px';
+  spans.forEach(function(s){s.style.paddingLeft='0px';s.style.paddingRight='0px'});
+  const labs=spans.map(function(s){return s.querySelector('.c19-tl')||s});
+  let size=9,track=0;
+  function apply(){
+    labs.forEach(function(l){l.style.fontSize=size+'px';l.style.letterSpacing=track+'em'})
+  }
+  function overflow(){
+    return labs.some(function(l,i){return l.scrollWidth>spans[i].clientWidth+1})
+  }
+  apply();
+  let guard=40;
+  while(guard--&&overflow()&&(size>6.5||track>-0.08)){
+    if(track>-0.06)track-=0.015;
+    else{size-=0.25;track=-0.03}
+    apply()
+  }
+}
+let p44fitT=0;
+function p44fitSoon(){
+  clearTimeout(p44fitT);
+  p44fitT=setTimeout(function(){try{p44fitTabs()}catch(e){}},30)
+}
+function p44fixPh(){
+  document.querySelectorAll('input.locin').forEach(function(inp){
+    const w=inp.closest('.loc');
+    const k=w&&w.dataset.k;
+    if(p44buy(k))inp.setAttribute('placeholder',p44get(k).length?'ещё район или населённый пункт':'например, Всеволожск или Приморский район');
+  })
+}
+if(typeof show==='function'&&!show.__p44){
+  const sh=show;
+  show=function(){
+    const r=sh.apply(this,arguments);
+    try{p44fixPh();p44fitSoon()}catch(e){}
+    return r
+  };
+  show.__p44=1
+}
+window.addEventListener('resize',p44fitSoon);
+if(window.visualViewport){
+  visualViewport.addEventListener('resize',p44fitSoon);
+  visualViewport.addEventListener('scroll',p44fitSoon)
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',p44fitSoon);
+else p44fitSoon();
+
+window.p44add=p44add;window.p44get=p44get;window.p44set=p44set;window.p44buy=p44buy;window.p44fitTabs=p44fitTabs;
 })();
 // ===== n29 END
 
