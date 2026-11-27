@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 16:18';
+var APPV='27.11.2026 16:21';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -9553,6 +9553,8 @@ const st=document.createElement('style');st.id='n29-p46-css';
 st.textContent=`
 #body .p46-price{margin-top:6px}
 #body .p46-price input{width:100%}
+#body .p46-plbl{font-size:12.5px;margin-top:2px;margin-bottom:3px;color:inherit}
+#body .p46-phint{margin-top:4px;font-size:12px;opacity:.85;line-height:1.35}
 #body .p46-remain{
   margin-top:8px;padding:8px 10px;border-radius:8px;
   background:#eef2f7;color:#1e2f4a;font-size:13.5px;line-height:1.35
@@ -9625,14 +9627,14 @@ function p46priceHtml(j){
   try{v=(typeof bGet==='function'&&bGet(j,'bbud'))||(A&&A.bbud)||''}catch(e){v=(A&&A.bbud)||''}
   const more=(typeof bN==='function'&&bN()>1)?' · покупка '+(j+1):'';
   return '<div class="p46-price">'+
-    '<div class="lbl" style="margin-top:2px">Цена покупки, ₽'+more+'</div>'+
+    '<div class="p46-plbl">Цена покупки, ₽'+more+'</div>'+
     '<input inputmode="numeric" aria-label="Цена покупки, ₽'+more+'" placeholder="например, 3 500 000" value="'+p46esc(v)+'" oninput="p46setPrice('+j+',this.value)" onchange="show(cur,true)">'+
-    '<div class="hint">Можно меньше суммы продажи — остаток останется у вас.</div></div>';
+    '<div class="p46-phint">Можно меньше суммы продажи — остаток останется у вас.</div></div>';
 }
 function p46remainHtml(){
   const r=p46remain();
-  if(!(r>0))return '<div class="p46-remain" id="p46-remain" hidden></div>';
-  return '<div class="p46-remain" id="p46-remain">Останется у вас после сделок: <b>'+p46fmt(r)+'</b></div>';
+  if(!(r>0))return '<div class="p46-remain" hidden></div>';
+  return '<div class="p46-remain">Останется у вас после сделок: <b>'+p46fmt(r)+'</b></div>';
 }
 
 function p46snilsMask(v){
@@ -9714,16 +9716,46 @@ function p46walk(root){
   }catch(e){}
 }
 
+function p46isMoneyBlk(t){
+  t=(t||'').trim();
+  return /^Бюджет на покупку/.test(t)||/^Деньги на покупки/.test(t);
+}
+
 function p46ensureRemain(blk){
   if(!blk||blk.querySelector('.p46-remain'))return;
+  const body=document.getElementById('body');
+  if(body&&body.querySelector('.p46-remain'))return;
   blk.insertAdjacentHTML('beforeend',p46remainHtml());
 }
 function p46ensurePrice(blk,j){
-  if(!blk||A.goal!=='alt')return;
-  if(blk.querySelector('.p46-price, input[aria-label^="Цена покупки"], input[aria-label^="Свой бюджет"]'))return;
-  const lbl=blk.querySelector('.lbl');
-  if(!lbl)return;
-  lbl.insertAdjacentHTML('afterend',p46priceHtml(j||0));
+  if(!blk||!A||A.goal!=='alt')return;
+  const body=document.getElementById('body');
+  if(blk.querySelector('.p46-price'))return;
+  if(body&&body.querySelector('.p46-price')&&!p46isMoneyBlk((blk.querySelector('.p46-plbl, .lbl')||{}).innerText||'')){
+    // already have a field on this screen in the budget card
+  }
+  if(blk.querySelector('input[aria-label^="Цена покупки"], input[aria-label^="Свой бюджет"]'))return;
+  const lbl=blk.querySelector('.c21-qblock, .lbl, .p46-plbl');
+  const host=blk.querySelector('.c21-qblock')||lbl;
+  if(!host){blk.insertAdjacentHTML('afterbegin',p46priceHtml(j||0));return}
+  host.insertAdjacentHTML('afterend',p46priceHtml(j||0));
+}
+
+function p46hideTop(body){
+  const cheap=p46cheap();
+  body.querySelectorAll('.row').forEach(row=>{
+    const t=(row.innerText||'').replace(/\u00a0/g,' ');
+    const isLab=/свои деньги/i.test(t)&&/ипотека/i.test(t);
+    const prev=row.previousElementSibling;
+    const prevT=prev?((prev.innerText||'').replace(/\u00a0/g,' ')): '';
+    const isInp=row.querySelector('input')&&prev&&/свои деньги/i.test(prevT)&&/ипотека/i.test(prevT);
+    if(isLab||isInp)row.classList.toggle('p46-hidetop',cheap);
+  });
+  body.querySelectorAll('.p46-phint, .hint').forEach(el=>{
+    if(/Сколько добавите к деньгам от продажи/.test(el.innerText||'')){
+      el.classList.toggle('p46-hidetop',cheap);
+    }
+  });
 }
 
 function p46updRemain(){
@@ -9732,24 +9764,14 @@ function p46updRemain(){
   const r=p46remain();
   const cheap=r>0;
   const html=cheap?'Останется у вас после сделок: <b>'+p46fmt(r)+'</b>':'';
-  body.querySelectorAll('.p46-remain').forEach(el=>{
+  const boxes=body.querySelectorAll('.p46-remain');
+  boxes.forEach((el,i)=>{
+    if(i>0){el.remove();return}
     el.hidden=!cheap;
     if(cheap)el.innerHTML=html;
     else el.innerHTML='';
   });
-  body.querySelectorAll('.row.mut').forEach(row=>{
-    const t=row.innerText||'';
-    if(!/Свои деньги/.test(t))return;
-    if(!/ипотека/i.test(t))return;
-    row.classList.toggle('p46-hidetop',cheap);
-    const next=row.nextElementSibling;
-    if(next&&next.classList.contains('row'))next.classList.toggle('p46-hidetop',cheap);
-  });
-  body.querySelectorAll('.hint').forEach(el=>{
-    if(/Сколько добавите к деньгам от продажи/.test(el.innerText||'')){
-      el.classList.toggle('p46-hidetop',cheap);
-    }
-  });
+  p46hideTop(body);
   try{
     const buy=p46buyCost();
     if(buy&&typeof buyRange==='function'){
@@ -9765,7 +9787,7 @@ function p46updRemain(){
     }
   }catch(e){}
   if(cheap){
-    body.querySelectorAll('.hint, .fx20-date').forEach(el=>{
+    body.querySelectorAll('.hint, .fx20-date, .c19-mb').forEach(el=>{
       let t=el.innerHTML;
       const n=t
         .replace(/От продажи \(минус остаток долга\), свои деньги и ипотека вместе\./g,'Цена покупки меньше суммы продажи — доплата не нужна.')
@@ -9783,10 +9805,10 @@ function p46dom(){
   if(!A||A.goal!=='alt')return;
   try{
     [...body.querySelectorAll('.f')].forEach(f=>{
-      const l=f.querySelector('.lbl');
+      const l=f.querySelector('.lbl, .p46-plbl');
       if(!l)return;
       const t=(l.innerText||'').trim();
-      if(/^Бюджет на покупку/.test(t)||/^Деньги на покупки/.test(t)||/^Цена покупки и деньги/.test(t)||/^Свои деньги и ипотека/.test(t)){
+      if(p46isMoneyBlk(t)){
         p46ensurePrice(f,0);
         p46ensureRemain(f);
       }
@@ -9801,29 +9823,35 @@ function p46dom(){
         }
         p46ensureRemain(f);
       }
-      if(/Свой бюджет/.test(t))p46ensureRemain(f);
     });
-    const bp=body.querySelector('.bprice, .f.bprice');
-    if(bp)p46ensureRemain(bp);
+    if(!body.querySelector('.p46-remain')){
+      const price=body.querySelector('.p46-price');
+      if(price)price.insertAdjacentHTML('afterend',p46remainHtml());
+    }
+    // один блок остатка на экран
+    const all=body.querySelectorAll('.p46-remain');
+    all.forEach((el,i)=>{if(i>0)el.remove()});
+    const prices=body.querySelectorAll('.p46-price');
+    // на сводке оставляем поле только в «Бюджет на покупку»
+    if(prices.length>1){
+      const keep=[...prices].find(el=>el.closest('.f')&&p46isMoneyBlk(((el.closest('.f').querySelector('.lbl')||{}).innerText||'')));
+      [...prices].forEach(el=>{if(keep&&el!==keep)el.remove()});
+    }
   }catch(e){}
   try{p46updRemain()}catch(e){}
 }
 
 function p46patchSumHtml(h){
   if(typeof h!=='string'||!A||A.goal!=='alt')return h;
-  if(h.indexOf('p46-price')<0){
-    if(h.indexOf('<div class="lbl">Бюджет на покупку</div>')>=0){
-      h=h.replace('<div class="lbl">Бюджет на покупку</div>','<div class="lbl">Бюджет на покупку</div>'+p46priceHtml(0));
-    }
+  if(h.indexOf('p46-price')<0 && h.indexOf('<div class="lbl">Бюджет на покупку</div>')>=0){
+    h=h.replace('<div class="lbl">Бюджет на покупку</div>','<div class="lbl">Бюджет на покупку</div>'+p46priceHtml(0));
   }
   const r=p46remain();
-  if(r>0){
+  if(r>0 && h.indexOf('p46-remain')<0){
     h=h.replace(/ · хватает/g,'');
-    const line=p46remainHtml();
+    h=h.replace(/(<div class="big"[^>]*>[\s\S]*?<\/div>\s*<div class="hint">[\s\S]*?<\/div>)/,'$1'+p46remainHtml());
     if(h.indexOf('p46-remain')<0){
-      const k=h.indexOf('<div class="f"><div class="lbl">Что впереди');
-      if(k>=0)h=h.slice(0,k)+line+h.slice(k);
-      else h+=line;
+      h=h.replace(/(<div class="fx20-date">[\s\S]*?<\/div>)/,'$1'+p46remainHtml());
     }
   }
   return h;
@@ -9837,7 +9865,7 @@ try{
       let h=bp.apply(this,arguments);
       try{
         if(A&&A.goal==='alt'&&typeof h==='string'&&h.indexOf('p46-price')<0){
-          h+=p46priceHtml(j||0);
+          h+=p46priceHtml(j||0)+p46remainHtml();
         }
       }catch(e){}
       return h;
@@ -9856,6 +9884,24 @@ try{
         }
       }catch(e){}
       return h;
+    };
+  }
+  if(typeof budgetFormula==='function'){
+    const bf=budgetFormula;
+    budgetFormula=function(){
+      try{
+        if(A&&A.goal==='alt'&&p46buyCost()>0){
+          const buy=p46buyCost(),net=p46netSale();
+          const [lo,hi]=(typeof buyRange==='function'?buyRange(buy):[0,0]);
+          const rng=(typeof rngT==='function'?rngT(lo,hi):'');
+          const M=v=>(typeof mln==='function'?mln(v):p46fmt(v));
+          let t='цена покупки '+M(buy);
+          if(net)t+=' · от продажи ~'+M(net);
+          if(rng)t+=' → ищем '+rng;
+          return t;
+        }
+      }catch(e){}
+      return bf.apply(this,arguments);
     };
   }
   if(typeof SCR==='object'&&SCR.sum&&typeof SCR.sum.b==='function'){
@@ -9883,7 +9929,7 @@ try{
     const bn=budgetNote;
     budgetNote=function(){
       const r=bn.apply(this,arguments);
-      try{if(p46cheap())p46updRemain()}catch(e){}
+      try{if(A&&A.goal==='alt')p46updRemain()}catch(e){}
       return r;
     };
   }
