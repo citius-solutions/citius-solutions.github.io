@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 16:24';
+var APPV='27.11.2026 18:03';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -9982,6 +9982,155 @@ window.p46snilsItem=p46snilsItem;
 window.p46snilsMask=p46snilsMask;
 window.p46fmt=p46fmt;
 window.p46dom=p46dom;
+})();
+// p47 (27.11): слоган на главном экране крупнее;
+// в покупке населённый пункт из подсказки можно выбрать целиком — чип «… (весь город)».
+// Не правит p6_auth_ui / p8 / p11 / p13 / p14.
+(function(){
+if(document.getElementById('n29-p47-css'))return;
+
+const st=document.createElement('style');st.id='n29-p47-css';
+st.textContent=`
+#helloov .hi-slogan{
+  font-family:"Playfair Display",Georgia,serif;
+  font-style:italic;
+  font-weight:400;
+  color:#d4b57e;
+  font-size:27px!important;
+  line-height:1.28!important;
+  text-wrap:balance;
+  margin:0 0 10px
+}
+@media (min-width:700px){
+  #helloov .hi-slogan{font-size:27px!important;line-height:1.25!important}
+}
+@media (orientation:landscape) and (min-width:700px){
+  #helloov .hi-slogan{font-size:23px!important}
+}
+@media (orientation:landscape) and (min-width:700px) and (max-height:560px){
+  #helloov .hi-slogan{font-size:17px!important;margin:0 0 8px}
+}
+`;
+document.head.appendChild(st);
+
+const FED=['Москва','Санкт-Петербург','Севастополь'];
+function p47esc(s){
+  s=String(s==null?'':s);
+  if(typeof hq==='function')return hq(s);
+  return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function p47lnorm(s){
+  if(typeof lnorm==='function')return lnorm(s);
+  return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/^\s*(г\.|город|пос\.|посёлок|поселок|п\.|пгт)\s*/,'').trim();
+}
+function p47base(name){
+  return String(name||'').trim().replace(/\s*\((весь город|весь посёлок|вся деревня|всё село)\)\s*$/i,'');
+}
+function p47isFed(name){
+  const t=p47base(name);
+  return FED.indexOf(t)>=0;
+}
+function p47inCity(name){
+  const t=p47base(name);if(!t)return false;
+  const k=p47lnorm(t);
+  try{
+    if(typeof CITY!=='undefined'&&CITY.some(function(c){return c.n===t||c.k===k||p47lnorm(c.n)===k}))return true;
+  }catch(e){}
+  return false;
+}
+function p47isSubject(name){
+  const t=p47base(name);if(!t)return false;
+  if(p47isFed(t)||p47inCity(t))return false;
+  try{if(typeof p44isReg==='function'&&p44isReg(t))return true;}catch(e){}
+  return /(область|край|республика|респ\.?|автономный округ)$/i.test(t);
+}
+function p47isSettlementName(name){
+  const t=p47base(name);if(!t)return false;
+  if(p47isSubject(t))return false;
+  if(/район$|округ$/i.test(t)&&!p47isFed(t)&&!p47inCity(t))return false;
+  if(p47isFed(t)||p47inCity(t))return true;
+  return false;
+}
+function p47chipName(name){
+  const raw=String(name||'').trim();
+  const t=p47base(raw);
+  if(!t)return '';
+  if(/\((весь город|весь посёлок|вся деревня|всё село)\)/i.test(raw))return t===p47base(raw)?raw:t+' (весь город)';
+  if(/пос[её]лок|деревня|село|поселение|станица|хутор/i.test(t))return t;
+  return t+' (весь город)';
+}
+
+function p47fixSugHtml(html,q,buy){
+  if(!html||typeof html!=='string')return html;
+  const box=document.createElement('div');
+  box.innerHTML=html;
+  const rows=[].slice.call(box.querySelectorAll('.locsug'));
+  if(!rows.length)return html;
+  const cityRows=[];
+  rows.forEach(function(row){
+    if(row.getAttribute('data-t')!=null)return;
+    if(row.getAttribute('data-w')==='1')return;
+    const n=(row.getAttribute('data-n')||'').trim();
+    if(!n||p47isSubject(n))return;
+    if(!p47isSettlementName(n)&&!p47isFed(n))return;
+    const r=(row.getAttribute('data-r')||'').trim();
+    row.innerHTML='<b>'+p47esc(n)+'</b> (весь город)'+(r&&r!==n?', '+p47esc(r):'');
+    row.setAttribute('data-whole','1');
+    cityRows.push(row);
+  });
+  if(buy&&cityRows.length){
+    const qq=p47lnorm((q||'').split(',')[0]);
+    const prefer=cityRows.filter(function(row){
+      const n=p47lnorm(row.getAttribute('data-n')||'');
+      return !qq||n.indexOf(qq)===0||qq.indexOf(n)===0;
+    });
+    if(prefer.length){
+      const first=prefer[0];
+      if(box.firstChild!==first)box.insertBefore(first,box.firstChild);
+      rows.forEach(function(r){r.classList.remove('on')});
+      first.classList.add('on');
+    }
+  }
+  return box.innerHTML;
+}
+
+try{
+  if(typeof p44add==='function'&&!p44add.__p47){
+    const add0=p44add;
+    window.p44add=function(k,name,meta){
+      if(p47isSettlementName(name)){
+        const base=p47base(name);
+        const chip=p47chipName(name);
+        try{
+          if(typeof locPut==='function'){
+            locPut(k,'city',base);
+            const r=(meta&&meta.reg)||(typeof rgFind==='function'&&rgFind(base))||(p47isFed(base)?base:'');
+            if(r)locPut(k,'reg',r);
+          }
+        }catch(e){}
+        return add0.call(this,k,chip,meta);
+      }
+      return add0.apply(this,arguments);
+    };
+    window.p44add.__p47=1;
+  }
+  if(typeof adrRender==='function'&&!adrRender.__p47){
+    const ar=adrRender;
+    adrRender=function(el,k,html){
+      try{
+        const buy=typeof p44buy==='function'&&p44buy(k);
+        const q=el&&el.value;
+        html=p47fixSugHtml(html,q,buy);
+      }catch(e){}
+      return ar.apply(this,arguments);
+    };
+    adrRender.__p47=1;
+  }
+}catch(e){try{logErr('p47-init',e)}catch(x){}}
+
+window.p47chipName=p47chipName;
+window.p47isSettlementName=p47isSettlementName;
+window.p47fixSugHtml=p47fixSugHtml;
 })();
 // ===== n29 END
 
