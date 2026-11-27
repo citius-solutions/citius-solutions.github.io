@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 16:21';
+var APPV='27.11.2026 16:22';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -9721,10 +9721,29 @@ function p46isMoneyBlk(t){
   return /^Бюджет на покупку/.test(t)||/^Деньги на покупки/.test(t);
 }
 
+function p46budgetCard(body){
+  return [...(body||document).querySelectorAll('.f')].find(f=>{
+    const l=f.querySelector('.lbl');
+    return l&&p46isMoneyBlk(l.innerText||'');
+  })||null;
+}
+function p46placeRemain(body){
+  if(!body||!A||A.goal!=='alt')return;
+  const target=p46budgetCard(body)||body.querySelector('.p46-price')&&body.querySelector('.p46-price').closest('.f')||body.querySelector('.p46-price');
+  if(!target)return;
+  [...body.querySelectorAll('.p46-remain')].forEach(el=>{
+    if(!target.contains(el))el.remove();
+  });
+  if(!target.querySelector('.p46-remain')){
+    const price=target.querySelector('.p46-price');
+    const html=p46remainHtml();
+    if(price)price.insertAdjacentHTML('afterend',html);
+    else target.insertAdjacentHTML('beforeend',html);
+  }
+}
 function p46ensureRemain(blk){
   if(!blk||blk.querySelector('.p46-remain'))return;
-  const body=document.getElementById('body');
-  if(body&&body.querySelector('.p46-remain'))return;
+  if(!p46isMoneyBlk(((blk.querySelector('.lbl')||{}).innerText)||'') && !blk.querySelector('.p46-price'))return;
   blk.insertAdjacentHTML('beforeend',p46remainHtml());
 }
 function p46ensurePrice(blk,j){
@@ -9824,13 +9843,7 @@ function p46dom(){
         p46ensureRemain(f);
       }
     });
-    if(!body.querySelector('.p46-remain')){
-      const price=body.querySelector('.p46-price');
-      if(price)price.insertAdjacentHTML('afterend',p46remainHtml());
-    }
-    // один блок остатка на экран
-    const all=body.querySelectorAll('.p46-remain');
-    all.forEach((el,i)=>{if(i>0)el.remove()});
+    p46placeRemain(body);
     const prices=body.querySelectorAll('.p46-price');
     // на сводке оставляем поле только в «Бюджет на покупку»
     if(prices.length>1){
@@ -9844,16 +9857,9 @@ function p46dom(){
 function p46patchSumHtml(h){
   if(typeof h!=='string'||!A||A.goal!=='alt')return h;
   if(h.indexOf('p46-price')<0 && h.indexOf('<div class="lbl">Бюджет на покупку</div>')>=0){
-    h=h.replace('<div class="lbl">Бюджет на покупку</div>','<div class="lbl">Бюджет на покупку</div>'+p46priceHtml(0));
+    h=h.replace('<div class="lbl">Бюджет на покупку</div>','<div class="lbl">Бюджет на покупку</div>'+p46priceHtml(0)+p46remainHtml());
   }
-  const r=p46remain();
-  if(r>0 && h.indexOf('p46-remain')<0){
-    h=h.replace(/ · хватает/g,'');
-    h=h.replace(/(<div class="big"[^>]*>[\s\S]*?<\/div>\s*<div class="hint">[\s\S]*?<\/div>)/,'$1'+p46remainHtml());
-    if(h.indexOf('p46-remain')<0){
-      h=h.replace(/(<div class="fx20-date">[\s\S]*?<\/div>)/,'$1'+p46remainHtml());
-    }
-  }
+  if(p46remain()>0)h=h.replace(/ · хватает/g,'');
   return h;
 }
 
