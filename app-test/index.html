@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='26.11.2026 16:22';
+var APPV='27.11.2026 10:22';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -8635,6 +8635,159 @@ try{
       'border-color:#c9a46a;'+
     '}';
   document.documentElement.appendChild(st);
+})();
+// p42 (27.11): после «Получить код» поле ввода кода должно открываться всегда,
+// даже если ответ сервера запоздал, оборвался по таймауту или пришёл в непривычном виде.
+// Письмо при этом уже могло уйти. p6_auth_ui / p11_compact не правим — только обёртки.
+(function(){
+  if(typeof auMail!=='function')return;
+
+  function p42okish(r){
+    if(!r||typeof r!=='object')return false;
+    return r.ok===true||r.ok===1||r.ok==='true'||r.sent===true||r.status==='ok'||r.result==='ok';
+  }
+  function p42norm(r){
+    if(p42okish(r)){try{r.ok=true}catch(e){}return r}
+    return r||{ok:false,err:'net'};
+  }
+  function p42hardFail(r){
+    const e=r&&r.err;
+    return e==='bad_email'||e==='no_url';
+  }
+  function p42focusCode(){
+    setTimeout(function(){try{const c=document.getElementById('aucode');if(c)c.focus({preventScroll:true})}catch(e){}},0);
+  }
+  function p42redraw(){try{if(typeof auR==='function')auR()}catch(e){}}
+
+  // Рассылающий запрос: дольше ждём и принимаем «кривой» JSON (письмо могло уже уйти).
+  try{
+    const s0=authEmailSend;
+    authEmailSend=function(email){
+      const p=typeof apiCall==='function'?apiCall('sendCode',{email:email},60000):(typeof s0==='function'?s0(email):Promise.resolve({ok:false,err:'no_url'}));
+      return Promise.resolve(p).then(function(r){
+        if(r&&typeof r==='object')return p42norm(r);
+        if(typeof r==='string'){
+          try{return p42norm(JSON.parse(r))}catch(e){
+            const i=r.indexOf('{'),j=r.lastIndexOf('}');
+            if(i>=0&&j>i){try{return p42norm(JSON.parse(r.slice(i,j+1)))}catch(x){}}
+          }
+          return {ok:false,err:'odd'};
+        }
+        return r||{ok:false,err:'net'};
+      }).catch(function(){return {ok:false,err:'net'}});
+    };
+  }catch(e){try{logErr('p42-send',e)}catch(x){}}
+
+  // Как только адрес и согласие на месте — сразу шаг «код», не дожидаясь ответа.
+  try{
+    const m0=auMail;
+    auMail=function(){
+      try{
+        const e=document.getElementById('auemail');
+        if(e)AU.email=e.value.trim();
+      }catch(x){}
+      const em=(typeof AU!=='undefined'&&AU.email||'').trim();
+      const valid=/^\S+@\S+\.\S+$/.test(em);
+      const pd=typeof A!=='undefined'&&!!A.pdauth;
+      if(AU._p42send && AU.step==='code'){
+        p42redraw();p42focusCode();
+        return;
+      }
+      if(valid&&pd){
+        AU.step='code';
+        AU._p42send=1;
+        AU.err='';
+        AU.msg='Код отправляем на '+em+'. Если письмо уже пришло — введите его. Если нет, подождите или нажмите «Отправить ещё раз».';
+      }
+      const r=m0.apply(this,arguments);
+      // auRun в начале обнуляет AU.msg — возвращаем пояснение, пока запрос ещё идёт.
+      if(AU.step==='code'&&AU._p42send){
+        AU.msg='Код отправляем на '+em+'. Если письмо уже пришло — введите его.';
+        p42redraw();p42focusCode();
+      }
+      const done=function(res){
+        AU._p42send=0;
+        if(res==null){p42redraw();if(AU.step==='code')p42focusCode();return res}
+        res=p42norm(res);
+        if(p42hardFail(res)){
+          AU.step='';
+          AU.msg='';
+        }else{
+          AU.step='code';
+          if(res&&res.ok){
+            AU.err='';
+            AU.msg='Код отправлен на '+(AU.email||em)+'. Код на почту придёт в течение минуты, проверьте «Спам».';
+          }else if(res&&res.err==='wait'){
+            AU.msg='Код уже отправлен на '+(AU.email||em)+'. Если письмо пришло — введите его.';
+          }else if(res&&res.err){
+            if(!AU.err&&typeof authErr==='function')AU.err=authErr(res);
+            AU.msg='Если письмо уже пришло — введите код. Если нет, нажмите «Отправить ещё раз».';
+          }
+        }
+        p42redraw();
+        if(AU.step==='code')p42focusCode();
+        return res;
+      };
+      if(r&&typeof r.then==='function')return r.then(done,function(){return done({ok:false,err:'net'})});
+      AU._p42send=0;
+      return r;
+    };
+  }catch(e){try{logErr('p42-auMail',e)}catch(x){}}
+
+  // Пока запрос ещё идёт, не блокируем ввод уже пришедшего кода.
+  try{
+    if(typeof auMailV==='function'){
+      const v0=auMailV;
+      auMailV=function(){
+        try{
+          const e=document.getElementById('aucode');
+          if(e)AU.code=e.value.replace(/\D/g,'');
+        }catch(x){}
+        const hold=AU._p42send&&AU.busy;
+        if(hold)AU.busy=0;
+        try{return v0.apply(this,arguments)}
+        finally{if(hold)AU.busy=1}
+      };
+    }
+  }catch(e){try{logErr('p42-auMailV',e)}catch(x){}}
+
+  // Подпись кнопки на время отправки и ссылка «Отправить ещё раз», если её нет.
+  function p42injectResend(h){
+    if(!h||/Отправить ещё раз/.test(h))return h;
+    return h+'<div class="cs-row cs-c" style="margin-top:6px"><button type="button" class="cs-lnk btn ghost" style="width:100%" onclick="AU.code=\'\';auMail()">Отправить ещё раз</button></div>';
+  }
+  try{
+    if(typeof csView==='function'){
+      const cv=csView;
+      csView=function(){
+        const r=cv.apply(this,arguments);
+        try{
+          if(!r||!r[1])return r;
+          if(typeof AU!=='undefined'&&AU.step==='code'){
+            if(AU._p42send||(AU.busy&&!(AU.code||'').length)){
+              r[1]=String(r[1]).replace('>Проверяем…<','>Отправляем…<');
+            }
+            r[1]=p42injectResend(r[1]);
+          }
+        }catch(e){}
+        return r;
+      };
+    }
+  }catch(e){try{logErr('p42-csView',e)}catch(x){}}
+  try{
+    if(typeof authHtml==='function'){
+      const ah=authHtml;
+      authHtml=function(){
+        let h=ah.apply(this,arguments);
+        try{
+          if(typeof AU!=='undefined'&&AU.step==='code'&&h){
+            h=p42injectResend(h);
+          }
+        }catch(e){}
+        return h;
+      };
+    }
+  }catch(e){try{logErr('p42-authHtml',e)}catch(x){}}
 })();
 // ===== n29 END
 
