@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 10:51';
+var APPV='27.11.2026 12:30';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -9305,6 +9305,243 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else p44fitSoon();
 
 window.p44add=p44add;window.p44get=p44get;window.p44set=p44set;window.p44buy=p44buy;window.p44fitTabs=p44fitTabs;
+})();
+// p45 (27.11, GB-36): свой расчёт имущественного вычета в покупке.
+// Ссылка «Сколько вернёт налоговый вычет» сразу после кнопки «План сделки».
+// Открывает небольшой лист. Не правит p6_auth_ui / p8 / p11 / p13 / p14.
+(function(){
+if(document.getElementById('n29-p45-css'))return;
+
+const PRICE_CAP=2000000, INT_CAP=3000000, RATE=0.13;
+const DISCL='Расчёт ориентировочный, по ставке 13%; итог зависит от ваших доходов и уже полученных вычетов.';
+
+const st=document.createElement('style');st.id='n29-p45-css';
+st.textContent=
+  '.p45-linkline{margin:2px 0 10px;text-align:center}'+
+  '.p45-link{display:inline-block;color:#8a6a2f;font:500 13.5px/1.35 Montserrat,system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:8px 6px;cursor:pointer;-webkit-tap-highlight-color:transparent}'+
+  '.p45-link:hover,.p45-link:focus-visible{color:#a8844a}'+
+  '.p45-link:focus-visible{outline:2px solid #a8844a;outline-offset:2px;border-radius:6px}'+
+  '[data-theme="light"] .p45-link{color:#7a5a24}'+
+  '[data-theme="dark"] .p45-link{color:#e0c48f}'+
+  '#p45-sheet{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;background:rgba(18,28,45,.55);font-family:Montserrat,system-ui,-apple-system,"Segoe UI",sans-serif}'+
+  '#p45-sheet.on{display:flex}'+
+  '#p45-sheet .p45-card{display:block;isolation:isolate;background:#fbf8f1;color:#1e2f4a;width:100%;max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:18px 18px 0 0;padding:6px 18px calc(16px + env(safe-area-inset-bottom));box-sizing:border-box;box-shadow:0 -6px 30px rgba(0,0,0,.25)}'+
+  '#p45-sheet .p45-card *{box-sizing:border-box}'+
+  '@media (min-width:600px){#p45-sheet{align-items:center}#p45-sheet .p45-card{width:420px;max-height:80vh;border-radius:18px;padding-bottom:18px;box-shadow:0 12px 40px rgba(30,47,74,.28)}}'+
+  '#p45-sheet .p45-hd{display:flex;align-items:center;gap:6px;min-height:46px;position:sticky;top:-6px;background:#fbf8f1;z-index:1}'+
+  '#p45-sheet .p45-hd b{flex:1;text-align:center;font-family:"Playfair Display",Georgia,serif;font-size:19px;font-weight:600;color:#1e2f4a}'+
+  '#p45-sheet .p45-x{width:36px;height:36px;border-radius:50%;border:0;background:#efe7d6;color:#1e2f4a;font-size:18px;cursor:pointer;flex:none;line-height:36px}'+
+  '#p45-sheet .p45-x:focus-visible,#p45-sheet input:focus-visible{outline:2px solid #a8844a;outline-offset:2px}'+
+  '#p45-sheet .p45-sp{width:36px;flex:none}'+
+  '#p45-sheet .p45-lbl,#p45-sheet .p45-note,#p45-sheet .p45-out,#p45-sheet .p45-empty,#p45-sheet .p45-ask{display:block;width:100%;max-width:100%;float:none}'+
+  '#p45-sheet .p45-lbl{font-size:13.5px;font-weight:600;margin:10px 0 5px;line-height:1.3}'+
+  '#p45-sheet .p45-opt{font-weight:400;opacity:.75}'+
+  '#p45-sheet input{display:block!important;width:100%!important;max-width:100%!important;float:none!important;margin:0 0 2px;padding:13px 14px;border-radius:12px;border:1.5px solid #c9a46a;background:#fff;color:#1e2f4a;font-size:16px}'+
+  '#p45-sheet .p45-out{margin:14px 0 8px;padding:12px 14px;border-radius:14px;border:1px solid #e6dccb;background:#fff}'+
+  '#p45-sheet .p45-row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin:0 0 8px;font-size:14px;line-height:1.35}'+
+  '#p45-sheet .p45-row b{font-variant-numeric:tabular-nums;white-space:nowrap}'+
+  '#p45-sheet .p45-row.tot{margin-top:6px;padding-top:8px;border-top:1px solid #e6dccb;font-weight:650}'+
+  '#p45-sheet .p45-years{margin:8px 0 0;font-size:13px;line-height:1.4;opacity:.92}'+
+  '#p45-sheet .p45-empty{margin:14px 0 8px;font-size:13.5px;line-height:1.4;opacity:.8}'+
+  '#p45-sheet .p45-note{margin:8px 0 0;font-size:12.5px;line-height:1.45;opacity:.8}'+
+  '#p45-sheet .p45-ask{margin:10px 0 4px;padding:14px;border-radius:14px;background:#1e2f4a;color:#fbf8f1;border:1.5px solid #c9a46a}'+
+  '#p45-sheet .p45-ask[hidden]{display:none!important}'+
+  '#p45-sheet .p45-ask-t{margin:0 0 12px;font:500 13.5px/1.4 Montserrat,system-ui,sans-serif}'+
+  '#p45-sheet .p45-ask-btn{display:block;width:100%;min-height:44px;padding:11px 14px;border:0;border-radius:12px;background:linear-gradient(180deg,#d4b57e,#c9a46a);color:#1e2f4a;font:600 15px/1.2 Montserrat,system-ui,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}'+
+  '#p45-sheet .p45-ask-btn:hover{background:linear-gradient(180deg,#e0c48f,#d4b57e)}'+
+  '#p45-sheet .p45-ask-btn:focus-visible{outline:2px solid #f0dcb0;outline-offset:2px}'+
+  '[data-theme="dark"] #p45-sheet .p45-card,[data-theme="dark"] #p45-sheet .p45-hd{background:#1e2f4a;color:#fbf8f1}'+
+  '[data-theme="dark"] #p45-sheet .p45-hd b{color:#fbf8f1}'+
+  '[data-theme="dark"] #p45-sheet .p45-x{background:#2a3d5c;color:#fbf8f1}'+
+  '[data-theme="dark"] #p45-sheet input{background:#152033;color:#fbf8f1;border-color:#c9a46a}'+
+  '[data-theme="dark"] #p45-sheet .p45-out{background:#152033;border-color:#3a4f6e}'+
+  '[data-theme="dark"] #p45-sheet .p45-row.tot{border-top-color:#3a4f6e}'+
+  '[data-theme="dark"] #p45-sheet .p45-ask{background:#152033;border-color:#d4b57e}'+
+  '[data-theme="dark"] .p45-link{color:#e0c48f}';
+document.documentElement.appendChild(st);
+
+function p45buy(){
+  try{if(typeof buys==='function'&&buys())return true}catch(e){}
+  if(typeof A==='object'&&A){
+    if(A.goal==='new')return true;
+    if(A.goal==='share'){
+      try{if(typeof xN==='function'&&typeof xBuys==='function'){for(let i=0;i<xN();i++)if(xBuys(i))return true}}catch(e){}
+    }
+  }
+  return false
+}
+function p45num(s){
+  try{if(typeof num==='function'){const v=num(s);if(isFinite(v))return v}}catch(e){}
+  const v=parseInt(String(s||'').replace(/\D/g,''),10);
+  return isFinite(v)?v:0
+}
+function p45fmt(n){
+  const x=Math.round(n||0);
+  try{if(typeof fmt==='function'&&x>0)return fmt(x)}catch(e){}
+  return x.toLocaleString('ru-RU')+' ₽'
+}
+function p45sp(n){
+  const x=Math.round(n||0);
+  return x?x.toLocaleString('ru-RU'):''
+}
+function p45yrs(n){
+  const n10=n%10,n100=n%100;
+  if(n100>=11&&n100<=14)return n+' лет';
+  if(n10===1)return n+' год';
+  if(n10>=2&&n10<=4)return n+' года';
+  return n+' лет'
+}
+function p45calc(price,interest,income){
+  const p=Math.max(0,price||0), i=Math.max(0,interest||0), inc=Math.max(0,income||0);
+  const buy=Math.round(Math.min(p,PRICE_CAP)*RATE);
+  const inte=Math.round(Math.min(i,INT_CAP)*RATE);
+  const tot=buy+inte;
+  let years=null, perYear=0;
+  if(inc>0){
+    perYear=Math.round(inc*RATE);
+    if(perYear>0)years=Math.ceil(tot/perYear);
+  }
+  return {buy:buy,interest:inte,total:tot,years:years,perYear:perYear}
+}
+function p45guessPrice(){
+  if(A&&A.p45price)return A.p45price;
+  let v=0;
+  try{if(typeof budget==='function')v=budget()||0}catch(e){}
+  try{if(!v&&typeof bGet==='function')v=p45num(bGet(0,'bbud'))}catch(e){}
+  try{if(!v&&A&&A.bbud)v=p45num(A.bbud)}catch(e){}
+  return v?p45sp(v):''
+}
+
+function p45html(){
+  const price=p45guessPrice();
+  const interest=A&&A.p45int||'';
+  const income=A&&A.p45inc||'';
+  return '<div class="p45-card" role="document">'+
+    '<div class="p45-hd"><span class="p45-sp"></span><b id="p45-ttl">Налоговый вычет</b>'+
+    '<button type="button" class="p45-x" aria-label="Закрыть" onclick="p45close()">×</button></div>'+
+    '<div class="p45-lbl" id="p45-lp">Стоимость квартиры, ₽</div>'+
+    '<input id="p45-price" inputmode="numeric" autocomplete="off" aria-labelledby="p45-lp" placeholder="например, 10 000 000" value="'+(price?String(price).replace(/"/g,''):'')+'">'+
+    '<div class="p45-lbl" id="p45-li">Уплаченные или планируемые проценты по ипотеке, ₽ <span class="p45-opt">необязательно</span></div>'+
+    '<input id="p45-int" inputmode="numeric" autocomplete="off" aria-labelledby="p45-li" placeholder="например, 4 000 000" value="'+(interest?String(interest).replace(/"/g,''):'')+'">'+
+    '<div class="p45-lbl" id="p45-ld">Годовой официальный доход, ₽ <span class="p45-opt">необязательно, чтобы оценить срок</span></div>'+
+    '<input id="p45-inc" inputmode="numeric" autocomplete="off" aria-labelledby="p45-ld" placeholder="например, 1 200 000" value="'+(income?String(income).replace(/"/g,''):'')+'">'+
+    '<div id="p45-res"></div>'+
+    '<div id="p45-ask" class="p45-ask" hidden>'+
+      '<div class="p45-ask-t">Для точного расчёта лучше посоветоваться с Ситиус</div>'+
+      '<button type="button" class="p45-ask-btn" onclick="p45ask()">Обсудить с Ситиус</button>'+
+    '</div>'+
+    '<div class="p45-note">'+DISCL+'</div>'+
+  '</div>'
+}
+function p45render(){
+  const price=p45num((document.getElementById('p45-price')||{}).value);
+  const interest=p45num((document.getElementById('p45-int')||{}).value);
+  const income=p45num((document.getElementById('p45-inc')||{}).value);
+  if(A){A.p45price=(document.getElementById('p45-price')||{}).value||'';A.p45int=(document.getElementById('p45-int')||{}).value||'';A.p45inc=(document.getElementById('p45-inc')||{}).value||''}
+  const box=document.getElementById('p45-res');if(!box)return;
+  const ask=document.getElementById('p45-ask');
+  if(!price){box.className='p45-empty';box.innerHTML='Укажите стоимость квартиры, чтобы увидеть сумму к возврату.';if(ask)ask.hidden=true;return}
+  const r=p45calc(price,interest,income);
+  let years='';
+  if(income&&r.perYear>0&&r.years!=null){
+    years='<div class="p45-years">При таком доходе вычет можно получить примерно за '+p45yrs(r.years)+
+      ': в год вернётся не больше '+p45fmt(r.perYear)+' (13% дохода). Прогрессивная шкала упрощена и считается по ставке 13%.</div>'
+  }
+  box.className='p45-out';
+  if(ask)ask.hidden=false;
+  box.innerHTML=
+    '<div class="p45-row"><span>К возврату за покупку</span><b>'+p45fmt(r.buy)+'</b></div>'+
+    '<div class="p45-row"><span>К возврату за проценты</span><b>'+p45fmt(r.interest)+'</b></div>'+
+    '<div class="p45-row tot"><span>Итого</span><b>'+p45fmt(r.total)+'</b></div>'+years
+}
+function p45bind(){
+  ['p45-price','p45-int','p45-inc'].forEach(function(id){
+    const el=document.getElementById(id);if(!el||el.__p45)return;el.__p45=1;
+    el.addEventListener('input',p45render);
+    el.addEventListener('blur',function(){
+      const n=p45num(el.value);
+      if(n)el.value=p45sp(n);
+      p45render();
+      try{if(typeof saveSt==='function')saveSt()}catch(e){}
+    });
+  })
+}
+
+window.p45ask=function(){
+  try{p45close()}catch(e){}
+  try{if(typeof openHelp==='function'){openHelp('tax');return}}catch(e){}
+  try{A.osvc='taxlow';A.oback=cur;A.osent=0;if(typeof go==='function')go('order')}catch(e){}
+};
+window.p45open=function(){
+  let o=document.getElementById('p45-sheet');
+  if(!o){
+    o=document.createElement('div');
+    o.id='p45-sheet';
+    o.setAttribute('role','dialog');
+    o.setAttribute('aria-modal','true');
+    o.setAttribute('aria-labelledby','p45-ttl');
+    o.addEventListener('click',function(e){if(e.target===o)p45close()});
+    document.body.appendChild(o)
+  }
+  o.innerHTML=p45html();
+  o.className='on';
+  p45bind();
+  p45render();
+  try{const i=document.getElementById('p45-price');if(i)i.focus()}catch(e){}
+};
+window.p45close=function(){
+  const o=document.getElementById('p45-sheet');
+  if(o){o.className='';o.innerHTML=''}
+  try{if(typeof saveSt==='function')saveSt()}catch(e){}
+};
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    const o=document.getElementById('p45-sheet');
+    if(o&&o.classList.contains('on')){e.preventDefault();p45close()}
+  }
+});
+
+function p45isPlanBtn(el){
+  if(!el||!el.closest)return false;
+  if(el.closest('#p45-sheet')||el.closest('.p45-linkline'))return false;
+  if(el.classList&&(el.classList.contains('planbtn')||el.classList.contains('fx20-plan')))return true;
+  const oc=el.getAttribute&&el.getAttribute('onclick')||'';
+  if(/go\(['"]plan['"]\)/.test(oc))return true;
+  const t=(el.textContent||'').replace(/\s+/g,' ').trim();
+  return /план сделки/i.test(t)&&(el.tagName==='BUTTON'||el.tagName==='A')
+}
+function p45place(){
+  if(!p45buy()){
+    document.querySelectorAll('.p45-linkline').forEach(function(n){n.remove()});
+    return
+  }
+  const root=document.getElementById('body')||document;
+  const buttons=[...root.querySelectorAll('button,a')].filter(p45isPlanBtn);
+  buttons.forEach(function(btn){
+    const next=btn.nextElementSibling;
+    if(next&&next.classList&&next.classList.contains('p45-linkline'))return;
+    if(btn.parentNode&&btn.parentNode.classList&&btn.parentNode.classList.contains('p45-linkline'))return;
+    const line=document.createElement('div');
+    line.className='p45-linkline';
+    line.innerHTML='<button type="button" class="p45-link" onclick="p45open()">Сколько вернёт налоговый вычет</button>';
+    if(btn.nextSibling)btn.parentNode.insertBefore(line,btn.nextSibling);
+    else btn.parentNode.appendChild(line)
+  })
+}
+
+if(typeof show==='function'&&!show.__p45){
+  const sh=show;
+  show=function(){
+    const r=sh.apply(this,arguments);
+    try{p45place()}catch(e){}
+    return r
+  };
+  show.__p45=1
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){try{p45place()}catch(e){}});
+else try{p45place()}catch(e){}
+
+window.p45calc=p45calc;window.p45place=p45place;window.p45render=p45render;
 })();
 // ===== n29 END
 
