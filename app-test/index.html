@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 18:10';
+var APPV='27.11.2026 18:22';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -7655,41 +7655,13 @@ try{
   }
   window.p38forget=p38forget;
 
+  // GB-41: ответы гостя остаются в localStorage и переживают перезагрузку и обрыв сети.
+  // Раньше saveSt молчал без входа, а при загрузке p38forget стирал прогресс — из-за этого
+  // любой reload (в том числе после offline) обнулял старт.
   if(typeof saveSt==='function'){
     const s0=saveSt;
-    saveSt=function(){if(window.__noSave||!p38authed())return;return s0.apply(this,arguments)};
+    saveSt=function(){if(window.__noSave)return;return s0.apply(this,arguments)};
   }
-  if(typeof authLogout==='function'){
-    const al0=authLogout;
-    authLogout=function(){try{p38forget()}catch(e){}try{return al0.apply(this,arguments)}finally{try{window.__noSave=0}catch(e){}}};
-  }
-  if(typeof sitiusSuccess==='function'){
-    const ok0=sitiusSuccess;
-    sitiusSuccess=function(t){
-      const txt='Без входа ответы на этом устройстве не сохраняются.';
-      if(t&&typeof t==='object'){
-        const n={};
-        for(const k in t)n[k]=t[k];
-        if(/остались|Ответы сохранены/.test(String(n.text||'')))n.text=txt;
-        return ok0.call(this,n);
-      }
-      if(typeof t==='string'&&/остались|Ответы сохранены/.test(t))
-        t='Вы вышли. '+txt;
-      return ok0.apply(this,arguments);
-    };
-  }
-  if(typeof auOut==='function'){
-    const o0=auOut;
-    auOut=function(){
-      try{p38forget()}catch(e){}
-      const msg='Вы вышли. Без входа ответы на этом устройстве не сохраняются.';
-      try{if(typeof AU!=='undefined')AU.msg=msg}catch(e){}
-      const r=o0.apply(this,arguments);
-      try{if(typeof AU!=='undefined')AU.msg=msg}catch(e){}
-      return r;
-    };
-  }
-  if(!p38authed()){try{p38forget()}catch(e){}try{window.__noSave=0}catch(e){}}
 
   function p38ownSum(){
     try{
@@ -10170,6 +10142,423 @@ try{
 window.p47chipName=p47chipName;
 window.p47isSettlementName=p47isSettlementName;
 window.p47fixSugHtml=p47fixSugHtml;
+})();
+// p48 (27.11, GB-41): самопроверка на старте не пустая; фильтры подставляются
+// из ответов старта (тип, комнаты, бюджет, районы) и больше не переспрашивают
+// уже сказанное; «Выбрать районы» открывается листом на месте; ответы гостя
+// пишутся в localStorage и переживают offline и перезагрузку.
+// Не правит p6_auth_ui / p8 / p11 / p13 / p14.
+(function(){
+if(document.getElementById('n29-p48-css'))return;
+
+const st=document.createElement('style');st.id='n29-p48-css';
+st.textContent=
+  '.p48-lock .p48-sum{font-size:14.5px;line-height:1.4;color:inherit}'+
+  '.p48-lock .p48-sum b{font-weight:650}'+
+  '.p48-lock a.gld{margin-left:4px}'+
+  '#p48-dist{position:fixed;inset:0;z-index:12000}'+
+  '#p48-dist .p48-dist-bg{position:absolute;inset:0;background:rgba(15,22,36,.55)}'+
+  '#p48-dist .p48-dist-sheet{position:absolute;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;'+
+    'background:#fbf8f1;color:#1e2f4a;border-radius:16px 16px 0 0;padding:14px 16px 28px;'+
+    'box-shadow:0 -8px 28px rgba(15,22,36,.25)}'+
+  '[data-theme="dark"] #p48-dist .p48-dist-sheet{background:#1e2f4a;color:#fbf8f1}'+
+  '#p48-dist .p48-dist-hd{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}'+
+  '#p48-dist .p48-dist-hd b{font-size:16px}'+
+  '#p48-dist .p48-dist-hd a{color:#c9a46a;text-decoration:none;white-space:nowrap}';
+document.documentElement.appendChild(st);
+
+function isSell(){try{return typeof sells==='function'&&!!sells()}catch(e){return false}}
+function isBuyGoal(){
+  try{
+    if(!A||!A.goal)return false;
+    if(A.goal==='new')return true;
+    if(typeof buys==='function'&&buys())return true;
+    return A.goal==='share';
+  }catch(e){return false}
+}
+function esc(s){return typeof hq==='function'?hq(s):String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function p48plain(n){
+  return String(n||'').replace(/\s*\(весь город\)\s*$/,'').trim();
+}
+function p48knownDist(n){
+  const t=p48plain(n);
+  if(!t)return '';
+  try{
+    const lists=[].concat(typeof SPB!=='undefined'?SPB:[],typeof LO!=='undefined'?LO:[]);
+    const hit=lists.find(function(d){return d&&(d[0]===t||d[0]===n)});
+    if(hit)return hit[0];
+  }catch(e){}
+  return t;
+}
+function p48locFromStart(){
+  try{
+    if(A.goal==='new'){
+      const D=(typeof p44get==='function'?p44get('x0'):A.xdist)||A.xdist||[];
+      if(D&&D.length)return D.slice();
+    }
+    if((A.goal==='buy'||A.goal==='alt')&&typeof bDist==='function'){
+      const D=bDist(typeof bAct==='function'?bAct():0)||[];
+      if(D.length)return D.slice();
+    }
+  }catch(e){}
+  return (A&&A.dist)||[];
+}
+function p48roomsFromXt(xt){
+  if(xt==='st')return ['st'];
+  if(xt==='1')return ['1'];
+  if(xt==='2')return ['2'];
+  if(xt==='3')return ['3','4'];
+  return [];
+}
+function p48typeLabel(){
+  if(A.goal==='new'||A.ltype==='new')return 'Новостройка';
+  const m={sec:'Вторичка',room:'Комната',house:'Дом, дача, участок',new:'Новостройка',any:'Любое жильё'};
+  if(A.ltype&&m[A.ltype])return m[A.ltype];
+  try{
+    if((A.goal==='buy'||A.goal==='alt')&&typeof bLt==='function'){
+      const lt=bLt(0);
+      if(lt&&m[lt])return m[lt];
+    }
+  }catch(e){}
+  return '';
+}
+function p48roomsLabel(){
+  if(A.xt==='st')return 'студия';
+  if(A.xt==='1')return '1 комн.';
+  if(A.xt==='2')return '2 комн.';
+  if(A.xt==='3')return '3 комн.';
+  const R=(A.lrooms||[]).filter(Boolean);
+  if(!R.length)return '';
+  return R.map(function(r){
+    if(r==='st')return 'студия';
+    if(r==='4')return '4+ комн.';
+    return r+' комн.';
+  }).join(', ');
+}
+function p48typeLocked(){
+  if(!A||!A.goal)return false;
+  if(A.goal==='new')return true;
+  if(A.ltype&&A.ltype!=='any')return true;
+  try{
+    if((A.goal==='buy'||A.goal==='alt')&&typeof bLt==='function'&&bLt(0))return true;
+  }catch(e){}
+  return false;
+}
+function p48roomsLocked(){
+  if(A&&A.xt)return true;
+  if(A&&A.lrooms&&A.lrooms.length)return true;
+  try{
+    if((A.goal==='buy'||A.goal==='alt')&&typeof bGet==='function'){
+      const r=bGet(0,'lrooms');
+      if(r&&r.length)return true;
+    }
+  }catch(e){}
+  return false;
+}
+function p48buyBudget(){
+  try{
+    if(A&&A.goal==='new'){
+      const n=typeof num==='function'?num(A.xbud):parseInt(String(A.xbud||'').replace(/\s/g,''),10);
+      if(n)return n;
+    }
+    if(typeof buys==='function'&&buys()&&typeof bBud==='function'){
+      const n=bBud(typeof bAct==='function'?bAct():0);
+      if(n)return n;
+    }
+    if(typeof budget==='function'){
+      // don't recurse into our wrap: read own/mort/xbud only when original would be 0 for new
+    }
+  }catch(e){}
+  return 0;
+}
+
+function p48syncFilters(){
+  if(typeof A!=='object'||!A)return;
+  if(!Array.isArray(A.dist))A.dist=[];
+  if(!A.ck||typeof A.ck!=='object')A.ck={};
+  try{
+    if(A.goal==='new'){
+      A.ltype='new';
+      if(!(A.lrooms&&A.lrooms.length)&&A.xt)A.lrooms=p48roomsFromXt(A.xt);
+    }else if(A.goal==='buy'||A.goal==='alt'){
+      try{
+        if(typeof bLt==='function'){
+          const lt=bLt(0);
+          if(lt)A.ltype=lt;
+        }
+        if(typeof bGet==='function'){
+          const lr=bGet(0,'lrooms');
+          if(lr&&lr.length&&!(A.lrooms&&A.lrooms.length))A.lrooms=lr.slice();
+        }
+      }catch(e){}
+    }
+    const raw=p48locFromStart();
+    if(raw&&raw.length){
+      const names=raw.map(p48knownDist).filter(Boolean);
+      if(names.length){
+        A.dist=names.slice();
+        if(A.goal==='new'&&(!A.xdist||!A.xdist.length))A.xdist=raw.slice();
+      }
+    }
+  }catch(e){try{if(typeof logErr==='function')logErr('p48-sync',e)}catch(x){}}
+}
+
+function p48selfItems(){
+  const L=[];
+  if(!isBuyGoal())return L;
+  L.push({id:'nb_money',text:'Есть одобрение ипотеки или свои деньги на покупку'});
+  L.push({id:'nb_docs',text:'Паспорт и СНИЛС на руках'});
+  L.push({id:'nb_spouse',text:'Если вы в браке — есть согласие супруга или оно не нужно'});
+  L.push({id:'nb_msk',text:'Если планируете маткапитал — сертификат на руках'});
+  return L;
+}
+function p48selfHtml(){
+  const items=p48selfItems();
+  if(!items.length)return '';
+  if(!A.ck)A.ck={};
+  return items.map(function(it){return ck(it.id,it.text)}).join('');
+}
+function p48selfEmptyHtml(h){
+  return !h||!/<div class="ck\b/.test(h);
+}
+function p48selfEmpty(){
+  if(p48selfItems().length)return false;
+  if(isSell())return false;
+  return true;
+}
+function p48startTotal(){
+  if(isSell())return 4;
+  return p48selfEmpty()?2:3;
+}
+function p48startI(step){
+  return 'Этап 0 · Старт · '+step+'/'+p48startTotal();
+}
+
+function p48cutF(html,lbl){
+  const mark='<div class="f"><div class="lbl">'+lbl+'</div>';
+  const i=html.indexOf(mark);
+  if(i<0)return {html:html,cut:''};
+  const k=html.indexOf('</div></div>',i+mark.length);
+  if(k<0)return {html:html,cut:''};
+  return {html:html.slice(0,i)+html.slice(k+12),from:i,cut:html.slice(i,k+12)};
+}
+function p48lockHtml(){
+  const t=p48typeLabel();
+  const r=p48roomsLabel();
+  const parts=[];
+  if(t)parts.push(t);
+  if(r)parts.push(r);
+  if(!parts.length)return '';
+  return '<div class="f p48-lock"><div class="lbl">Что ищете</div>'+
+    '<div class="p48-sum"><b>'+esc(parts.join(' · '))+'</b> · '+
+    '<a href="#" class="gld" onclick="go(\'s0a\');return false">изменить</a></div></div>';
+}
+function p48patchLive(h){
+  p48syncFilters();
+  const lockT=p48typeLocked();
+  const lockR=p48roomsLocked();
+  if(lockT||lockR){
+    let html=h;
+    const typ=p48cutF(html,'Тип жилья');
+    html=typ.html;
+    const rms=p48cutF(html,'Комнаты');
+    html=rms.html;
+    const card=p48lockHtml();
+    if(card){
+      const at=typeof typ.from==='number'?typ.from:html.indexOf('<div class="f"><div class="lbl">Цена');
+      if(at>=0)html=html.slice(0,at)+card+html.slice(at);
+      else html=card+html;
+    }else if(typ.cut||rms.cut){
+      html=(typ.cut||'')+(rms.cut||'')+html;
+    }
+    h=html;
+  }
+  if(A&&(A.goal==='new'||(typeof buys==='function'&&buys()))){
+    h=h.replace('±1 млн от оценки','от бюджета −1 млн до +10%');
+    h=h.replace(/Оценка [^.<]+ ±1 млн — похожие на вашу\. /,'От бюджета −1 млн до +10% — запас на торг. ');
+    h=h.replace('Сначала оценка (этап 1). ','Сначала бюджет (этап 0). ');
+  }
+  return h;
+}
+
+function p48openDist(){
+  try{p48syncFilters()}catch(e){}
+  if(!A.dist||!Array.isArray(A.dist))A.dist=[];
+  let ov=document.getElementById('p48-dist');
+  if(ov)ov.remove();
+  ov=document.createElement('div');
+  ov.id='p48-dist';
+  let body='';
+  try{body=SCR.dist.b()}catch(e){
+    try{if(typeof logErr==='function')logErr('p48-dist',e)}catch(x){}
+    body='<div class="hint">Не удалось открыть список районов. Попробуйте ещё раз.</div>';
+  }
+  ov.innerHTML='<div class="p48-dist-bg" onclick="p48closeDist()"></div>'+
+    '<div class="p48-dist-sheet" role="dialog" aria-label="Районы и города">'+
+    '<div class="p48-dist-hd"><b>Районы и города</b>'+
+    '<a href="#" onclick="p48closeDist();return false">Готово</a></div>'+
+    '<div class="p48-dist-bd">'+body+'</div></div>';
+  document.body.appendChild(ov);
+}
+function p48closeDist(){
+  const ov=document.getElementById('p48-dist');
+  if(ov)ov.remove();
+  try{
+    if(A.goal==='new')A.xdist=(A.dist||[]).slice();
+    else if((A.goal==='buy'||A.goal==='alt')&&typeof bSet==='function'){
+      bSet(typeof bAct==='function'?bAct():0,'dist',(A.dist||[]).slice());
+    }
+  }catch(e){}
+  try{if(typeof saveSt==='function')saveSt()}catch(e){}
+  try{if(typeof show==='function'&&typeof cur==='string'&&cur&&cur!=='dist')show(cur,true)}catch(e){}
+}
+window.p48openDist=p48openDist;
+window.p48closeDist=p48closeDist;
+window.p48syncFilters=p48syncFilters;
+
+// --- самопроверка: заполнить или пропустить пустую ---
+if(SCR&&SCR.s0c&&typeof SCR.s0c.b==='function'){
+  const sc=SCR.s0c.b;
+  SCR.s0c.b=function(){
+    let h=sc.apply(this,arguments);
+    try{
+      const extra=p48selfHtml();
+      if(extra){
+        if(/<div class="f">\s*<\/div>/.test(h))
+          h=h.replace(/<div class="f">\s*<\/div>/,'<div class="f">'+extra+'</div>');
+        else if(h.indexOf('<div class="f">')>=0)
+          h=h.replace(/<div class="f">/,'<div class="f">'+extra);
+        else
+          h+='<div class="f">'+extra+'</div>';
+      }
+    }catch(e){try{if(typeof logErr==='function')logErr('p48-s0c',e)}catch(x){}}
+    return h;
+  };
+}
+if(SCR&&SCR.s0a&&typeof SCR.s0a.next==='function'){
+  const n0=SCR.s0a.next;
+  SCR.s0a.next=function(){
+    const r=n0.apply(this,arguments);
+    if(r==='s0c'&&p48selfEmpty())return 's0d';
+    return r;
+  };
+}
+try{
+  Object.defineProperty(SCR.s0a,'i',{get:function(){return p48startI(1)},configurable:true});
+  Object.defineProperty(SCR.s0c,'i',{get:function(){return p48startI(isSell()?3:2)},configurable:true});
+  Object.defineProperty(SCR.s0d,'i',{get:function(){return p48startI(isSell()?4:p48selfEmpty()?2:3)},configurable:true});
+}catch(e){}
+
+// --- бюджет на старте новостройки (даже при одной покупке) ---
+if(typeof xBlock==='function'){
+  const xb=xBlock;
+  xBlock=function(){
+    let h=xb.apply(this,arguments);
+    try{
+      if(A&&A.goal==='new'&&typeof xN==='function'&&xN()===1&&h.indexOf('Бюджет на')<0){
+        const field='<div class="lbl" style="margin-top:6px">Бюджет на покупку, ₽</div>'+
+          '<input inputmode="numeric" aria-label="Бюджет на покупку" placeholder="например, 20 000 000" value="'+esc(A.xbud||'')+'" oninput="xSet(0,\'bud\',this.value)">';
+        const add=h.indexOf('<button class="btn ghost"');
+        if(add>=0){
+          const close=h.lastIndexOf('</div>',add);
+          if(close>=0)h=h.slice(0,close)+field+h.slice(close);
+          else h=h.slice(0,add)+'<div class="f">'+field+'</div>'+h.slice(add);
+        }else h+='<div class="f">'+field+'</div>';
+      }
+    }catch(e){try{if(typeof logErr==='function')logErr('p48-xbud',e)}catch(x){}}
+    return h;
+  };
+}
+
+// --- фильтры: префилл и не переспрашивать ---
+if(SCR&&SCR.live&&typeof SCR.live.b==='function'){
+  const lv=SCR.live.b;
+  SCR.live.b=function(){
+    try{p48syncFilters()}catch(e){}
+    const h=lv.apply(this,arguments);
+    try{return p48patchLive(h)}catch(e){
+      try{if(typeof logErr==='function')logErr('p48-live',e)}catch(x){}
+      return h;
+    }
+  };
+}
+
+// цена поиска для новостройки — как у покупки: от бюджета −1 млн до +10%
+if(typeof pRange==='function'){
+  const pr=pRange;
+  pRange=function(){
+    try{
+      if(A&&A.goal==='new'&&!A.pman){
+        const b=p48buyBudget();
+        if(b&&typeof buyRange==='function')return buyRange(b);
+      }
+    }catch(e){}
+    return pr.apply(this,arguments);
+  };
+}
+if(typeof budget==='function'){
+  const b0=budget;
+  budget=function(){
+    try{
+      if(A&&A.goal==='new'){
+        const n=p48buyBudget();
+        if(n)return n;
+      }
+    }catch(e){}
+    return b0.apply(this,arguments);
+  };
+}
+
+// «Выбрать районы» — лист на месте, состояние фильтров не теряется
+if(typeof go==='function'){
+  const g0=go;
+  go=function(id){
+    if(id==='dist'){
+      try{p48openDist();return}catch(e){
+        try{if(typeof logErr==='function')logErr('p48-go-dist',e)}catch(x){}
+      }
+    }
+    return g0.apply(this,arguments);
+  };
+}
+
+if(typeof show==='function'){
+  const sh=show;
+  show=function(id,keep){
+    try{
+      if(id==='s0c'&&p48selfEmpty())id='s0d';
+      if(id==='live'||id==='s0c'||id==='s0d'||id==='s0a'||id==='links')p48syncFilters();
+    }catch(e){}
+    return sh.call(this,id,keep);
+  };
+}
+
+// гость: дозапись на уход со страницы, обрыв сети и клики по чипам
+function p48saveSafe(){
+  try{if(typeof saveSt==='function'&&!window.__noSave)saveSt()}catch(e){}
+}
+['pagehide','beforeunload','offline','visibilitychange'].forEach(function(ev){
+  try{
+    window.addEventListener(ev,function(){
+      if(ev==='visibilitychange'&&document.visibilityState!=='hidden')return;
+      p48saveSafe();
+    });
+  }catch(e){}
+});
+document.addEventListener('click',function(){setTimeout(p48saveSafe,0)},true);
+if(typeof p44add==='function'){
+  const a0=p44add;
+  p44add=function(){
+    const r=a0.apply(this,arguments);
+    p48saveSafe();
+    return r;
+  };
+  try{window.p44add=p44add}catch(e){}
+}
+
+window.p48selfItems=p48selfItems;
+window.p48selfEmpty=p48selfEmpty;
 })();
 // ===== n29 END
 
