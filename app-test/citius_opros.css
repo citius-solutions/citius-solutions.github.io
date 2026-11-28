@@ -326,3 +326,17 @@
   text-align: center;
 }
 .opros-foot a { color: var(--gold); }
+
+
+.opros-offer {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+.opros-offer-act {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}

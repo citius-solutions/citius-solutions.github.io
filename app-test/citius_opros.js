@@ -211,16 +211,135 @@
       '</div>';
   }
 
+  var DRAFT_K = 'sitius-opros-draft';
+
   function emptyData() {
-    return { step: 1, topicId: '', answers: {}, cityOther: '', comment: '', name: '', phone: '', whenId: '', whenCustom: '', consent: false, hp: '', err: '' };
+    return { step: 1, topicId: '', answers: {}, cityOther: '', comment: '', name: '', phone: '', whenId: '', whenCustom: '', consent: false, hp: '', err: '', commentOffer: null };
+  }
+
+  function snapshotForAuto(s) {
+    s = s || state;
+    if (!s) return { topicId: '', answers: {}, cityOther: '' };
+    var o = { topicId: s.topicId || '', answers: Object.assign({}, s.answers || {}), cityOther: s.cityOther || '' };
+    Object.keys(s).forEach(function (k) {
+      if (/^other_/.test(k)) o[k] = s[k];
+    });
+    return o;
+  }
+
+  function autoComment(s) {
+    s = s || state;
+    if (!s || !s.topicId || s.topicId === 'other') return '';
+    var t = topicById(s.topicId);
+    if (!t) return '';
+    var parts = [t.label];
+    (t.qs || []).forEach(function (q) {
+      if (q.free) return;
+      var v = ((s.answers && s.answers[q.id]) || '').trim();
+      if (!v) return;
+      if (q.city && /другой/i.test(v)) v = (s.cityOther || '').trim() || v;
+      else if (q.other && (v === 'Другое' || /другое/i.test(v))) {
+        var alt = (s['other_' + q.id] || '').trim();
+        if (alt) v = alt;
+      }
+      parts.push(v);
+    });
+    return parts.join(', ') + '.';
+  }
+
+  function applyGeneratedComment(prev) {
+    if (!state) return;
+    var cur = String(state.comment || '').trim();
+    var oldAuto = autoComment(prev);
+    var newAuto = autoComment(state);
+    state.commentOffer = null;
+    if (!cur || (oldAuto && cur === oldAuto) || (prev && prev.auto && cur === prev.auto)) {
+      state.comment = newAuto;
+      return;
+    }
+    if (oldAuto && cur.indexOf(oldAuto) !== -1) {
+      state.comment = cur.split(oldAuto).join(newAuto).replace(/\s{2,}/g, ' ').trim();
+      return;
+    }
+    if (newAuto && cur !== newAuto) {
+      var label = (topicById(state.topicId) || {}).label || '';
+      state.commentOffer = { keep: cur, replace: newAuto, topic: label };
+    }
+  }
+
+  function saveDraft() {
+    try {
+      if (!state || state.view === 'ok' || state.view === 'fail') return;
+      var d = snapshotForAuto(state);
+      d.comment = state.comment || '';
+      d.name = state.name || '';
+      d.phone = state.phone || '';
+      d.whenId = state.whenId || '';
+      d.whenCustom = state.whenCustom || '';
+      d.consent = !!state.consent;
+      d.auto = autoComment(state);
+      d.step = state.step || 1;
+      d.t = Date.now();
+      localStorage.setItem(DRAFT_K, JSON.stringify(d));
+    } catch (e) {}
+  }
+
+  function loadDraft() {
+    try {
+      var d = JSON.parse(localStorage.getItem(DRAFT_K) || 'null');
+      return d && typeof d === 'object' ? d : null;
+    } catch (e) { return null; }
+  }
+
+  function applyDraft(d) {
+    if (!d || !state) return;
+    state.topicId = d.topicId || '';
+    state.answers = d.answers || {};
+    state.cityOther = d.cityOther || '';
+    state.name = d.name || '';
+    state.phone = d.phone || '';
+    state.whenId = d.whenId || '';
+    state.whenCustom = d.whenCustom || '';
+    state.consent = !!d.consent;
+    if (d.step) state.step = d.step;
+    Object.keys(d).forEach(function (k) {
+      if (/^other_/.test(k)) state[k] = d[k];
+    });
+    var stored = String(d.comment || '').trim();
+    var storedAuto = String(d.auto || '').trim();
+    var nowAuto = autoComment(state);
+    if (!stored || (storedAuto && stored === storedAuto)) state.comment = nowAuto;
+    else if (storedAuto && stored.indexOf(storedAuto) !== -1) state.comment = stored.split(storedAuto).join(nowAuto).replace(/\s{2,}/g, ' ').trim();
+    else state.comment = stored;
+    state.commentOffer = null;
+  }
+
+  function clearDraft() {
+    try { localStorage.removeItem(DRAFT_K); } catch (e) {}
   }
 
   function setChip(group, id, val) {
     if (!state) return;
-    if (group === 'topic') { state.topicId = val; state.answers = {}; state.cityOther = ''; state.comment = state.topicId === 'other' ? state.comment : state.comment; }
-    else if (group === 'when') state.whenId = val;
-    else state.answers[id] = val;
+    if (group === 'topic') {
+      var prev = snapshotForAuto(state);
+      prev.auto = autoComment(state);
+      state.topicId = val;
+      state.answers = {};
+      state.cityOther = '';
+      applyGeneratedComment(prev);
+    } else if (group === 'when') {
+      state.whenId = val;
+    } else {
+      var prevA = snapshotForAuto(state);
+      prevA.auto = autoComment(state);
+      state.answers[id] = val;
+      var cur = String(state.comment || '').trim();
+      var oldAuto = autoComment(prevA);
+      if (!cur || cur === oldAuto) state.comment = autoComment(state);
+      else if (oldAuto && cur.indexOf(oldAuto) !== -1) state.comment = cur.split(oldAuto).join(autoComment(state)).replace(/\s{2,}/g, ' ').trim();
+    }
     state.err = '';
+    saveDraft();
     render();
   }
 
@@ -279,6 +398,16 @@
       '<input type="text" id="opros-cityOther" data-f="cityOther" maxlength="80" value="' + esc(state.cityOther || '') + '"></div>';
   }
 
+  function commentOfferHtml() {
+    if (!state || !state.commentOffer || !state.commentOffer.replace) return '';
+    var topic = state.commentOffer.topic || 'новой темы';
+    return '<div class="opros-offer" role="status">В поле остался ваш текст с предыдущей темы. Заменить его текстом для темы «' + esc(topic) + '»?</div>' +
+      '<div class="opros-offer-act">' +
+      '<button type="button" class="opros-btn opros-btn--primary" data-act="offer-replace">Заменить</button>' +
+      '<button type="button" class="opros-btn opros-btn--ghost" data-act="offer-keep">Оставить</button>' +
+      '</div>';
+  }
+
   function step1() {
     var n = 1;
     return '<div class="opros-card"><div class="opros-q" id="opros-q">' + qn(n) + 'С чем хотите обратиться</div>' +
@@ -295,6 +424,7 @@
       html += '<div class="opros-q">' + qn(n++) + esc(q.text) + '</div>';
       if (q.free) {
         html += '<textarea data-f="comment" id="opros-free" maxlength="800" placeholder="Коротко, своими словами">' + esc(state.comment || '') + '</textarea>';
+        html += commentOfferHtml();
       } else {
         html += chips(q.opts, 'ans', q.id, state.answers[q.id] || '') + otherField(q) + cityField(q);
       }
@@ -302,6 +432,7 @@
     if (state.topicId !== 'other') {
       html += '<div class="opros-q">' + qn(n) + 'Коротко опишите запрос <span class="opros-opt">необязательно</span></div>';
       html += '<textarea data-f="comment" maxlength="800" placeholder="Если хотите добавить детали">' + esc(state.comment || '') + '</textarea>';
+      html += commentOfferHtml();
     }
     html += '</div>';
     return html;
@@ -448,8 +579,8 @@
         el.addEventListener('input', maskPhone);
         el.addEventListener('focus', function () { if (!el.value) el.value = '+7 '; });
       } else {
-        el.addEventListener('input', function () { readInputs(); if (state.err) { state.err = ''; /* don't rerender on every key */ } });
-        el.addEventListener('change', readInputs);
+        el.addEventListener('input', function () { readInputs(); if (state.err) { state.err = ''; } saveDraft(); });
+        el.addEventListener('change', function () { readInputs(); saveDraft(); });
       }
     });
     var cons = host.querySelector('[data-f="consent"]');
@@ -463,13 +594,16 @@
         if (act === 'back') { goBack(); return; }
         if (act === 'next') { goNext(); return; }
         if (act === 'send') { send(); return; }
-        if (act === 'reset') { state = Object.assign(emptyData(), { mode: state.mode, source: state.source, view: 'form' }); render(); }
+        if (act === 'reset') { clearDraft(); state = Object.assign(emptyData(), { mode: state.mode, source: state.source, view: 'form' }); render(); return; }
+        if (act === 'offer-replace' && state.commentOffer) { state.comment = state.commentOffer.replace || ''; state.commentOffer = null; saveDraft(); render(); return; }
+        if (act === 'offer-keep' && state.commentOffer) { state.commentOffer = null; saveDraft(); render(); return; }
       });
     });
   }
 
   function goBack() {
     readInputs();
+    saveDraft();
     state.err = '';
     if (state.view === 'fail') { state.view = 'form'; state.step = 3; render(); return; }
     if (state.step > 1) { state.step -= 1; render(); }
@@ -506,6 +640,7 @@
 
   function goNext() {
     readInputs();
+    saveDraft();
     var err = state.step === 1 ? validStep1() : validStep2();
     if (err) { state.err = err; render(); focusErr(); return; }
     state.err = '';
@@ -569,6 +704,7 @@
         var when = (state.lastLead && state.lastLead.when) || timeLabel(state);
         state.view = 'ok';
         state.result = { id: res.id || '', when: when };
+        clearDraft();
         render();
         showSuccessOverlay(when, res.id || '');
         return;
@@ -616,6 +752,10 @@
       view: 'form',
       justOpened: opts.mode === 'modal'
     });
+    try {
+      var draft = loadDraft();
+      if (draft) applyDraft(draft);
+    } catch (e) {}
     host.className = 'opros opros--' + state.mode;
     if (state.mode === 'modal') {
       host.setAttribute('role', 'dialog');
