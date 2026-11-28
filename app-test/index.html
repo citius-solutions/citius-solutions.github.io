@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='28.11.2026 15:41';
+var APPV='28.11.2026 15:43';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -10871,7 +10871,7 @@ const P50_YOURS={
 
 const P50_PRICE={
   delay:['перенос срока и неустойка','Если вы купили через Ситиус по агентскому договору, проверка сроков и расчёт неустойки бесплатны. Если приходите со своим ДДУ — от 35&nbsp;000&nbsp;₽. Претензия застройщику, переговоры и документы для суда — цена по составу работ.'],
-  accept:['приёмка квартиры','Если вы купили через Ситиус по агентскому договору, эта работа бесплатна. Если приходите со своим ДДУ — от 35&nbsp;000&nbsp;₽.'],
+  accept:['приёмка квартиры','От 20&nbsp;000&nbsp;₽.'],
   ddu:['проверка ДДУ','Если вы купили через Ситиус по агентскому договору, эта работа бесплатна. Если приходите со своим ДДУ — от 35&nbsp;000&nbsp;₽.'],
   share:['продажа доли','От 5% до 6%.'],
   rass:['расселение','От 6–8%. Зависит от сложности и стоимости объектов и не ниже, чем за продажу одной комнаты.']
@@ -10911,10 +10911,20 @@ window.p50kind=p50kind;
 window.p50take=p50take;
 window.p50yours=p50yours;
 
+function p50noteAccept(pr){
+  if(!pr||!pr.length)return pr||['',''];
+  const title=pr[0]||'', body=String(pr[1]||'');
+  if(/Приёмка квартиры — от 20/.test(body))return [title,body];
+  if(/Покупка новостройки через Ситиус — бесплатно/.test(body)){
+    const core=body.replace(/\s+$/,'').replace(/\.+$/,'');
+    return [title, core+'. Приёмка квартиры — от 20&nbsp;000&nbsp;₽.'];
+  }
+  return [title,body];
+}
 agPrice=function(){
   const k=p50kind();
   if(P50_PRICE[k])return P50_PRICE[k].slice();
-  return ag0?ag0.apply(this,arguments):['',''];
+  return p50noteAccept(ag0?ag0.apply(this,arguments):['','']);
 };
 
 if(typeof SCR==='object'&&SCR.agent&&typeof SCR.agent.b==='function'){
