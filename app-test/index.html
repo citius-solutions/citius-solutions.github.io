@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='28.11.2026 11:37';
+var APPV='28.11.2026 11:41';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -10586,9 +10586,60 @@ function p49sit(n){
     return (w&&w.sit)?String(w.sit).trim():'';
   }catch(e){return ''}
 }
-function p49join(parts){
-  const L=(parts||[]).map(function(s){return String(s||'').trim()}).filter(Boolean);
-  return L.join(', ');
+function p49isAcronym(s){
+  return /^[A-ZА-ЯЁ]{2,}(?![a-zа-яё])/.test(String(s||'').trim());
+}
+function p49lcStart(s){
+  s=String(s||'').trim();
+  if(!s||p49isAcronym(s))return s;
+  return s.charAt(0).toLowerCase()+s.slice(1);
+}
+function p49capStart(s){
+  s=String(s||'').trim();
+  if(!s)return s;
+  if(p49isAcronym(s))return s;
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}
+function p49extractTax(s){
+  let tax=false;
+  let body=String(s||'').trim();
+  body=body.replace(/[;.,]?\s*оптимизация налога\s*—\s*отдельно\.?\s*$/i,function(){tax=true;return ''});
+  return {body:body.replace(/[;,\s.]+$/g,'').trim(),tax:tax};
+}
+function p49asSentence(parts){
+  let tax=false;
+  const bodies=[];
+  (parts||[]).forEach(function(raw){
+    const x=p49extractTax(raw);
+    if(x.tax)tax=true;
+    if(x.body)bodies.push(x.body);
+  });
+  if(!bodies.length)return tax?'Оптимизация налога — отдельно.':'';
+  const text=bodies.map(function(b,i){return i===0?p49capStart(b):p49lcStart(b)}).join(', ');
+  let out=text.replace(/[.]+$/,'')+'.';
+  if(tax)out+=' Оптимизация налога — отдельно.';
+  return out;
+}
+function p49visName(v){
+  let s=String(v||'').trim();
+  s=s.replace(/\s*[×xXхХ]\s*\d+/g,'').trim();
+  if(/мфц или электронно/i.test(s))return 'МФЦ или электронная подача';
+  return p49lcStart(s);
+}
+function p49dedupeVis(list){
+  const out=[];
+  (list||[]).forEach(function(s){
+    if(!s)return;
+    const k=s.toLowerCase().replace(/\s+/g,' ').trim();
+    let i=-1;
+    for(let n=0;n<out.length;n++){
+      const o=out[n].toLowerCase();
+      if(o===k||k.indexOf(o)===0||o.indexOf(k)===0){i=n;break}
+    }
+    if(i>=0){if(s.length>out[i].length)out[i]=s;return}
+    out.push(s);
+  });
+  return out;
 }
 function p49stageFromCtx(){
   const c=p49ctx();
@@ -10655,8 +10706,8 @@ const P49_YOURS={
 function p49takeAll(){
   const L=p49remaining();
   const parts=L.map(function(s){return p49sit(s.n)});
-  const t=p49join(parts);
-  if(t)return t.charAt(0).toUpperCase()+t.slice(1);
+  const t=p49asSentence(parts);
+  if(t)return t;
   return 'На отмеченных этапах шаги уже пройдены. Если нужна ещё помощь Ситиуса, закажите звонок или напишите.';
 }
 function p49yoursAll(){
@@ -10665,12 +10716,14 @@ function p49yoursAll(){
     try{
       const w=WK(s.n);
       (w&&w.vis||[]).forEach(function(v){
-        if(v&&vis.indexOf(v)<0)vis.push(v);
+        const n=p49visName(v);
+        if(n)vis.push(n);
       });
     }catch(e){}
   });
-  if(vis.length)
-    return 'Решения, подписи и визиты, где закон требует вашего присутствия ('+vis.join(', ')+') или доверенности.';
+  const uniq=p49dedupeVis(vis);
+  if(uniq.length)
+    return 'Решения, подписи и визиты, где закон требует вашего присутствия ('+uniq.join(', ')+') или доверенности.';
   return 'Решения, подписи и визиты, где закон требует вашего присутствия или доверенности.';
 }
 function p49take(){
@@ -10678,9 +10731,9 @@ function p49take(){
   if(k==='stage'){
     const st=p49stageFromCtx();
     const sit=st?p49sit(st.n):'';
-    return sit||p49takeAll();
+    return sit?p49asSentence([sit]):p49takeAll();
   }
-  if(P49_TAKE[k])return P49_TAKE[k];
+  if(P49_TAKE[k])return p49asSentence([P49_TAKE[k]]);
   return p49takeAll();
 }
 function p49yours(){
@@ -10693,6 +10746,7 @@ function p49yours(){
 window.p49take=p49take;
 window.p49yours=p49yours;
 window.p49kind=p49kind;
+window.p49asSentence=p49asSentence;
 
 if(typeof SCR==='object'&&SCR.agent&&typeof SCR.agent.b==='function'){
   SCR.agent.b=function(){
