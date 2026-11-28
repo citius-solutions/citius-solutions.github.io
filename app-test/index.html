@@ -2402,7 +2402,7 @@ Object.keys(SCR).forEach(id=>{const s=SCR[id];const d=Object.getOwnPropertyDescr
 {const sh=show;show=function(id,keep){const r=sh.apply(this,arguments);if(id==='sec'){const n=document.getElementById('next');if(n&&n.textContent==='Этап готов')n.textContent='Мой путь'}return r}}
 
 // ===== (43) 18.11 №24: переход целиком (заголовок и содержимое вместе), версия Аппа, самообновление устаревшей копии, «К этапам» на экране заявки
-var APPV='27.11.2026 18:22';
+var APPV='28.11.2026 11:37';
 function errLine(e){return `<div class="hint errl" style="margin:0 0 8px">Полный вид не открылся, показан простой. Сбой: ${hq(String(e&&e.message||e).slice(0,140))} · версия ${APPV}. Ответы сохранены.</div>`}
 function verLine(){return `<div class="hint ver" style="margin:-4px 2px 8px;font-size:12px">Версия Аппа: ${APPV}</div>`}
 {const pb=SCR.path.b;SCR.path.b=function(){const h=pb.apply(this,arguments);const k=h.indexOf('<div class="setlink">');if(k<0)return h.includes('class="hint ver"')?h:verLine()+h;const e=h.indexOf('</div>',h.indexOf('</a>',k))+6;return h.slice(0,e)+verLine()+h.slice(e)}}
@@ -10559,6 +10559,156 @@ if(typeof p44add==='function'){
 
 window.p48selfItems=p48selfItems;
 window.p48selfEmpty=p48selfEmpty;
+})();
+// p49 (28.11): «Работа с Ситиусом» — «Что берёт Ситиус», «Что остаётся за вами»
+// и подпись стоимости зависят от задачи и оставшихся этапов, а не от одного
+// текста продажи. Услуги и цены только из уже существующих формулировок приложения.
+// Не правит p6_auth_ui / p8 / p11 / p13 / p14.
+(function(){
+if(document.getElementById('n29-p49-css'))return;
+const st=document.createElement('style');st.id='n29-p49-css';
+st.textContent='';
+document.documentElement.appendChild(st);
+
+function p49ctx(){return String((typeof A==='object'&&A&&A.ctx)||'').trim()}
+function p49esc(s){return typeof hq==='function'?hq(s):String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function p49visible(){
+  try{return (STAGES||[]).filter(function(s){try{return s.show()}catch(e){return false}})}
+  catch(e){return []}
+}
+function p49remaining(){
+  return p49visible().filter(function(s){try{return !done.has(s.n)}catch(e){return true}});
+}
+function p49sit(n){
+  try{
+    const w=typeof WK==='function'?WK(n):null;
+    return (w&&w.sit)?String(w.sit).trim():'';
+  }catch(e){return ''}
+}
+function p49join(parts){
+  const L=(parts||[]).map(function(s){return String(s||'').trim()}).filter(Boolean);
+  return L.join(', ');
+}
+function p49stageFromCtx(){
+  const c=p49ctx();
+  const m=/^этап\s+(\d+)\s*:\s*(.*)$/i.exec(c);
+  if(!m)return null;
+  const title=(m[2]||'').trim().toLowerCase();
+  const L=p49visible();
+  const idx=+m[1];
+  if(title){
+    const hit=L.find(function(s){return String(s.t||'').toLowerCase()===title});
+    if(hit)return hit;
+  }
+  if(L[idx])return L[idx];
+  return null;
+}
+function p49kind(){
+  const c=p49ctx();
+  if(/перенос срок|неустойк/i.test(c))return 'delay';
+  if(/приёмк/i.test(c))return 'accept';
+  if(/ДДУ/i.test(c))return 'ddu';
+  if(/избранн/i.test(c))return 'fav';
+  if(/уточнить оценку/i.test(c))return 'price';
+  const st=p49stageFromCtx();
+  if(st){
+    if(st.n===25||/ожидание дома/i.test(st.t||''))return 'delay';
+    if(st.n===26||/приёмк/i.test(st.t||''))return 'accept';
+    if(st.n===23||/квартира и договор/i.test(st.t||''))return 'ddu';
+    if(st.n===22||/застройщик и дом/i.test(st.t||''))return 'dev';
+    if(st.n===21||/деньги на покупку/i.test(st.t||''))return 'nbmoney';
+    if(st.n===24||/бронь/i.test(st.t||''))return 'book';
+    if(st.n===27||/право собственности/i.test(st.t||''))return 'own';
+    if(st.n===28||/налогов/i.test(st.t||''))return 'tax';
+    return 'stage';
+  }
+  return 'all';
+}
+
+// Тексты по задаче — только то, что уже сказано в шагах приложения.
+const P49_TAKE={
+  delay:'Проверка ДДУ и срока передачи, расчёт неустойки за просрочку, оценка предложения застройщика изменить договор (подписывать ли), контроль хода стройки и сроков.',
+  accept:'Осмотр квартиры, письменный перечень недостатков, помощь с актом осмотра при серьёзных недостатках и с передаточным актом.',
+  ddu:'Проверка договора участия: квартира и площадь, срок передачи, цена и порядок оплаты, эскроу-счёт, гарантия, условия при изменении площади и отделке.',
+  fav:'Работа с вашим избранным: связь с продавцами, просмотры, проверка.',
+  price:'Оценка экспертом по сделкам района.',
+  dev:'Проверка застройщика и дома.',
+  nbmoney:'Подбор банка и программы, одобрение ипотеки.',
+  book:'Бронь, подписание, регистрация, оплата на эскроу.',
+  own:'Регистрация собственности.',
+  tax:'Вычет при покупке.'
+};
+const P49_YOURS={
+  delay:'Решение, принимать ли предложение застройщика перенести срок: соглашаться не обязательно. Если примете — подпись изменения договора.',
+  accept:'Присутствие на осмотре и подпись передаточного акта, когда будете готовы. Если откладывать приёмку, через два месяца после срока передачи застройщик может составить акт сам.',
+  ddu:'Подпись договора и визит в отдел продаж, если он нужен.',
+  fav:'Просмотры, где нужно ваше присутствие, и решение, какой объект выбрать.',
+  price:'Решение, на какую цену опираться и за сколько готовы продать или купить.',
+  dev:'Решение, с каким застройщиком и домом продолжать.',
+  nbmoney:'Справки о доходах и визит в банк, если закон или банк требуют вашего присутствия.',
+  book:'Подпись ДДУ и действия в банке по эскроу-счёту, где нужно ваше присутствие или доверенность.',
+  own:'Проверка выписки ЕГРН: площадь, адрес и ваши данные. Заявление можно подать и самим — через МФЦ или Госуслуги.',
+  tax:'Подача 3-НДФЛ или заявления через работодателя, когда будете готовы.'
+};
+
+function p49takeAll(){
+  const L=p49remaining();
+  const parts=L.map(function(s){return p49sit(s.n)});
+  const t=p49join(parts);
+  if(t)return t.charAt(0).toUpperCase()+t.slice(1);
+  return 'На отмеченных этапах шаги уже пройдены. Если нужна ещё помощь Ситиуса, закажите звонок или напишите.';
+}
+function p49yoursAll(){
+  const vis=[];
+  p49remaining().forEach(function(s){
+    try{
+      const w=WK(s.n);
+      (w&&w.vis||[]).forEach(function(v){
+        if(v&&vis.indexOf(v)<0)vis.push(v);
+      });
+    }catch(e){}
+  });
+  if(vis.length)
+    return 'Решения, подписи и визиты, где закон требует вашего присутствия ('+vis.join(', ')+') или доверенности.';
+  return 'Решения, подписи и визиты, где закон требует вашего присутствия или доверенности.';
+}
+function p49take(){
+  const k=p49kind();
+  if(k==='stage'){
+    const st=p49stageFromCtx();
+    const sit=st?p49sit(st.n):'';
+    return sit||p49takeAll();
+  }
+  if(P49_TAKE[k])return P49_TAKE[k];
+  return p49takeAll();
+}
+function p49yours(){
+  const k=p49kind();
+  if(k==='stage')return p49yoursAll();
+  if(P49_YOURS[k])return P49_YOURS[k];
+  return p49yoursAll();
+}
+
+window.p49take=p49take;
+window.p49yours=p49yours;
+window.p49kind=p49kind;
+
+if(typeof SCR==='object'&&SCR.agent&&typeof SCR.agent.b==='function'){
+  SCR.agent.b=function(){
+    const take=p49take();
+    const yours=p49yours();
+    const pr=(typeof agPrice==='function'?agPrice():['','']);
+    const ctx=p49ctx();
+    return ''+
+      '<div class="card"><b>Что берёт Ситиус'+(ctx?' · '+p49esc(ctx):'')+'</b><br>'+take+'</div>'+
+      '<div class="card"><b>Что остаётся за вами</b><br>'+yours+'</div>'+
+      '<div class="card"><b>Стоимость · '+pr[0]+'</b><br>'+pr[1]+
+      '<div class="hint" style="margin:3px 0 0">Примерные цены, точная стоимость зависит от сложности сделки. Оптимизация налога оплачивается отдельно.</div></div>'+
+      (typeof contactBtns==='function'?contactBtns():'')+
+      '<div class="hint">Разговор ни к чему не обязывает. Путь в приложении остаётся бесплатным.</div>';
+  };
+}
 })();
 // ===== n29 END
 
